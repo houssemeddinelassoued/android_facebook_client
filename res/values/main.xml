@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="main_button_newsfeed_text">Newsfeed</string>
+	<string name="main_button_friends_text">Friends</string>
+
+</resources>
