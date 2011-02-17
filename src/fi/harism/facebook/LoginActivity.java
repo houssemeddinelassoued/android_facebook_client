@@ -32,6 +32,12 @@ public class LoginActivity extends Activity {
 		});
     }
     
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	super.onActivityResult(requestCode, resultCode, data);
+    	facebook.authorizeCallback(requestCode, resultCode, data);
+    }
+    
     private void facebookAuthorize() {
     	facebook.authorize(this, new Facebook.DialogListener() {
 			@Override
