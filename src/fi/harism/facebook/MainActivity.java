@@ -3,11 +3,10 @@ package fi.harism.facebook;
 import org.json.JSONObject;
 
 import fi.harism.facebook.net.FacebookRequest;
-import fi.harism.facebook.net.FacebookRequestObserver;
 import fi.harism.facebook.net.ImageRequest;
-import fi.harism.facebook.net.ImageRequestObserver;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
+import fi.harism.facebook.util.FacebookController;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -26,15 +25,15 @@ public class MainActivity extends Activity {
 				.getRequestController();
 		Bundle b = new Bundle();
 		b.putString("fields", "id,name,picture");
-		b.putString("access_token", LoginActivity.facebook.getAccessToken());
+		b.putString(FacebookController.TOKEN, FacebookController.getFacebookController().getAccessToken());
 		FacebookRequest request = new FacebookRequest(this, "me", b,
-				new FacebookRequestObserver() {
+				new FacebookRequest.Observer() {
 					@Override
-					public void requestError(Exception ex) {
+					public void onError(Exception ex) {
 					}
 
 					@Override
-					public void requestDone(JSONObject response) {
+					public void onComplete(JSONObject response) {
 						meReceived(response);
 					}
 				});
@@ -54,13 +53,13 @@ public class MainActivity extends Activity {
 			RequestController requestController = RequestController
 					.getRequestController();
 			ImageRequest request = new ImageRequest(this, picture,
-					new ImageRequestObserver() {
+					new ImageRequest.Observer() {
 						@Override
-						public void requestError(Exception ex) {
+						public void onError(Exception ex) {
 						}
 
 						@Override
-						public void requestDone(Bitmap bitmap) {
+						public void onComplete(Bitmap bitmap) {
 							imageReceived(bitmap);
 						}
 					});

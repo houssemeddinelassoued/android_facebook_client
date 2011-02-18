@@ -10,11 +10,10 @@ import android.graphics.BitmapFactory;
 public class ImageRequest extends Request {
 
 	private String url;
-	private ImageRequestObserver observer;
+	private Observer observer;
 	private Bitmap bitmap;
 
-	public ImageRequest(Activity activity, String url,
-			ImageRequestObserver observer) {
+	public ImageRequest(Activity activity, String url, Observer observer) {
 		super(activity);
 		this.url = url;
 		this.observer = observer;
@@ -27,14 +26,20 @@ public class ImageRequest extends Request {
 			InputStream is = u.openStream();
 			bitmap = BitmapFactory.decodeStream(is);
 		} catch (Exception ex) {
-			observer.requestError(ex);
+			observer.onError(ex);
 			throw ex;
 		}
 	}
 
 	@Override
 	public void runOnUiThread() throws Exception {
-		observer.requestDone(bitmap);
+		observer.onComplete(bitmap);
+	}
+
+	public interface Observer {
+		public void onError(Exception ex);
+
+		public void onComplete(Bitmap bitmap);
 	}
 
 }
