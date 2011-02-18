@@ -12,7 +12,7 @@
     </LinearLayout>
     
     <ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/background_gradient">
-    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="10px">
     
     <Button android:layout_height="wrap_content" android:id="@+id/main_button_newsfeed" android:layout_width="match_parent" android:text="@string/main_button_newsfeed_text"></Button>
     <Button android:layout_height="wrap_content" android:id="@+id/main_button_friends" android:layout_width="match_parent" android:text="@string/main_button_friends_text"></Button>
