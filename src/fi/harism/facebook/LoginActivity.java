@@ -11,12 +11,16 @@ import android.widget.Button;
 import fi.harism.facebook.util.FacebookController;
 
 public class LoginActivity extends Activity {
+	
+	private FacebookController facebookController = null;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
+		
+		facebookController = FacebookController.getFacebookController();
 
 		Button b = (Button) findViewById(R.id.login_button);
 		b.setOnClickListener(new View.OnClickListener() {
@@ -26,17 +30,21 @@ public class LoginActivity extends Activity {
 			}
 		});
 	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		facebookController = null;
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		FacebookController c = FacebookController.getFacebookController();
-		c.authorizeCallback(requestCode, resultCode, data);
+		facebookController.authorizeCallback(requestCode, resultCode, data);
 	}
 
 	private void facebookAuthorize() {
-		FacebookController c = FacebookController.getFacebookController();
-		c.authorize(this, new FacebookController.LoginObserver() {
+		facebookController.authorize(this, new FacebookController.LoginObserver() {
 			@Override
 			public void onError(Exception ex) {
 				showAlert(getText(R.string.login_alert_facebook_error_title),

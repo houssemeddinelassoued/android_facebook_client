@@ -16,16 +16,21 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	private FacebookController facebookController = null;
+	private RequestController requestController = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		RequestController requestController = RequestController
-				.getRequestController();
+		facebookController = FacebookController.getFacebookController();
+		requestController = RequestController.getRequestController();
+		
 		Bundle b = new Bundle();
 		b.putString("fields", "id,name,picture");
-		b.putString(FacebookController.TOKEN, FacebookController.getFacebookController().getAccessToken());
+		b.putString(FacebookController.TOKEN,
+				facebookController.getAccessToken());
 		FacebookRequest request = new FacebookRequest(this, "me", b,
 				new FacebookRequest.Observer() {
 					@Override
@@ -38,6 +43,13 @@ public class MainActivity extends Activity {
 					}
 				});
 		requestController.addRequest(request);
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		facebookController = null;
+		requestController = null;
 	}
 
 	private void meReceived(JSONObject response) {
