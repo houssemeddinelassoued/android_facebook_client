@@ -2,9 +2,9 @@ package fi.harism.facebook;
 
 import org.json.JSONObject;
 
-import fi.harism.facebook.net.FacebookRequest;
-import fi.harism.facebook.net.ImageRequest;
-import fi.harism.facebook.net.RequestController;
+import fi.harism.facebook.request.FacebookRequest;
+import fi.harism.facebook.request.ImageRequest;
+import fi.harism.facebook.request.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookController;
 

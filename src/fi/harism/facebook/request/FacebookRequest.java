@@ -1,4 +1,4 @@
-package fi.harism.facebook.net;
+package fi.harism.facebook.request;
 
 import org.json.JSONObject;
 
