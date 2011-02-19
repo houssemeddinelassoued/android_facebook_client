@@ -13,16 +13,17 @@ public class FacebookRequest extends Request {
 	private Observer observer;
 	private JSONObject response;
 
-	public FacebookRequest(Activity activity, String path, Observer observer) {
-		super(activity);
+	public FacebookRequest(Activity activity, Request.Observer requestObserver,
+			String path, Observer observer) {
+		super(activity, requestObserver);
 		this.path = path;
 		this.bundle = null;
 		this.observer = observer;
 	}
 
-	public FacebookRequest(Activity activity, String path, Bundle bundle,
-			Observer observer) {
-		super(activity);
+	public FacebookRequest(Activity activity, Request.Observer requestObserver,
+			String path, Bundle bundle, Observer observer) {
+		super(activity, requestObserver);
 		this.path = path;
 		this.bundle = bundle;
 		this.observer = observer;

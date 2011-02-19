@@ -6,17 +6,32 @@ import java.net.URL;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 
 public class ImageRequest extends Request {
 
 	private String url;
 	private Observer observer;
 	private Bitmap bitmap;
+	private Bundle bundle;
 
-	public ImageRequest(Activity activity, String url, Observer observer) {
-		super(activity);
+	public ImageRequest(Activity activity, Request.Observer requestObserver,
+			String url, Observer observer) {
+		super(activity, requestObserver);
 		this.url = url;
 		this.observer = observer;
+	}
+	
+	public Bitmap getBitmap() {
+		return bitmap;
+	}
+	
+	public void setBundle(Bundle bundle) {
+		this.bundle = bundle;
+	}
+	
+	public Bundle getBundle() {
+		return bundle;
 	}
 
 	@Override
@@ -33,13 +48,13 @@ public class ImageRequest extends Request {
 
 	@Override
 	public void runOnUiThread() throws Exception {
-		observer.onComplete(bitmap);
+		observer.onComplete(this);
 	}
 
 	public interface Observer {
 		public void onError(Exception ex);
 
-		public void onComplete(Bitmap bitmap);
+		public void onComplete(ImageRequest imageRequest);
 	}
 
 }

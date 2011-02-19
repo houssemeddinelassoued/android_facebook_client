@@ -2,21 +2,13 @@ package fi.harism.facebook.request;
 
 import java.util.ArrayDeque;
 
-public final class RequestController {
+public final class RequestController implements Request.Observer {
 
-	private static RequestController instance = null;
 	private ArrayDeque<Request> requests = null;
 	private Request currentRequest = null;
 
-	private RequestController() {
+	public RequestController() {
 		requests = new ArrayDeque<Request>();
-	}
-
-	public final static RequestController getRequestController() {
-		if (instance == null) {
-			instance = new RequestController();
-		}
-		return instance;
 	}
 
 	public final void clear() {
@@ -32,13 +24,18 @@ public final class RequestController {
 		processNextRequest();
 	}
 
-	public final void processNextRequest() {
+	private final void processNextRequest() {
 		if (currentRequest == null || currentRequest.hasStopped()) {
 			if (!requests.isEmpty()) {
 				currentRequest = requests.removeFirst();
 				new Thread(currentRequest).start();
 			}
 		}
+	}
+	
+	@Override
+	public void onComplete() {
+		processNextRequest();
 	}
 
 }

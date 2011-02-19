@@ -14,6 +14,7 @@
             </intent-filter>
         </activity>
         <activity android:name="MainActivity"></activity>
+        <activity android:name="FriendsActivity"></activity>
     </application>
     
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>

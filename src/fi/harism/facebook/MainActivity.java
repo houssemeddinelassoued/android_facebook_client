@@ -9,8 +9,11 @@ import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookController;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,13 +28,33 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 
 		facebookController = FacebookController.getFacebookController();
-		requestController = RequestController.getRequestController();
+		requestController = new RequestController();
 		
+		Button friendsButton = (Button)findViewById(R.id.main_button_friends);
+		friendsButton.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				showFriendsList();
+			}
+		});
+		
+		fetchNameAndImage();
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		facebookController = null;
+		requestController.clear();
+		requestController = null;
+	}
+	
+	private final void fetchNameAndImage() {
 		Bundle b = new Bundle();
-		b.putString("fields", "id,name,picture");
+		b.putString("fields", "name,picture");
 		b.putString(FacebookController.TOKEN,
 				facebookController.getAccessToken());
-		FacebookRequest request = new FacebookRequest(this, "me", b,
+		FacebookRequest request = new FacebookRequest(this, requestController, "me", b,
 				new FacebookRequest.Observer() {
 					@Override
 					public void onError(Exception ex) {
@@ -42,17 +65,10 @@ public class MainActivity extends Activity {
 						meReceived(response);
 					}
 				});
-		requestController.addRequest(request);
-	}
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		facebookController = null;
-		requestController = null;
+		requestController.addRequest(request);		
 	}
 
-	private void meReceived(JSONObject response) {
+	private final void meReceived(JSONObject response) {
 		try {
 			String name = response.getString("name");
 			TextView tv = (TextView) findViewById(R.id.main_user_name);
@@ -62,17 +78,15 @@ public class MainActivity extends Activity {
 
 		try {
 			String picture = response.getString("picture");
-			RequestController requestController = RequestController
-					.getRequestController();
-			ImageRequest request = new ImageRequest(this, picture,
+			ImageRequest request = new ImageRequest(this, requestController, picture,
 					new ImageRequest.Observer() {
 						@Override
 						public void onError(Exception ex) {
 						}
 
 						@Override
-						public void onComplete(Bitmap bitmap) {
-							imageReceived(bitmap);
+						public void onComplete(ImageRequest imageRequest) {
+							imageReceived(imageRequest.getBitmap());
 						}
 					});
 			requestController.addRequest(request);
@@ -80,9 +94,15 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void imageReceived(Bitmap bitmap) {
+	private final void imageReceived(Bitmap bitmap) {
 		ImageView iv = (ImageView) findViewById(R.id.main_user_image);
 		iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap, 10));
+	}
+	
+	private final void showFriendsList() {
+		Intent i = new Intent(this, FriendsActivity.class);
+		i.putExtra("user_id", "me");
+		startActivity(i);
 	}
 
 }

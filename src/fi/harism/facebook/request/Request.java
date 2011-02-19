@@ -3,17 +3,19 @@ package fi.harism.facebook.request;
 import android.app.Activity;
 
 public abstract class Request implements Runnable {
-	
+
 	private final static int EXECUTION_NOT_STARTED = 0;
 	private final static int EXECUTION_THREAD = 1;
 	private final static int EXECUTION_UI_THREAD = 2;
 	private final static int EXECUTION_STOPPED = 3;
-	
+
 	private int executionState;
 	private Activity activity = null;
+	private Observer observer = null;
 
-	public Request(Activity activity) {
+	public Request(Activity activity, Observer observer) {
 		this.activity = activity;
+		this.observer = observer;
 		executionState = EXECUTION_NOT_STARTED;
 	}
 
@@ -35,7 +37,7 @@ public abstract class Request implements Runnable {
 				activity.runOnUiThread(this);
 			} catch (Exception ex) {
 				stop();
-				processNextRequest();
+				observer.onComplete();
 			}
 			break;
 		case EXECUTION_THREAD:
@@ -45,16 +47,16 @@ public abstract class Request implements Runnable {
 			} catch (Exception ex) {
 			}
 			stop();
-			processNextRequest();
+			observer.onComplete();
 			break;
 		}
-	}
-
-	private final void processNextRequest() {
-		RequestController.getRequestController().processNextRequest();
 	}
 
 	public abstract void runOnThread() throws Exception;
 
 	public abstract void runOnUiThread() throws Exception;
+
+	public interface Observer {
+		public void onComplete();
+	}
 }
