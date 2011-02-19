@@ -34,30 +34,35 @@ public class FacebookController {
 		if (facebookAuthorized) {
 			observer.onComplete();
 		} else {
-			facebook.authorize(activity, new Facebook.DialogListener() {
-				@Override
-				public void onFacebookError(FacebookError e) {
-					Exception ex = new Exception(e.getLocalizedMessage());
-					observer.onError(ex);
-				}
+			String permissions[] = { "read_friendlists" };
 
-				@Override
-				public void onError(DialogError e) {
-					Exception ex = new Exception(e.getLocalizedMessage());
-					observer.onError(ex);
-				}
+			facebook.authorize(activity, permissions,
+					new Facebook.DialogListener() {
+						@Override
+						public void onFacebookError(FacebookError e) {
+							Exception ex = new Exception(e
+									.getLocalizedMessage());
+							observer.onError(ex);
+						}
 
-				@Override
-				public void onComplete(Bundle values) {
-					facebookAuthorized = true;
-					observer.onComplete();
-				}
+						@Override
+						public void onError(DialogError e) {
+							Exception ex = new Exception(e
+									.getLocalizedMessage());
+							observer.onError(ex);
+						}
 
-				@Override
-				public void onCancel() {
-					observer.onCancel();
-				}
-			});
+						@Override
+						public void onComplete(Bundle values) {
+							facebookAuthorized = true;
+							observer.onComplete();
+						}
+
+						@Override
+						public void onCancel() {
+							observer.onCancel();
+						}
+					});
 		}
 	}
 

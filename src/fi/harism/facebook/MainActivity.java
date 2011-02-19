@@ -99,7 +99,6 @@ public class MainActivity extends BaseActivity {
 
 	private final void showFriendsList() {
 		Intent i = new Intent(this, FriendsActivity.class);
-		i.putExtra("user_id", "me");
 		startActivity(i);
 	}
 

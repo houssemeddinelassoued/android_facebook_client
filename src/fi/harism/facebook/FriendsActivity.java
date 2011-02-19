@@ -18,7 +18,6 @@ import fi.harism.facebook.request.RequestController;
 
 public class FriendsActivity extends BaseActivity {
 
-	private String userId;
 	private RequestController requestController;
 
 	@Override
@@ -26,7 +25,6 @@ public class FriendsActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.friends);
 
-		userId = getIntent().getStringExtra("user_id");
 		requestController = new RequestController();
 
 		showProgressDialog();
@@ -37,7 +35,7 @@ public class FriendsActivity extends BaseActivity {
 		Bundle bundle = new Bundle();
 		bundle.putString("fields", "id,name,picture");
 		FacebookRequest facebookRequest = new FacebookRequest(this,
-				requestController, userId + "/friends", bundle,
+				requestController, "me/friends", bundle,
 				new FacebookRequest.Observer() {
 
 					@Override
@@ -129,6 +127,15 @@ public class FriendsActivity extends BaseActivity {
 
 		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 		scrollView.addView(friendView);
+
+		friendView.setTag(R.id.view_user_id, bundle.getString("id"));
+		friendView.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				showAlertDialog((String) v.getTag(R.id.view_user_id));
+			}
+		});
 	}
 
 }
