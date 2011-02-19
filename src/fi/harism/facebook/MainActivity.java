@@ -72,65 +72,61 @@ public class MainActivity extends BaseActivity {
 
 					@Override
 					public void onComplete(FacebookRequest facebookRequest) {
-						meReceived(facebookRequest.getJSONObject());
+						JSONObject o = facebookRequest.getJSONObject();
+						try {
+							String name = o.getString("name");
+							TextView tv = (TextView) findViewById(R.id.main_user_name);
+							tv.setText(name);
+						} catch (Exception ex) {
+						}
+						try {
+							String pictureUrl = o.getString("picture");
+							loadPicture(pictureUrl);
+						} catch (Exception ex) {
+						}
+					}
+				});
+		requestController.addRequest(request);
+
+		b = new Bundle();
+		b.putString("limit", "1");
+		b.putString("fields", "message");
+		request = requestController.createFacebookRequest("me/statuses", b,
+				new FacebookRequest.Observer() {
+					@Override
+					public void onError(Exception ex) {
+					}
+
+					@Override
+					public void onComplete(FacebookRequest facebookRequest) {
+						try {
+							JSONObject resp = facebookRequest.getJSONObject();
+							String message = resp.getJSONArray("data")
+									.getJSONObject(0).getString("message");
+							TextView tv = (TextView) findViewById(R.id.main_user_status);
+							tv.setText(message);
+						} catch (Exception ex) {
+						}
 					}
 				});
 		requestController.addRequest(request);
 	}
 
-	private final void meReceived(JSONObject response) {
-		try {
-			String name = response.getString("name");
-			TextView tv = (TextView) findViewById(R.id.main_user_name);
-			tv.setText(name);
-		} catch (Exception ex) {
-		}
+	private final void loadPicture(String pictureUrl) {
+		ImageRequest request = requestController.createImageRequest(pictureUrl,
+				new ImageRequest.Observer() {
+					@Override
+					public void onError(Exception ex) {
+					}
 
-		try {
-			Bundle bundle = new Bundle();
-			bundle.putString("limit", "1");
-			bundle.putString("fields", "message");
-			FacebookRequest request = requestController.createFacebookRequest(
-					"me/statuses", bundle, new FacebookRequest.Observer() {
-						@Override
-						public void onError(Exception ex) {
-						}
-
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONObject resp = facebookRequest
-										.getJSONObject();
-								String message = resp.getJSONArray("data")
-										.getJSONObject(0).getString("message");
-								TextView tv = (TextView) findViewById(R.id.main_user_status);
-								tv.setText(message);
-							} catch (Exception ex) {
-							}
-						}
-					});
-			requestController.addRequest(request);
-		} catch (Exception ex) {
-		}
-
-		try {
-			String picture = response.getString("picture");
-			ImageRequest request = requestController.createImageRequest(
-					picture, new ImageRequest.Observer() {
-						@Override
-						public void onError(Exception ex) {
-						}
-
-						@Override
-						public void onComplete(ImageRequest imageRequest) {
-							ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-							iv.setImageBitmap(BitmapUtils.roundBitmap(
-									imageRequest.getBitmap(), 10));
-						}
-					});
-			requestController.addRequest(request);
-		} catch (Exception ex) {
-		}
+					@Override
+					public void onComplete(ImageRequest imageRequest) {
+						ImageView iv = (ImageView) findViewById(R.id.main_user_image);
+						iv.setImageBitmap(BitmapUtils.roundBitmap(
+								imageRequest.getBitmap(), 10));
+					}
+				});
+		requestController.addRequest(request);
 	}
 
 }
