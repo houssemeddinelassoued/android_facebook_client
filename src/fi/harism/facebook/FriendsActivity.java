@@ -8,13 +8,14 @@ import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestController;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class FriendsActivity extends Activity {
+public class FriendsActivity extends BaseActivity {
 
 	private String userId;
 	private RequestController requestController;
@@ -25,9 +26,9 @@ public class FriendsActivity extends Activity {
 		setContentView(R.layout.friends);
 
 		userId = getIntent().getStringExtra("user_id");
-
 		requestController = new RequestController();
-
+		
+		showProgressDialog();
 		getFriendsList();
 	}
 
@@ -40,10 +41,12 @@ public class FriendsActivity extends Activity {
 
 					@Override
 					public void onError(Exception ex) {
+						hideProgressDialog();
 					}
 
 					@Override
 					public void onComplete(JSONObject response) {
+						hideProgressDialog();
 						try {
 							processFriendsList(response.getJSONArray("data"));
 						} catch (Exception ex) {

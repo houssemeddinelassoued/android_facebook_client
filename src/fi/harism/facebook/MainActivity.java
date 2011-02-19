@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
 
 	private FacebookController facebookController = null;
 	private RequestController requestController = null;
