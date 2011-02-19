@@ -1,5 +1,9 @@
 package fi.harism.facebook;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Vector;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -7,8 +11,6 @@ import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestController;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,7 +29,7 @@ public class FriendsActivity extends BaseActivity {
 
 		userId = getIntent().getStringExtra("user_id");
 		requestController = new RequestController();
-		
+
 		showProgressDialog();
 		getFriendsList();
 	}
@@ -58,9 +60,33 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	private final void processFriendsList(JSONArray friendList) {
+		Vector<JSONObject> lst = new Vector<JSONObject>();
 		for (int i = 0; i < friendList.length(); ++i) {
 			try {
-				JSONObject friend = friendList.getJSONObject(i);
+				JSONObject f = friendList.getJSONObject(i);
+				lst.add(f);
+			} catch (Exception ex) {
+			}
+		}
+
+		Comparator<JSONObject> comparator = new Comparator<JSONObject>() {
+			@Override
+			public int compare(JSONObject arg0, JSONObject arg1) {
+				try {
+					String arg0Name = arg0.getString("name");
+					String arg1Name = arg1.getString("name");
+					return arg0Name.compareToIgnoreCase(arg1Name);
+				} catch (Exception ex) {
+					return 0;
+				}
+			}
+		};
+
+		Collections.sort(lst, comparator);
+
+		for (int i = 0; i < lst.size(); ++i) {
+			try {
+				JSONObject friend = lst.elementAt(i);
 				String imageUrl = friend.getString("picture");
 				String id = friend.getString("id");
 				String name = friend.getString("name");
