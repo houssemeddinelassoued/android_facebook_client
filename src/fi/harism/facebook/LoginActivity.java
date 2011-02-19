@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-
 import fi.harism.facebook.util.FacebookController;
 
 public class LoginActivity extends BaseActivity {

@@ -2,9 +2,9 @@ package fi.harism.facebook.request;
 
 import org.json.JSONObject;
 
-import fi.harism.facebook.util.FacebookController;
 import android.app.Activity;
 import android.os.Bundle;
+import fi.harism.facebook.util.FacebookController;
 
 public class FacebookRequest extends Request {
 

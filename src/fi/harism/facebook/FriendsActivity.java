@@ -7,15 +7,14 @@ import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import fi.harism.facebook.request.FacebookRequest;
-import fi.harism.facebook.request.ImageRequest;
-import fi.harism.facebook.request.RequestController;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import fi.harism.facebook.request.FacebookRequest;
+import fi.harism.facebook.request.ImageRequest;
+import fi.harism.facebook.request.RequestController;
 
 public class FriendsActivity extends BaseActivity {
 
