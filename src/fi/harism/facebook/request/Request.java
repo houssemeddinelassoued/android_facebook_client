@@ -1,6 +1,7 @@
 package fi.harism.facebook.request;
 
 import android.app.Activity;
+import android.os.Bundle;
 
 public abstract class Request implements Runnable {
 
@@ -12,11 +13,20 @@ public abstract class Request implements Runnable {
 	private int executionState;
 	private Activity activity = null;
 	private Observer observer = null;
+	private Bundle bundle = null;
 
 	public Request(Activity activity, Observer observer) {
 		this.activity = activity;
 		this.observer = observer;
 		executionState = EXECUTION_NOT_STARTED;
+	}
+
+	public final void setBundle(Bundle bundle) {
+		this.bundle = bundle;
+	}
+
+	public final Bundle getBundle() {
+		return bundle;
 	}
 
 	public final void stop() {

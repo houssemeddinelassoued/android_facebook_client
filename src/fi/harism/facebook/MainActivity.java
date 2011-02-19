@@ -26,7 +26,7 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.main);
 
 		facebookController = FacebookController.getFacebookController();
-		requestController = new RequestController();
+		requestController = new RequestController(this);
 
 		Button friendsButton = (Button) findViewById(R.id.main_button_friends);
 		friendsButton.setOnClickListener(new View.OnClickListener() {
@@ -40,10 +40,22 @@ public class MainActivity extends BaseActivity {
 	}
 
 	@Override
+	public void onResume() {
+		super.onResume();
+		requestController.resume();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		requestController.pause();
+	}
+
+	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		facebookController = null;
-		requestController.clear();
+		requestController.destroy();
 		requestController = null;
 	}
 
@@ -52,15 +64,15 @@ public class MainActivity extends BaseActivity {
 		b.putString("fields", "name,picture");
 		b.putString(FacebookController.TOKEN,
 				facebookController.getAccessToken());
-		FacebookRequest request = new FacebookRequest(this, requestController,
-				"me", b, new FacebookRequest.Observer() {
+		FacebookRequest request = requestController.createFacebookRequest("me",
+				b, new FacebookRequest.Observer() {
 					@Override
 					public void onError(Exception ex) {
 					}
 
 					@Override
-					public void onComplete(JSONObject response) {
-						meReceived(response);
+					public void onComplete(FacebookRequest facebookRequest) {
+						meReceived(facebookRequest.getJSONObject());
 					}
 				});
 		requestController.addRequest(request);
@@ -76,7 +88,7 @@ public class MainActivity extends BaseActivity {
 
 		try {
 			String picture = response.getString("picture");
-			ImageRequest request = new ImageRequest(this, requestController,
+			ImageRequest request = requestController.createImageRequest(
 					picture, new ImageRequest.Observer() {
 						@Override
 						public void onError(Exception ex) {

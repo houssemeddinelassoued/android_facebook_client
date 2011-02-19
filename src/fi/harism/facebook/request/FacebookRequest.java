@@ -8,25 +8,29 @@ import fi.harism.facebook.util.FacebookController;
 
 public class FacebookRequest extends Request {
 
-	private String path;
-	private Bundle bundle;
+	private String requestPath;
+	private Bundle requestBundle;
 	private Observer observer;
 	private JSONObject response;
 
 	public FacebookRequest(Activity activity, Request.Observer requestObserver,
-			String path, Observer observer) {
+			String requestPath, Observer observer) {
 		super(activity, requestObserver);
-		this.path = path;
-		this.bundle = null;
+		this.requestPath = requestPath;
+		this.requestBundle = null;
 		this.observer = observer;
 	}
 
 	public FacebookRequest(Activity activity, Request.Observer requestObserver,
-			String path, Bundle bundle, Observer observer) {
+			String requestPath, Bundle requestBundle, Observer observer) {
 		super(activity, requestObserver);
-		this.path = path;
-		this.bundle = bundle;
+		this.requestPath = requestPath;
+		this.requestBundle = requestBundle;
 		this.observer = observer;
+	}
+
+	public JSONObject getJSONObject() {
+		return response;
 	}
 
 	@Override
@@ -34,10 +38,10 @@ public class FacebookRequest extends Request {
 		try {
 			String r;
 			FacebookController c = FacebookController.getFacebookController();
-			if (bundle != null) {
-				r = c.request(path, bundle);
+			if (requestBundle != null) {
+				r = c.request(requestPath, requestBundle);
 			} else {
-				r = c.request(path);
+				r = c.request(requestPath);
 			}
 
 			response = new JSONObject(r);
@@ -56,13 +60,13 @@ public class FacebookRequest extends Request {
 
 	@Override
 	public void runOnUiThread() throws Exception {
-		observer.onComplete(response);
+		observer.onComplete(this);
 	}
 
 	public interface Observer {
 		public void onError(Exception ex);
 
-		public void onComplete(JSONObject response);
+		public void onComplete(FacebookRequest facebookRequest);
 	}
 
 }

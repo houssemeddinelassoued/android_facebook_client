@@ -32,4 +32,10 @@ public class BitmapUtils {
 		return roundedBitmap;
 	}
 
+	public static final Bitmap scaleToHeight(Bitmap bitmap, int height) {
+		int dstHeight = 30;
+		int dstWidth = dstHeight * bitmap.getWidth() / bitmap.getHeight();
+		return Bitmap.createScaledBitmap(bitmap, dstWidth, dstHeight, true);
+	}
+
 }

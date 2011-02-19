@@ -7,6 +7,7 @@ import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestController;
+import fi.harism.facebook.util.BitmapUtils;
 
 public class FriendsActivity extends BaseActivity {
 
@@ -25,33 +27,55 @@ public class FriendsActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.friends);
 
-		requestController = new RequestController();
+		requestController = new RequestController(this);
 
 		showProgressDialog();
 		getFriendsList();
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		requestController.resume();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		requestController.pause();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		requestController.destroy();
+		requestController = null;
+	}
+
 	private void getFriendsList() {
 		Bundle bundle = new Bundle();
 		bundle.putString("fields", "id,name,picture");
-		FacebookRequest facebookRequest = new FacebookRequest(this,
-				requestController, "me/friends", bundle,
-				new FacebookRequest.Observer() {
+		FacebookRequest facebookRequest = requestController
+				.createFacebookRequest("me/friends", bundle,
+						new FacebookRequest.Observer() {
 
-					@Override
-					public void onError(Exception ex) {
-						hideProgressDialog();
-					}
+							@Override
+							public void onError(Exception ex) {
+								hideProgressDialog();
+							}
 
-					@Override
-					public void onComplete(JSONObject response) {
-						hideProgressDialog();
-						try {
-							processFriendsList(response.getJSONArray("data"));
-						} catch (Exception ex) {
-						}
-					}
-				});
+							@Override
+							public void onComplete(
+									FacebookRequest facebookRequest) {
+								hideProgressDialog();
+								try {
+									processFriendsList(facebookRequest
+											.getJSONObject().getJSONArray(
+													"data"));
+								} catch (Exception ex) {
+								}
+							}
+						});
 
 		requestController.addRequest(facebookRequest);
 	}
@@ -88,19 +112,20 @@ public class FriendsActivity extends BaseActivity {
 				String id = friend.getString("id");
 				String name = friend.getString("name");
 
-				ImageRequest imageRequest = new ImageRequest(this,
-						requestController, imageUrl,
-						new ImageRequest.Observer() {
+				ImageRequest imageRequest = requestController
+						.createImageRequest(imageUrl,
+								new ImageRequest.Observer() {
 
-							@Override
-							public void onError(Exception ex) {
-							}
+									@Override
+									public void onError(Exception ex) {
+									}
 
-							@Override
-							public void onComplete(ImageRequest imageRequest) {
-								handleImageReceived(imageRequest);
-							}
-						});
+									@Override
+									public void onComplete(
+											ImageRequest imageRequest) {
+										handleImageReceived(imageRequest);
+									}
+								});
 
 				Bundle bundle = new Bundle();
 				bundle.putString("id", id);
@@ -123,7 +148,9 @@ public class FriendsActivity extends BaseActivity {
 		nameTextView.setText(bundle.getString("name"));
 		ImageView imageView = (ImageView) friendView
 				.findViewById(R.id.friends_item_image);
-		imageView.setImageBitmap(imageRequest.getBitmap());
+
+		Bitmap scaled = BitmapUtils.scaleToHeight(imageRequest.getBitmap(), 30);
+		imageView.setImageBitmap(BitmapUtils.roundBitmap(scaled, 3));
 
 		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 		scrollView.addView(friendView);

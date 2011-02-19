@@ -6,14 +6,12 @@ import java.net.URL;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 
 public class ImageRequest extends Request {
 
 	private String url;
 	private Observer observer;
 	private Bitmap bitmap;
-	private Bundle bundle;
 
 	public ImageRequest(Activity activity, Request.Observer requestObserver,
 			String url, Observer observer) {
@@ -24,14 +22,6 @@ public class ImageRequest extends Request {
 
 	public Bitmap getBitmap() {
 		return bitmap;
-	}
-
-	public void setBundle(Bundle bundle) {
-		this.bundle = bundle;
-	}
-
-	public Bundle getBundle() {
-		return bundle;
 	}
 
 	@Override
