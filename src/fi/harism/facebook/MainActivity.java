@@ -3,7 +3,6 @@ package fi.harism.facebook;
 import org.json.JSONObject;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -88,6 +87,33 @@ public class MainActivity extends BaseActivity {
 		}
 
 		try {
+			Bundle bundle = new Bundle();
+			bundle.putString("limit", "1");
+			bundle.putString("fields", "message");
+			FacebookRequest request = requestController.createFacebookRequest(
+					"me/statuses", bundle, new FacebookRequest.Observer() {
+						@Override
+						public void onError(Exception ex) {
+						}
+
+						@Override
+						public void onComplete(FacebookRequest facebookRequest) {
+							try {
+								JSONObject resp = facebookRequest
+										.getJSONObject();
+								String message = resp.getJSONArray("data")
+										.getJSONObject(0).getString("message");
+								TextView tv = (TextView) findViewById(R.id.main_user_status);
+								tv.setText(message);
+							} catch (Exception ex) {
+							}
+						}
+					});
+			requestController.addRequest(request);
+		} catch (Exception ex) {
+		}
+
+		try {
 			String picture = response.getString("picture");
 			ImageRequest request = requestController.createImageRequest(
 					picture, new ImageRequest.Observer() {
@@ -97,17 +123,14 @@ public class MainActivity extends BaseActivity {
 
 						@Override
 						public void onComplete(ImageRequest imageRequest) {
-							imageReceived(imageRequest.getBitmap());
+							ImageView iv = (ImageView) findViewById(R.id.main_user_image);
+							iv.setImageBitmap(BitmapUtils.roundBitmap(
+									imageRequest.getBitmap(), 10));
 						}
 					});
 			requestController.addRequest(request);
 		} catch (Exception ex) {
 		}
-	}
-
-	private final void imageReceived(Bitmap bitmap) {
-		ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-		iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap, 10));
 	}
 
 }

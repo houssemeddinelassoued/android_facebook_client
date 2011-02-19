@@ -34,7 +34,8 @@ public class FacebookController {
 		if (facebookAuthorized) {
 			observer.onComplete();
 		} else {
-			facebook.authorize(activity, new Facebook.DialogListener() {
+			String permissions[] = { "user_status", "friends_status", "read_stream" };
+			facebook.authorize(activity, permissions, new Facebook.DialogListener() {
 				@Override
 				public void onFacebookError(FacebookError e) {
 					Exception ex = new Exception(e.getLocalizedMessage());
