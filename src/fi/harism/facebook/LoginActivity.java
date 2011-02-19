@@ -8,7 +8,7 @@ import android.widget.Button;
 import fi.harism.facebook.util.FacebookController;
 
 public class LoginActivity extends BaseActivity {
-	
+
 	private FacebookController facebookController = null;
 
 	/** Called when the activity is first created. */
@@ -16,7 +16,7 @@ public class LoginActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
-		
+
 		facebookController = FacebookController.getFacebookController();
 
 		Button b = (Button) findViewById(R.id.login_button);
@@ -27,7 +27,7 @@ public class LoginActivity extends BaseActivity {
 			}
 		});
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -41,21 +41,22 @@ public class LoginActivity extends BaseActivity {
 	}
 
 	private void facebookAuthorize() {
-		facebookController.authorize(this, new FacebookController.LoginObserver() {
-			@Override
-			public void onError(Exception ex) {
-				showAlertDialog(ex.getLocalizedMessage());
-			}
+		facebookController.authorize(this,
+				new FacebookController.LoginObserver() {
+					@Override
+					public void onError(Exception ex) {
+						showAlertDialog(ex.getLocalizedMessage());
+					}
 
-			@Override
-			public void onComplete() {
-				showMainActivity();
-			}
+					@Override
+					public void onComplete() {
+						showMainActivity();
+					}
 
-			@Override
-			public void onCancel() {
-			}
-		});
+					@Override
+					public void onCancel() {
+					}
+				});
 	}
 
 	private void showMainActivity() {

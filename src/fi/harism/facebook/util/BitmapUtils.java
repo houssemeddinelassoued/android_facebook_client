@@ -10,7 +10,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 
 public class BitmapUtils {
-	
+
 	public static final Bitmap roundBitmap(Bitmap bitmap, float radiusPx) {
 		Bitmap roundedBitmap = Bitmap.createBitmap(bitmap.getWidth(),
 				bitmap.getHeight(), Config.ARGB_8888);
@@ -28,7 +28,7 @@ public class BitmapUtils {
 
 		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
 		canvas.drawBitmap(bitmap, rect, rect, paint);
-		
+
 		return roundedBitmap;
 	}
 

@@ -8,7 +8,6 @@ import fi.harism.facebook.request.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookController;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -29,18 +28,18 @@ public class MainActivity extends BaseActivity {
 
 		facebookController = FacebookController.getFacebookController();
 		requestController = new RequestController();
-		
-		Button friendsButton = (Button)findViewById(R.id.main_button_friends);
-		friendsButton.setOnClickListener(new View.OnClickListener() {			
+
+		Button friendsButton = (Button) findViewById(R.id.main_button_friends);
+		friendsButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				showFriendsList();
 			}
 		});
-		
+
 		fetchNameAndImage();
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -48,14 +47,14 @@ public class MainActivity extends BaseActivity {
 		requestController.clear();
 		requestController = null;
 	}
-	
+
 	private final void fetchNameAndImage() {
 		Bundle b = new Bundle();
 		b.putString("fields", "name,picture");
 		b.putString(FacebookController.TOKEN,
 				facebookController.getAccessToken());
-		FacebookRequest request = new FacebookRequest(this, requestController, "me", b,
-				new FacebookRequest.Observer() {
+		FacebookRequest request = new FacebookRequest(this, requestController,
+				"me", b, new FacebookRequest.Observer() {
 					@Override
 					public void onError(Exception ex) {
 					}
@@ -65,7 +64,7 @@ public class MainActivity extends BaseActivity {
 						meReceived(response);
 					}
 				});
-		requestController.addRequest(request);		
+		requestController.addRequest(request);
 	}
 
 	private final void meReceived(JSONObject response) {
@@ -78,8 +77,8 @@ public class MainActivity extends BaseActivity {
 
 		try {
 			String picture = response.getString("picture");
-			ImageRequest request = new ImageRequest(this, requestController, picture,
-					new ImageRequest.Observer() {
+			ImageRequest request = new ImageRequest(this, requestController,
+					picture, new ImageRequest.Observer() {
 						@Override
 						public void onError(Exception ex) {
 						}
@@ -98,7 +97,7 @@ public class MainActivity extends BaseActivity {
 		ImageView iv = (ImageView) findViewById(R.id.main_user_image);
 		iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap, 10));
 	}
-	
+
 	private final void showFriendsList() {
 		Intent i = new Intent(this, FriendsActivity.class);
 		i.putExtra("user_id", "me");

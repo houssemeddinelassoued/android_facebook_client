@@ -68,11 +68,11 @@ public class FacebookController {
 	public String request(String path, Bundle bundle) throws Exception {
 		return facebook.request(path, bundle);
 	}
-	
+
 	public String getAccessToken() {
 		return facebook.getAccessToken();
 	}
-	
+
 	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
 		facebook.authorizeCallback(requestCode, resultCode, data);
 	}

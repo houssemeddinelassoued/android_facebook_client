@@ -5,9 +5,9 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 
 public class BaseActivity extends Activity {
-	
+
 	private ProgressDialog progressDialog = null;
-	
+
 	public void showProgressDialog() {
 		if (progressDialog == null) {
 			progressDialog = new ProgressDialog(this);
@@ -15,19 +15,19 @@ public class BaseActivity extends Activity {
 			progressDialog.show();
 		}
 	}
-	
+
 	public void hideProgressDialog() {
 		if (progressDialog != null) {
 			progressDialog.dismiss();
 			progressDialog = null;
 		}
 	}
-	
+
 	public void showAlertDialog(String message) {
 		AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(this);
 		dlgBuilder.setMessage(message);
 		AlertDialog dlg = dlgBuilder.create();
-		dlg.show();	
+		dlg.show();
 	}
 
 }

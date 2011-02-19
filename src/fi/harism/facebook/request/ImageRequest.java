@@ -21,15 +21,15 @@ public class ImageRequest extends Request {
 		this.url = url;
 		this.observer = observer;
 	}
-	
+
 	public Bitmap getBitmap() {
 		return bitmap;
 	}
-	
+
 	public void setBundle(Bundle bundle) {
 		this.bundle = bundle;
 	}
-	
+
 	public Bundle getBundle() {
 		return bundle;
 	}

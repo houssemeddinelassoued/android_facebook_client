@@ -32,7 +32,7 @@ public final class RequestController implements Request.Observer {
 			}
 		}
 	}
-	
+
 	@Override
 	public void onComplete() {
 		processNextRequest();
