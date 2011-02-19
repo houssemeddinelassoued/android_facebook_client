@@ -1,19 +1,19 @@
 package fi.harism.facebook.request;
 
-import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.os.Bundle;
 
 public final class RequestController implements Request.Observer {
 
-	private ArrayDeque<Request> requests = null;
+	private ArrayList<Request> requests = null;
 	private Request currentRequest = null;
 	private Activity activity = null;
 	private boolean paused;
 
 	public RequestController(Activity activity) {
-		requests = new ArrayDeque<Request>();
+		requests = new ArrayList<Request>();
 		this.activity = activity;
 		paused = false;
 	}
@@ -58,14 +58,14 @@ public final class RequestController implements Request.Observer {
 	}
 
 	public final void addRequest(Request request) {
-		requests.addLast(request);
+		requests.add(request);
 		processNextRequest();
 	}
 
 	private final void processNextRequest() {
 		if (!paused && (currentRequest == null || currentRequest.hasStopped())) {
 			if (!requests.isEmpty()) {
-				currentRequest = requests.removeFirst();
+				currentRequest = requests.remove(0);
 				new Thread(currentRequest).start();
 			}
 		}
