@@ -32,7 +32,8 @@ public class MainActivity extends BaseActivity {
 		friendsButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showFriendsList();
+				Intent i = createIntent(FriendsActivity.class);
+				startActivity(i);
 			}
 		});
 
@@ -107,11 +108,6 @@ public class MainActivity extends BaseActivity {
 	private final void imageReceived(Bitmap bitmap) {
 		ImageView iv = (ImageView) findViewById(R.id.main_user_image);
 		iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap, 10));
-	}
-
-	private final void showFriendsList() {
-		Intent i = new Intent(this, FriendsActivity.class);
-		startActivity(i);
 	}
 
 }

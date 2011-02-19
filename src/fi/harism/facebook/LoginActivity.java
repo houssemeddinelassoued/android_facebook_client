@@ -49,19 +49,15 @@ public class LoginActivity extends BaseActivity {
 
 					@Override
 					public void onComplete() {
-						showMainActivity();
+						finish();
+						Intent i = createIntent(MainActivity.class);
+						startActivity(i);
 					}
 
 					@Override
 					public void onCancel() {
 					}
 				});
-	}
-
-	private void showMainActivity() {
-		finish();
-		Intent i = new Intent(this, MainActivity.class);
-		startActivity(i);
 	}
 
 }
