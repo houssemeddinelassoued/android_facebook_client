@@ -108,14 +108,13 @@ public class FriendsActivity extends BaseActivity {
 		for (int i = 0; i < lst.size(); ++i) {
 			try {
 				JSONObject friend = lst.elementAt(i);
-				String imageUrl = friend.getString("picture");
 				String id = friend.getString("id");
+				String picture = friend.getString("picture");
 				String name = friend.getString("name");
 
 				ImageRequest imageRequest = requestController
-						.createImageRequest(imageUrl,
+						.createImageRequest(picture,
 								new ImageRequest.Observer() {
-
 									@Override
 									public void onError(Exception ex) {
 									}
@@ -123,7 +122,7 @@ public class FriendsActivity extends BaseActivity {
 									@Override
 									public void onComplete(
 											ImageRequest imageRequest) {
-										handleImageReceived(imageRequest);
+										onImageReceived(imageRequest);
 									}
 								});
 
@@ -133,22 +132,22 @@ public class FriendsActivity extends BaseActivity {
 				imageRequest.setBundle(bundle);
 
 				requestController.addRequest(imageRequest);
-
 			} catch (Exception ex) {
 			}
 		}
 	}
 
-	private final void handleImageReceived(ImageRequest imageRequest) {
+	private final void onImageReceived(ImageRequest imageRequest) {
 		Bundle bundle = imageRequest.getBundle();
 		View friendView = getLayoutInflater().inflate(R.layout.friends_item,
 				null);
+
 		TextView nameTextView = (TextView) friendView
 				.findViewById(R.id.friends_item_name);
 		nameTextView.setText(bundle.getString("name"));
+
 		ImageView imageView = (ImageView) friendView
 				.findViewById(R.id.friends_item_image);
-
 		Bitmap scaled = BitmapUtils.scaleToHeight(imageRequest.getBitmap(), 30);
 		imageView.setImageBitmap(BitmapUtils.roundBitmap(scaled, 3));
 
