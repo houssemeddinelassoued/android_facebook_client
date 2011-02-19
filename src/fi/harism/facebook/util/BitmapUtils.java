@@ -16,14 +16,15 @@ public class BitmapUtils {
 				bitmap.getHeight(), Config.ARGB_8888);
 		Canvas canvas = new Canvas(roundedBitmap);
 
-		final int color = 0xff424242;
+		final int colorFg = 0xFFFFFFFF;
+		final int colorBg = 0x00000000;
 		final Paint paint = new Paint();
 		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 		final RectF rectF = new RectF(rect);
 
 		paint.setAntiAlias(true);
-		canvas.drawARGB(0, 0, 0, 0);
-		paint.setColor(color);
+		canvas.drawColor(colorBg);
+		paint.setColor(colorFg);
 		canvas.drawRoundRect(rectF, radiusPx, radiusPx, paint);
 
 		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
