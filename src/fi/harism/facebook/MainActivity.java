@@ -36,13 +36,24 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
+		Button feedButton = (Button) findViewById(R.id.main_button_feed);
+		feedButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = createIntent(FeedActivity.class);
+				startActivity(i);
+			}
+		});
+
 		loadProfileInfo();
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		requestController.resume();
+	public void onDestroy() {
+		super.onDestroy();
+		facebookController = null;
+		requestController.destroy();
+		requestController = null;
 	}
 
 	@Override
@@ -52,11 +63,9 @@ public class MainActivity extends BaseActivity {
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		facebookController = null;
-		requestController.destroy();
-		requestController = null;
+	public void onResume() {
+		super.onResume();
+		requestController.resume();
 	}
 
 	private final void loadProfileInfo() {
@@ -89,32 +98,28 @@ public class MainActivity extends BaseActivity {
 
 	private final class FacebookMeObserver implements FacebookRequest.Observer {
 		@Override
-		public void onError(Exception ex) {
-		}
-
-		@Override
 		public void onComplete(FacebookRequest facebookRequest) {
 			JSONObject o = facebookRequest.getJSONObject();
 
 			String name = o.optString("name");
-			if (name != "") {
+			if (name.length() > 0) {
 				TextView tv = (TextView) findViewById(R.id.main_user_name);
 				tv.setText(name);
 			}
 
 			String pictureUrl = o.optString("picture");
-			if (pictureUrl != "") {
+			if (pictureUrl.length() > 0) {
 				loadProfilePicture(pictureUrl);
 			}
+		}
+
+		@Override
+		public void onError(Exception ex) {
 		}
 	}
 
 	private final class FacebookMeStatusesObserver implements
 			FacebookRequest.Observer {
-		@Override
-		public void onError(Exception ex) {
-		}
-
 		@Override
 		public void onComplete(FacebookRequest facebookRequest) {
 			JSONObject o = facebookRequest.getJSONObject();
@@ -126,18 +131,22 @@ public class MainActivity extends BaseActivity {
 			} catch (Exception ex) {
 			}
 		}
-	}
 
-	private final class PictureObserver implements ImageRequest.Observer {
 		@Override
 		public void onError(Exception ex) {
 		}
+	}
 
+	private final class PictureObserver implements ImageRequest.Observer {
 		@Override
 		public void onComplete(ImageRequest imageRequest) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
 			iv.setImageBitmap(BitmapUtils.roundBitmap(imageRequest.getBitmap(),
 					10));
+		}
+
+		@Override
+		public void onError(Exception ex) {
 		}
 
 	}

@@ -14,8 +14,6 @@ public class FacebookController {
 	public static final String TOKEN = Facebook.TOKEN;
 
 	private static final String FACEBOOK_APP_ID = "190087744355420";
-	private Facebook facebook = null;
-	private boolean facebookAuthorized;
 
 	public static final FacebookController getFacebookController() {
 		if (instance == null) {
@@ -23,6 +21,10 @@ public class FacebookController {
 		}
 		return instance;
 	}
+
+	private Facebook facebook = null;
+
+	private boolean facebookAuthorized;
 
 	private FacebookController() {
 		facebook = new Facebook(FACEBOOK_APP_ID);
@@ -39,10 +41,14 @@ public class FacebookController {
 			facebook.authorize(activity, permissions,
 					new Facebook.DialogListener() {
 						@Override
-						public void onFacebookError(FacebookError e) {
-							Exception ex = new Exception(e
-									.getLocalizedMessage());
-							observer.onError(ex);
+						public void onCancel() {
+							observer.onCancel();
+						}
+
+						@Override
+						public void onComplete(Bundle values) {
+							facebookAuthorized = true;
+							observer.onComplete();
 						}
 
 						@Override
@@ -53,17 +59,21 @@ public class FacebookController {
 						}
 
 						@Override
-						public void onComplete(Bundle values) {
-							facebookAuthorized = true;
-							observer.onComplete();
-						}
-
-						@Override
-						public void onCancel() {
-							observer.onCancel();
+						public void onFacebookError(FacebookError e) {
+							Exception ex = new Exception(e
+									.getLocalizedMessage());
+							observer.onError(ex);
 						}
 					});
 		}
+	}
+
+	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
+		facebook.authorizeCallback(requestCode, resultCode, data);
+	}
+
+	public String getAccessToken() {
+		return facebook.getAccessToken();
 	}
 
 	public String request(String path) throws Exception {
@@ -74,20 +84,12 @@ public class FacebookController {
 		return facebook.request(path, bundle);
 	}
 
-	public String getAccessToken() {
-		return facebook.getAccessToken();
-	}
-
-	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
-		facebook.authorizeCallback(requestCode, resultCode, data);
-	}
-
 	public interface LoginObserver {
-		public void onError(Exception ex);
+		public void onCancel();
 
 		public void onComplete();
 
-		public void onCancel();
+		public void onError(Exception ex);
 	}
 
 }

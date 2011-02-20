@@ -4,7 +4,7 @@
 	<string name="main_name_text">Name</string>
 	<string name="main_status_text">Status</string>
 
-	<string name="main_button_newsfeed_text">Newsfeed</string>
+	<string name="main_button_feed_text">Feed</string>
 	<string name="main_button_friends_text">Friends</string>
 
 </resources>

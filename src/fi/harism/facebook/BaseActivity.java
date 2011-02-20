@@ -9,12 +9,9 @@ public class BaseActivity extends Activity {
 
 	private ProgressDialog progressDialog = null;
 
-	public void showProgressDialog() {
-		if (progressDialog == null) {
-			progressDialog = new ProgressDialog(this);
-			progressDialog.setMessage("Loading..");
-			progressDialog.show();
-		}
+	public Intent createIntent(Class<?> cls) {
+		Intent i = new Intent(this, cls);
+		return i;
 	}
 
 	public void hideProgressDialog() {
@@ -31,9 +28,12 @@ public class BaseActivity extends Activity {
 		dlg.show();
 	}
 
-	public Intent createIntent(Class<?> cls) {
-		Intent i = new Intent(this, cls);
-		return i;
+	public void showProgressDialog() {
+		if (progressDialog == null) {
+			progressDialog = new ProgressDialog(this);
+			progressDialog.setMessage("Loading..");
+			progressDialog.show();
+		}
 	}
 
 }

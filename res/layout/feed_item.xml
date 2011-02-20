@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@drawable/background_gradient">
+    <ImageView android:layout_height="wrap_content" android:src="@drawable/icon" android:layout_width="wrap_content" android:id="@+id/feed_item_picture"></ImageView>
+    <LinearLayout android:id="@+id/linearLayout1" android:layout_width="fill_parent" android:orientation="vertical" android:layout_height="wrap_content">
+        <TextView android:id="@+id/feed_item_name" android:layout_height="wrap_content" android:text="TextView" android:layout_width="wrap_content"></TextView>
+        <TextView android:layout_height="wrap_content" android:text="TextView" android:layout_width="wrap_content" android:id="@+id/feed_item_message"></TextView>
+        <TextView android:layout_height="wrap_content" android:text="TextView" android:layout_width="wrap_content" android:id="@+id/feed_item_created"></TextView>
+    </LinearLayout>
+</LinearLayout>

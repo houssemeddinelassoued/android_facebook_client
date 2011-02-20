@@ -14,18 +14,18 @@ public class FacebookRequest extends Request {
 	private JSONObject response;
 
 	public FacebookRequest(Activity activity, Request.Observer requestObserver,
-			String requestPath, Observer observer) {
-		super(activity, requestObserver);
-		this.requestPath = requestPath;
-		this.requestBundle = null;
-		this.observer = observer;
-	}
-
-	public FacebookRequest(Activity activity, Request.Observer requestObserver,
 			String requestPath, Bundle requestBundle, Observer observer) {
 		super(activity, requestObserver);
 		this.requestPath = requestPath;
 		this.requestBundle = requestBundle;
+		this.observer = observer;
+	}
+
+	public FacebookRequest(Activity activity, Request.Observer requestObserver,
+			String requestPath, Observer observer) {
+		super(activity, requestObserver);
+		this.requestPath = requestPath;
+		this.requestBundle = null;
 		this.observer = observer;
 	}
 
@@ -64,9 +64,9 @@ public class FacebookRequest extends Request {
 	}
 
 	public interface Observer {
-		public void onError(Exception ex);
-
 		public void onComplete(FacebookRequest facebookRequest);
+
+		public void onError(Exception ex);
 	}
 
 }

@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -43,9 +42,10 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		requestController.resume();
+	public void onDestroy() {
+		super.onDestroy();
+		requestController.destroy();
+		requestController = null;
 	}
 
 	@Override
@@ -55,10 +55,9 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		requestController.destroy();
-		requestController = null;
+	public void onResume() {
+		super.onResume();
+		requestController.resume();
 	}
 
 	private void getFriendsList() {
@@ -68,6 +67,37 @@ public class FriendsActivity extends BaseActivity {
 		FacebookRequest facebookRequest = requestController
 				.createFacebookRequest("me/friends", parameters, observer);
 		requestController.addRequest(facebookRequest);
+	}
+
+	private final void onImageReceived(ImageRequest imageRequest) {
+		Bundle bundle = imageRequest.getBundle();
+		View friendView = getLayoutInflater().inflate(R.layout.friends_item,
+				null);
+
+		TextView nameTextView = (TextView) friendView
+				.findViewById(R.id.friends_item_name);
+		nameTextView.setText(bundle.getString("name"));
+
+		ImageView imageView = (ImageView) friendView
+				.findViewById(R.id.friends_item_image);
+		Bitmap scaled = BitmapUtils.scaleToHeight(imageRequest.getBitmap(), 30);
+		imageView.setImageBitmap(BitmapUtils.roundBitmap(scaled, 3));
+
+		EditText searchEditText = (EditText) findViewById(R.id.friends_edit_search);
+		String searchText = searchEditText.getText().toString();
+		toggleFriendItemVisibility(friendView, searchText);
+
+		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
+		scrollView.addView(friendView);
+
+		friendView.setTag(R.id.view_user_id, bundle.getString("id"));
+		friendView.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				showAlertDialog((String) v.getTag(R.id.view_user_id));
+			}
+		});
 	}
 
 	private final void processFriendsList(JSONArray friendArray) {
@@ -113,43 +143,14 @@ public class FriendsActivity extends BaseActivity {
 		}
 	}
 
-	private final void onImageReceived(ImageRequest imageRequest) {
-		Bundle bundle = imageRequest.getBundle();
-		View friendView = getLayoutInflater().inflate(R.layout.friends_item,
-				null);
-
-		TextView nameTextView = (TextView) friendView
-				.findViewById(R.id.friends_item_name);
-		nameTextView.setText(bundle.getString("name"));
-
-		ImageView imageView = (ImageView) friendView
-				.findViewById(R.id.friends_item_image);
-		Bitmap scaled = BitmapUtils.scaleToHeight(imageRequest.getBitmap(), 30);
-		imageView.setImageBitmap(BitmapUtils.roundBitmap(scaled, 3));
-		
-		EditText searchEditText = (EditText)findViewById(R.id.friends_edit_search);
-		String searchText = searchEditText.getText().toString();
-		toggleFriendItemVisibility(friendView, searchText);
-
-		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
-		scrollView.addView(friendView);
-
-		friendView.setTag(R.id.view_user_id, bundle.getString("id"));
-		friendView.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				showAlertDialog((String) v.getTag(R.id.view_user_id));
-			}
-		});
-	}
-	
-	private final void toggleFriendItemVisibility(View friendItem, String searchText) {
+	private final void toggleFriendItemVisibility(View friendItem,
+			String searchText) {
 		searchText = searchText.toLowerCase();
-		TextView friendTextView = (TextView)friendItem.findViewById(R.id.friends_item_name);
+		TextView friendTextView = (TextView) friendItem
+				.findViewById(R.id.friends_item_name);
 		String friendName = friendTextView.getText().toString();
 		friendName = friendName.toLowerCase();
-		
+
 		if (friendName.contains(searchText)) {
 			friendItem.setVisibility(View.VISIBLE);
 		} else {
@@ -160,11 +161,6 @@ public class FriendsActivity extends BaseActivity {
 	private final class FacebookMeFriendsObserver implements
 			FacebookRequest.Observer {
 		@Override
-		public void onError(Exception ex) {
-			hideProgressDialog();
-		}
-
-		@Override
 		public void onComplete(FacebookRequest facebookRequest) {
 			hideProgressDialog();
 			try {
@@ -173,16 +169,21 @@ public class FriendsActivity extends BaseActivity {
 			} catch (Exception ex) {
 			}
 		}
+
+		@Override
+		public void onError(Exception ex) {
+			hideProgressDialog();
+		}
 	}
 
 	private final class PictureObserver implements ImageRequest.Observer {
 		@Override
-		public void onError(Exception ex) {
+		public void onComplete(ImageRequest imageRequest) {
+			onImageReceived(imageRequest);
 		}
 
 		@Override
-		public void onComplete(ImageRequest imageRequest) {
-			onImageReceived(imageRequest);
+		public void onError(Exception ex) {
 		}
 	}
 
@@ -190,9 +191,10 @@ public class FriendsActivity extends BaseActivity {
 		@Override
 		public void afterTextChanged(Editable editable) {
 			String searchText = editable.toString();
-			ViewGroup friendList = (LinearLayout)findViewById(R.id.friends_list);
-			for (int i=0; i<friendList.getChildCount(); ++i) {
-				LinearLayout friendItem = (LinearLayout)friendList.getChildAt(i);
+			ViewGroup friendList = (LinearLayout) findViewById(R.id.friends_list);
+			for (int i = 0; i < friendList.getChildCount(); ++i) {
+				LinearLayout friendItem = (LinearLayout) friendList
+						.getChildAt(i);
 				toggleFriendItemVisibility(friendItem, searchText);
 			}
 		}

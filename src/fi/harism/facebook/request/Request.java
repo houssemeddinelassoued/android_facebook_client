@@ -21,16 +21,8 @@ public abstract class Request implements Runnable {
 		executionState = EXECUTION_NOT_STARTED;
 	}
 
-	public final void setBundle(Bundle bundle) {
-		this.bundle = bundle;
-	}
-
 	public final Bundle getBundle() {
 		return bundle;
-	}
-
-	public final void stop() {
-		executionState = EXECUTION_STOPPED;
 	}
 
 	public final boolean hasStopped() {
@@ -66,6 +58,14 @@ public abstract class Request implements Runnable {
 	public abstract void runOnThread() throws Exception;
 
 	public abstract void runOnUiThread() throws Exception;
+
+	public final void setBundle(Bundle bundle) {
+		this.bundle = bundle;
+	}
+
+	public final void stop() {
+		executionState = EXECUTION_STOPPED;
+	}
 
 	public interface Observer {
 		public void onComplete();

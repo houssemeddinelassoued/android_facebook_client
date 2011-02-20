@@ -42,9 +42,9 @@ public class ImageRequest extends Request {
 	}
 
 	public interface Observer {
-		public void onError(Exception ex);
-
 		public void onComplete(ImageRequest imageRequest);
+
+		public void onError(Exception ex);
 	}
 
 }

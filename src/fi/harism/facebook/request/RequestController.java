@@ -18,13 +18,29 @@ public final class RequestController implements Request.Observer {
 		paused = false;
 	}
 
-	public final void pause() {
-		paused = true;
+	public final void addRequest(Request request) {
+		requests.add(request);
+		processNextRequest();
 	}
 
-	public final void resume() {
-		paused = false;
-		processNextRequest();
+	public final FacebookRequest createFacebookRequest(String requestPath,
+			Bundle requestBundle, FacebookRequest.Observer observer) {
+		FacebookRequest request = new FacebookRequest(activity, this,
+				requestPath, requestBundle, observer);
+		return request;
+	}
+
+	public final FacebookRequest createFacebookRequest(String requestPath,
+			FacebookRequest.Observer observer) {
+		FacebookRequest request = new FacebookRequest(activity, this,
+				requestPath, observer);
+		return request;
+	}
+
+	public final ImageRequest createImageRequest(String url,
+			ImageRequest.Observer observer) {
+		ImageRequest request = new ImageRequest(activity, this, url, observer);
+		return request;
 	}
 
 	public final void destroy() {
@@ -37,28 +53,17 @@ public final class RequestController implements Request.Observer {
 		activity = null;
 	}
 
-	public final FacebookRequest createFacebookRequest(String requestPath,
-			FacebookRequest.Observer observer) {
-		FacebookRequest request = new FacebookRequest(activity, this,
-				requestPath, observer);
-		return request;
+	@Override
+	public void onComplete() {
+		processNextRequest();
 	}
 
-	public final FacebookRequest createFacebookRequest(String requestPath,
-			Bundle requestBundle, FacebookRequest.Observer observer) {
-		FacebookRequest request = new FacebookRequest(activity, this,
-				requestPath, requestBundle, observer);
-		return request;
+	public final void pause() {
+		paused = true;
 	}
 
-	public final ImageRequest createImageRequest(String url,
-			ImageRequest.Observer observer) {
-		ImageRequest request = new ImageRequest(activity, this, url, observer);
-		return request;
-	}
-
-	public final void addRequest(Request request) {
-		requests.add(request);
+	public final void resume() {
+		paused = false;
 		processNextRequest();
 	}
 
@@ -69,11 +74,6 @@ public final class RequestController implements Request.Observer {
 				new Thread(currentRequest).start();
 			}
 		}
-	}
-
-	@Override
-	public void onComplete() {
-		processNextRequest();
 	}
 
 }
