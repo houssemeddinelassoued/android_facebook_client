@@ -2,17 +2,17 @@ package fi.harism.facebook.request;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.os.Bundle;
+import fi.harism.facebook.BaseActivity;
 
 public final class RequestController implements Request.Observer {
 
 	private ArrayList<Request> requests = null;
 	private Request currentRequest = null;
-	private Activity activity = null;
+	private BaseActivity activity = null;
 	private boolean paused;
 
-	public RequestController(Activity activity) {
+	public RequestController(BaseActivity activity) {
 		requests = new ArrayList<Request>();
 		this.activity = activity;
 		paused = false;

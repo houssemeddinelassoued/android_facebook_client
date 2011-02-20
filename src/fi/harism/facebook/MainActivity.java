@@ -24,7 +24,7 @@ public class MainActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		facebookController = FacebookController.getFacebookController();
+		facebookController = getGlobalState().getFacebookController();
 		requestController = new RequestController(this);
 
 		Button friendsButton = (Button) findViewById(R.id.main_button_friends);

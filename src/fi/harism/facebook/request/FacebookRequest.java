@@ -2,8 +2,8 @@ package fi.harism.facebook.request;
 
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.os.Bundle;
+import fi.harism.facebook.BaseActivity;
 import fi.harism.facebook.util.FacebookController;
 
 public class FacebookRequest extends Request {
@@ -12,21 +12,24 @@ public class FacebookRequest extends Request {
 	private Bundle requestBundle;
 	private Observer observer;
 	private JSONObject response;
+	private BaseActivity baseActivity;
 
-	public FacebookRequest(Activity activity, Request.Observer requestObserver,
+	public FacebookRequest(BaseActivity activity, Request.Observer requestObserver,
 			String requestPath, Bundle requestBundle, Observer observer) {
 		super(activity, requestObserver);
 		this.requestPath = requestPath;
 		this.requestBundle = requestBundle;
 		this.observer = observer;
+		this.baseActivity = activity;
 	}
 
-	public FacebookRequest(Activity activity, Request.Observer requestObserver,
+	public FacebookRequest(BaseActivity activity, Request.Observer requestObserver,
 			String requestPath, Observer observer) {
 		super(activity, requestObserver);
 		this.requestPath = requestPath;
 		this.requestBundle = null;
 		this.observer = observer;
+		this.baseActivity = activity;
 	}
 
 	public JSONObject getJSONObject() {
@@ -37,7 +40,7 @@ public class FacebookRequest extends Request {
 	public void runOnThread() throws Exception {
 		try {
 			String r;
-			FacebookController c = FacebookController.getFacebookController();
+			FacebookController c = baseActivity.getGlobalState().getFacebookController();
 			if (requestBundle != null) {
 				r = c.request(requestPath, requestBundle);
 			} else {

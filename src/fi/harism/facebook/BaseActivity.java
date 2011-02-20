@@ -13,6 +13,10 @@ public class BaseActivity extends Activity {
 		Intent i = new Intent(this, cls);
 		return i;
 	}
+	
+	public GlobalState getGlobalState() {
+		return (GlobalState)getApplication();
+	}
 
 	public void hideProgressDialog() {
 		if (progressDialog != null) {

@@ -10,23 +10,12 @@ import com.facebook.android.FacebookError;
 
 public class FacebookController {
 
-	private static FacebookController instance = null;
 	public static final String TOKEN = Facebook.TOKEN;
-
 	private static final String FACEBOOK_APP_ID = "190087744355420";
-
-	public static final FacebookController getFacebookController() {
-		if (instance == null) {
-			instance = new FacebookController();
-		}
-		return instance;
-	}
-
 	private Facebook facebook = null;
-
 	private boolean facebookAuthorized;
 
-	private FacebookController() {
+	public FacebookController() {
 		facebook = new Facebook(FACEBOOK_APP_ID);
 		facebookAuthorized = false;
 	}
