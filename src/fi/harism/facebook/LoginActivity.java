@@ -40,24 +40,27 @@ public class LoginActivity extends BaseActivity {
 	}
 
 	private void facebookAuthorize() {
-		facebookController.authorize(this,
-				new FacebookController.LoginObserver() {
-					@Override
-					public void onError(Exception ex) {
-						showAlertDialog(ex.getLocalizedMessage());
-					}
+		FacebookController.LoginObserver loginObserver = new FacebookLoginObserver();
+		facebookController.authorize(this, loginObserver);
+	}
 
-					@Override
-					public void onComplete() {
-						finish();
-						Intent i = createIntent(MainActivity.class);
-						startActivity(i);
-					}
+	private final class FacebookLoginObserver implements
+			FacebookController.LoginObserver {
+		@Override
+		public void onError(Exception ex) {
+			showAlertDialog(ex.getLocalizedMessage());
+		}
 
-					@Override
-					public void onCancel() {
-					}
-				});
+		@Override
+		public void onComplete() {
+			finish();
+			Intent i = createIntent(MainActivity.class);
+			startActivity(i);
+		}
+
+		@Override
+		public void onCancel() {
+		}
 	}
 
 }

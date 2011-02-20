@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-		fetchNameAndImage();
+		loadProfileInfo();
 	}
 
 	@Override
@@ -59,74 +59,87 @@ public class MainActivity extends BaseActivity {
 		requestController = null;
 	}
 
-	private final void fetchNameAndImage() {
-		Bundle b = new Bundle();
-		b.putString("fields", "name,picture");
-		b.putString(FacebookController.TOKEN,
+	private final void loadProfileInfo() {
+
+		Bundle meParameters = new Bundle();
+		meParameters.putString("fields", "name,picture");
+		meParameters.putString(FacebookController.TOKEN,
 				facebookController.getAccessToken());
-		FacebookRequest request = requestController.createFacebookRequest("me",
-				b, new FacebookRequest.Observer() {
-					@Override
-					public void onError(Exception ex) {
-					}
+		FacebookRequest.Observer meObserver = new FacebookMeObserver();
+		FacebookRequest meRequest = requestController.createFacebookRequest(
+				"me", meParameters, meObserver);
+		requestController.addRequest(meRequest);
 
-					@Override
-					public void onComplete(FacebookRequest facebookRequest) {
-						JSONObject o = facebookRequest.getJSONObject();
-						try {
-							String name = o.getString("name");
-							TextView tv = (TextView) findViewById(R.id.main_user_name);
-							tv.setText(name);
-						} catch (Exception ex) {
-						}
-						try {
-							String pictureUrl = o.getString("picture");
-							loadPicture(pictureUrl);
-						} catch (Exception ex) {
-						}
-					}
-				});
-		requestController.addRequest(request);
+		Bundle meStatusesParameters = new Bundle();
+		meStatusesParameters.putString("limit", "1");
+		meStatusesParameters.putString("fields", "message");
+		FacebookRequest.Observer meStatusesObserver = new FacebookMeStatusesObserver();
+		FacebookRequest meStatusesRequest = requestController
+				.createFacebookRequest("me/statuses", meStatusesParameters,
+						meStatusesObserver);
+		requestController.addRequest(meStatusesRequest);
+	}
 
-		b = new Bundle();
-		b.putString("limit", "1");
-		b.putString("fields", "message");
-		request = requestController.createFacebookRequest("me/statuses", b,
-				new FacebookRequest.Observer() {
-					@Override
-					public void onError(Exception ex) {
-					}
-
-					@Override
-					public void onComplete(FacebookRequest facebookRequest) {
-						try {
-							JSONObject resp = facebookRequest.getJSONObject();
-							String message = resp.getJSONArray("data")
-									.getJSONObject(0).getString("message");
-							TextView tv = (TextView) findViewById(R.id.main_user_status);
-							tv.setText(message);
-						} catch (Exception ex) {
-						}
-					}
-				});
+	private final void loadProfilePicture(String pictureUrl) {
+		ImageRequest.Observer observer = new PictureObserver();
+		ImageRequest request = requestController.createImageRequest(pictureUrl,
+				observer);
 		requestController.addRequest(request);
 	}
 
-	private final void loadPicture(String pictureUrl) {
-		ImageRequest request = requestController.createImageRequest(pictureUrl,
-				new ImageRequest.Observer() {
-					@Override
-					public void onError(Exception ex) {
-					}
+	private final class FacebookMeObserver implements FacebookRequest.Observer {
+		@Override
+		public void onError(Exception ex) {
+		}
 
-					@Override
-					public void onComplete(ImageRequest imageRequest) {
-						ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-						iv.setImageBitmap(BitmapUtils.roundBitmap(
-								imageRequest.getBitmap(), 10));
-					}
-				});
-		requestController.addRequest(request);
+		@Override
+		public void onComplete(FacebookRequest facebookRequest) {
+			JSONObject o = facebookRequest.getJSONObject();
+
+			String name = o.optString("name");
+			if (name != "") {
+				TextView tv = (TextView) findViewById(R.id.main_user_name);
+				tv.setText(name);
+			}
+
+			String pictureUrl = o.optString("picture");
+			if (pictureUrl != "") {
+				loadProfilePicture(pictureUrl);
+			}
+		}
+	}
+
+	private final class FacebookMeStatusesObserver implements
+			FacebookRequest.Observer {
+		@Override
+		public void onError(Exception ex) {
+		}
+
+		@Override
+		public void onComplete(FacebookRequest facebookRequest) {
+			JSONObject o = facebookRequest.getJSONObject();
+			try {
+				String message = o.getJSONArray("data").getJSONObject(0)
+						.getString("message");
+				TextView tv = (TextView) findViewById(R.id.main_user_status);
+				tv.setText(message);
+			} catch (Exception ex) {
+			}
+		}
+	}
+
+	private final class PictureObserver implements ImageRequest.Observer {
+		@Override
+		public void onError(Exception ex) {
+		}
+
+		@Override
+		public void onComplete(ImageRequest imageRequest) {
+			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
+			iv.setImageBitmap(BitmapUtils.roundBitmap(imageRequest.getBitmap(),
+					10));
+		}
+
 	}
 
 }

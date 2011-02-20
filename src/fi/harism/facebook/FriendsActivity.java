@@ -53,39 +53,20 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	private void getFriendsList() {
-		Bundle bundle = new Bundle();
-		bundle.putString("fields", "id,name,picture");
+		Bundle parameters = new Bundle();
+		parameters.putString("fields", "id,name,picture");
+		FacebookRequest.Observer observer = new FacebookMeFriendsObserver();
 		FacebookRequest facebookRequest = requestController
-				.createFacebookRequest("me/friends", bundle,
-						new FacebookRequest.Observer() {
-
-							@Override
-							public void onError(Exception ex) {
-								hideProgressDialog();
-							}
-
-							@Override
-							public void onComplete(
-									FacebookRequest facebookRequest) {
-								hideProgressDialog();
-								try {
-									processFriendsList(facebookRequest
-											.getJSONObject().getJSONArray(
-													"data"));
-								} catch (Exception ex) {
-								}
-							}
-						});
-
+				.createFacebookRequest("me/friends", parameters, observer);
 		requestController.addRequest(facebookRequest);
 	}
 
-	private final void processFriendsList(JSONArray friendList) {
-		Vector<JSONObject> lst = new Vector<JSONObject>();
-		for (int i = 0; i < friendList.length(); ++i) {
+	private final void processFriendsList(JSONArray friendArray) {
+		Vector<JSONObject> friendList = new Vector<JSONObject>();
+		for (int i = 0; i < friendArray.length(); ++i) {
 			try {
-				JSONObject f = friendList.getJSONObject(i);
-				lst.add(f);
+				JSONObject f = friendArray.getJSONObject(i);
+				friendList.add(f);
 			} catch (Exception ex) {
 			}
 		}
@@ -93,38 +74,24 @@ public class FriendsActivity extends BaseActivity {
 		Comparator<JSONObject> comparator = new Comparator<JSONObject>() {
 			@Override
 			public int compare(JSONObject arg0, JSONObject arg1) {
-				try {
-					String arg0Name = arg0.getString("name");
-					String arg1Name = arg1.getString("name");
-					return arg0Name.compareToIgnoreCase(arg1Name);
-				} catch (Exception ex) {
-					return 0;
-				}
+				String arg0Name = arg0.optString("name");
+				String arg1Name = arg1.optString("name");
+				return arg0Name.compareToIgnoreCase(arg1Name);
 			}
 		};
 
-		Collections.sort(lst, comparator);
+		Collections.sort(friendList, comparator);
 
-		for (int i = 0; i < lst.size(); ++i) {
+		for (int i = 0; i < friendList.size(); ++i) {
 			try {
-				JSONObject friend = lst.elementAt(i);
+				JSONObject friend = friendList.elementAt(i);
 				String id = friend.getString("id");
 				String picture = friend.getString("picture");
 				String name = friend.getString("name");
 
+				ImageRequest.Observer pictureObserver = new PictureObserver();
 				ImageRequest imageRequest = requestController
-						.createImageRequest(picture,
-								new ImageRequest.Observer() {
-									@Override
-									public void onError(Exception ex) {
-									}
-
-									@Override
-									public void onComplete(
-											ImageRequest imageRequest) {
-										onImageReceived(imageRequest);
-									}
-								});
+						.createImageRequest(picture, pictureObserver);
 
 				Bundle bundle = new Bundle();
 				bundle.putString("id", id);
@@ -162,6 +129,35 @@ public class FriendsActivity extends BaseActivity {
 				showAlertDialog((String) v.getTag(R.id.view_user_id));
 			}
 		});
+	}
+
+	private final class FacebookMeFriendsObserver implements
+			FacebookRequest.Observer {
+		@Override
+		public void onError(Exception ex) {
+			hideProgressDialog();
+		}
+
+		@Override
+		public void onComplete(FacebookRequest facebookRequest) {
+			hideProgressDialog();
+			try {
+				processFriendsList(facebookRequest.getJSONObject()
+						.getJSONArray("data"));
+			} catch (Exception ex) {
+			}
+		}
+	}
+
+	private final class PictureObserver implements ImageRequest.Observer {
+		@Override
+		public void onError(Exception ex) {
+		}
+
+		@Override
+		public void onComplete(ImageRequest imageRequest) {
+			onImageReceived(imageRequest);
+		}
 	}
 
 }

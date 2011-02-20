@@ -30,7 +30,7 @@ public class BaseActivity extends Activity {
 		AlertDialog dlg = dlgBuilder.create();
 		dlg.show();
 	}
-	
+
 	public Intent createIntent(Class<?> cls) {
 		Intent i = new Intent(this, cls);
 		return i;
