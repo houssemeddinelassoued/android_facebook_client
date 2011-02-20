@@ -4,11 +4,4 @@
     <string name="login_main_text"><b>Facebook</b>\nClient\nExample</string>
     <string name="login_button_text">Login</string>
     
-	<string name="login_alert_facebook_error_title">Facebook Error</string>
-	<string name="login_alert_dialog_error_title">Dialog Error</string>
-	<string name="login_alert_complete_title">Complete</string>
-	<string name="login_alert_complete_message">Login successful.</string>
-	<string name="login_alert_cancel_title">Cancel</string>
-	<string name="login_alert_cancel_message">Login canceled.</string>
-    
 </resources>

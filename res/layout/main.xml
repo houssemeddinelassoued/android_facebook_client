@@ -6,8 +6,8 @@
     <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:background="@drawable/background_gradient">
         <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/main_user_image" android:padding="10px"></ImageView>
         <LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:gravity="center">
-            <TextView android:layout_width="fill_parent" android:text="Username" android:layout_height="wrap_content" android:id="@+id/main_user_name"></TextView>
-            <TextView android:layout_width="fill_parent" android:text="Status" android:layout_height="wrap_content" android:id="@+id/main_user_status"></TextView>
+            <TextView android:layout_width="fill_parent" android:text="@string/main_name_text" android:layout_height="wrap_content" android:id="@+id/main_user_name"></TextView>
+            <TextView android:layout_width="fill_parent" android:text="@string/main_status_text" android:layout_height="wrap_content" android:id="@+id/main_user_status"></TextView>
         </LinearLayout>
     </LinearLayout>
     
