@@ -16,9 +16,7 @@ public class LoginActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
 
-		//facebookController = FacebookController.getFacebookController();
-		facebookController = new FacebookController();
-		getGlobalState().setFacebookController(facebookController);
+		facebookController = getGlobalState().getFacebookController();
 
 		Button b = (Button) findViewById(R.id.login_button);
 		b.setOnClickListener(new View.OnClickListener() {
