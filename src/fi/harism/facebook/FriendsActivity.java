@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -312,7 +311,7 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 *	Observer for handling "me/friends" request.
+	 * Observer for handling "me/friends" request.
 	 */
 	private final class FacebookMeFriendsObserver implements
 			FacebookRequest.Observer {
@@ -321,8 +320,11 @@ public class FriendsActivity extends BaseActivity {
 			// First hide progress dialog.
 			hideProgressDialog();
 			try {
-				processFriendsList(facebookRequest.getJSONObject()
-						.getJSONArray("data"));
+				// Friend array is found under name "data"
+				JSONArray friendArray = facebookRequest.getJSONObject()
+						.getJSONArray("data");
+				// Handle friendArray processing to appropriate method.
+				processFriendsList(friendArray);
 			} catch (Exception ex) {
 			}
 		}
@@ -335,7 +337,7 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 *	Observer for handling profile picture loading.
+	 * Observer for handling profile picture loading.
 	 */
 	private final class PictureObserver implements ImageRequest.Observer {
 		@Override
