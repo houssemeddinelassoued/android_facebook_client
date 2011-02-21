@@ -12,7 +12,7 @@
 	    <ImageView
     		android:layout_height="40px"
     		android:layout_width="40px"
-    		android:id="@+id/friends_item_image" />
+    		android:id="@+id/friends_item_picture" />
 	</LinearLayout>
     <TextView
     	android:layout_height="wrap_content"
