@@ -25,6 +25,9 @@ import fi.harism.facebook.util.BitmapUtils;
 public class FriendsActivity extends BaseActivity {
 
 	private RequestController requestController;
+	private Bitmap defaultPicture = null;
+
+	private static final int PICTURE_ROUND_RADIUS = 7;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,10 @@ public class FriendsActivity extends BaseActivity {
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
 		EditText searchEditor = (EditText) findViewById(R.id.friends_edit_search);
 		searchEditor.addTextChangedListener(searchObserver);
+
+		defaultPicture = getGlobalState().getDefaultPicture();
+		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
+				PICTURE_ROUND_RADIUS);
 
 		showProgressDialog();
 		getFriendsList();
@@ -60,44 +67,72 @@ public class FriendsActivity extends BaseActivity {
 		requestController.resume();
 	}
 
-	private void getFriendsList() {
-		Bundle parameters = new Bundle();
-		parameters.putString("fields", "id,name,picture");
-		FacebookRequest.Observer observer = new FacebookMeFriendsObserver();
-		FacebookRequest facebookRequest = requestController
-				.createFacebookRequest("me/friends", parameters, observer);
-		requestController.addRequest(facebookRequest);
-	}
+	private final View createFriendItem(String user_id, String name) {
+		View friendItemView = getLayoutInflater().inflate(
+				R.layout.friends_item, null);
 
-	private final void onImageReceived(ImageRequest imageRequest) {
-		Bundle bundle = imageRequest.getBundle();
-		View friendView = getLayoutInflater().inflate(R.layout.friends_item,
-				null);
-
-		TextView nameTextView = (TextView) friendView
+		TextView nameTextView = (TextView) friendItemView
 				.findViewById(R.id.friends_item_name);
-		nameTextView.setText(bundle.getString("name"));
+		nameTextView.setText(name);
 
-		ImageView imageView = (ImageView) friendView
+		ImageView imageView = (ImageView) friendItemView
 				.findViewById(R.id.friends_item_image);
-		Bitmap scaled = BitmapUtils.scaleToHeight(imageRequest.getBitmap(), 30);
-		imageView.setImageBitmap(BitmapUtils.roundBitmap(scaled, 3));
+		imageView.setImageBitmap(defaultPicture);
 
 		EditText searchEditText = (EditText) findViewById(R.id.friends_edit_search);
 		String searchText = searchEditText.getText().toString();
-		toggleFriendItemVisibility(friendView, searchText);
+		toggleFriendItemVisibility(friendItemView, searchText);
 
-		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
-		scrollView.addView(friendView);
-
-		friendView.setTag(R.id.view_user_id, bundle.getString("id"));
-		friendView.setOnClickListener(new View.OnClickListener() {
+		friendItemView.setTag(R.id.view_user_id, user_id);
+		friendItemView.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				showAlertDialog((String) v.getTag(R.id.view_user_id));
 			}
 		});
+
+		return friendItemView;
+	}
+
+	private final View findFriendItem(String user_id) {
+		View friendItemView = null;
+		
+		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
+		for (int i=0; i<scrollView.getChildCount(); ++i) {
+			View v = scrollView.getChildAt(i);
+			String view_user_id = (String)v.getTag(R.id.view_user_id);
+			if (user_id.equals(view_user_id)) {
+				friendItemView = v;
+				break;
+			}
+		}
+		
+		return friendItemView;
+	}
+	
+	private void getFriendsList() {
+		Bundle parameters = new Bundle();
+		parameters.putString("fields", "id,name");
+		FacebookRequest.Observer observer = new FacebookMeFriendsObserver();
+		FacebookRequest facebookRequest = requestController
+				.createFacebookRequest("me/friends", parameters, observer);
+		requestController.addRequest(facebookRequest);
+	}
+
+	private final void onPictureReceived(ImageRequest imageRequest) {
+		Bundle bundle = imageRequest.getBundle();
+		String user_id = bundle.getString("id");
+		
+		View friendView = findFriendItem(user_id);
+		
+		if (friendView != null) {
+			ImageView imageView = (ImageView) friendView
+				.findViewById(R.id.friends_item_image);
+			Bitmap picture = imageRequest.getBitmap();
+			picture = BitmapUtils.roundBitmap(picture, PICTURE_ROUND_RADIUS);
+			imageView.setImageBitmap(picture);
+		}
 	}
 
 	private final void processFriendsList(JSONArray friendArray) {
@@ -121,20 +156,24 @@ public class FriendsActivity extends BaseActivity {
 
 		Collections.sort(friendList, comparator);
 
+		ImageRequest.Observer pictureObserver = new PictureObserver();
+		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
+
 		for (int i = 0; i < friendList.size(); ++i) {
 			try {
 				JSONObject friend = friendList.elementAt(i);
 				String id = friend.getString("id");
-				String picture = friend.getString("picture");
+				String picture = "http://graph.facebook.com/" + id + "/picture";
 				String name = friend.getString("name");
 
-				ImageRequest.Observer pictureObserver = new PictureObserver();
+				View friendItemView = createFriendItem(id, name);
+				scrollView.addView(friendItemView);
+
 				ImageRequest imageRequest = requestController
 						.createImageRequest(picture, pictureObserver);
 
 				Bundle bundle = new Bundle();
 				bundle.putString("id", id);
-				bundle.putString("name", name);
 				imageRequest.setBundle(bundle);
 
 				requestController.addRequest(imageRequest);
@@ -179,7 +218,7 @@ public class FriendsActivity extends BaseActivity {
 	private final class PictureObserver implements ImageRequest.Observer {
 		@Override
 		public void onComplete(ImageRequest imageRequest) {
-			onImageReceived(imageRequest);
+			onPictureReceived(imageRequest);
 		}
 
 		@Override

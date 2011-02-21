@@ -3,6 +3,7 @@ package fi.harism.facebook;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +20,8 @@ public class MainActivity extends BaseActivity {
 	private FacebookController facebookController = null;
 	private RequestController requestController = null;
 
+	private static final int PICTURE_ROUND_RADIUS = 7;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -26,6 +29,11 @@ public class MainActivity extends BaseActivity {
 
 		facebookController = getGlobalState().getFacebookController();
 		requestController = new RequestController(this);
+
+		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
+		Bitmap picture = getGlobalState().getDefaultPicture();
+		picture = BitmapUtils.roundBitmap(picture, PICTURE_ROUND_RADIUS);
+		pictureView.setImageBitmap(picture);
 
 		Button friendsButton = (Button) findViewById(R.id.main_button_friends);
 		friendsButton.setOnClickListener(new View.OnClickListener() {
@@ -141,8 +149,9 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void onComplete(ImageRequest imageRequest) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-			iv.setImageBitmap(BitmapUtils.roundBitmap(imageRequest.getBitmap(),
-					10));
+			Bitmap picture = imageRequest.getBitmap();
+			iv.setImageBitmap(BitmapUtils.roundBitmap(picture,
+					PICTURE_ROUND_RADIUS));
 		}
 
 		@Override
