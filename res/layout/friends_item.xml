@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent"
-  android:background="@drawable/background_gradient"
-  android:layout_height="wrap_content"
-  android:clickable="true" >
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:background="@drawable/background_gradient"
+    android:layout_height="wrap_content"
+    android:clickable="true" >
   	<LinearLayout
-  		android:layout_width="wrap_content"
-  		android:layout_height="wrap_content"
-  		android:padding="5px" >
-	    <ImageView
-    		android:layout_height="40px"
-    		android:layout_width="40px"
-    		android:id="@+id/friends_item_picture" />
-	</LinearLayout>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5px" >
+        <ImageView
+            android:layout_height="40px"
+            android:layout_width="40px"
+            android:id="@+id/friends_item_picture" />
+    </LinearLayout>
     <TextView
-    	android:layout_height="wrap_content"
-    	android:id="@+id/friends_item_name"
-    	android:layout_width="wrap_content"
-    	android:text="Name" />
+        android:layout_height="wrap_content"
+        android:id="@+id/friends_item_name"
+        android:layout_width="wrap_content"
+        android:text="Name" />
 </LinearLayout>
