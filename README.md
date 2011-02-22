@@ -7,9 +7,9 @@ Getting started
 ===============
 
 1. Get latest [Facebook Android SDK](http://developers.facebook.com/docs/guides/mobile#android) and create a project for it in Eclipse.
-2. Download sources for Android Facebook Client, and import project
+2. Download sources for Android Facebook Client and import project
    into Eclipse. This Facebook client utilizes Facebook Android SDK
-   and it's required to have it compiled.
+   and it's required to have it for compilation.
 
 It's maybe easiest done using EGit Eclipse plugin but feel free to use Git client of your choice.
 
