@@ -33,7 +33,7 @@ public abstract class Request implements Runnable {
 	 * UI thread using Activity.runOnUiThread method. This method returns only
 	 * after run() method has been called from UI thread.
 	 */
-	public final synchronized void execute() {
+	public final void execute() {
 		// First check if execution should be stopped stopped.
 		if (!executionStopped) {
 			try {
@@ -55,7 +55,9 @@ public abstract class Request implements Runnable {
 				// Execution is blocked until notify() is called. This
 				// should happen in run() method once UI thread handles our
 				// request.
-				wait();
+				synchronized(this) {
+					wait();
+				}
 			} catch (Exception ex) {
 			}
 		}
@@ -81,7 +83,7 @@ public abstract class Request implements Runnable {
 			}
 		}
 		// Mark this Request as done. Calling stop() also sends notification to
-		// execute() method which is possible waiting for it.
+		// execute() method which is possibly waiting for it.
 		stop();
 	}
 
@@ -117,8 +119,10 @@ public abstract class Request implements Runnable {
 	/**
 	 * Marks this Request as stopped.
 	 */
-	public final synchronized void stop() {
+	public final void stop() {
 		executionStopped = true;
-		notify();
+		synchronized(this) {
+			notify();
+		}
 	}
 }
