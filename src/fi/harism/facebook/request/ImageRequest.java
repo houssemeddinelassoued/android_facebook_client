@@ -26,16 +26,14 @@ public class ImageRequest extends Request {
 	 * 
 	 * @param activity
 	 *            Activity to which use for runOnUiThread.
-	 * @param requestObserver
-	 *            Observer for Request base class.
 	 * @param url
 	 *            Image URL.
 	 * @param observer
 	 *            ImageRequest observer.
 	 */
-	public ImageRequest(Activity activity, Request.Observer requestObserver,
-			String url, ImageRequest.Observer observer) {
-		super(activity, requestObserver);
+	public ImageRequest(Activity activity, String url,
+			ImageRequest.Observer observer) {
+		super(activity);
 		this.url = url;
 		this.observer = observer;
 		bitmap = null;
@@ -69,7 +67,7 @@ public class ImageRequest extends Request {
 	}
 
 	/**
-	 * ImageRequest observer.
+	 * ImageRequest observer interface.
 	 */
 	public interface Observer {
 		/**

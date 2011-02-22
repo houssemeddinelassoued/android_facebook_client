@@ -4,28 +4,16 @@ import android.app.Activity;
 import android.os.Bundle;
 
 /**
- * Base class for all requests being handled by RequestController. Request uses
- * its run() method in two ways. First it is called from a Thread created by
- * RequestController once this Request is being handled. Once run() method
- * finishes it triggers a new request by calling Activity.runOnUiThread(). This
- * causes another call to run() method eventually.
+ * Base class for all requests being handled by RequestController.
  * 
  * @author harism
  */
 public abstract class Request implements Runnable {
 
-	// Static integers for execution state.
-	private final static int EXECUTION_NOT_STARTED = 0;
-	private final static int EXECUTION_THREAD = 1;
-	private final static int EXECUTION_UI_THREAD = 2;
-	private final static int EXECUTION_STOPPED = 3;
-
-	private int executionState;
-
-	// Activity we execute runOnUiThread.
+	// Boolean for marking execution stopped state.
+	private boolean executionStopped = false;
+	// Activity we execute runOnUiThread on.
 	private Activity activity = null;
-	// Request.Observer.
-	private Request.Observer observer = null;
 	// Data stored among with this Request.
 	private Bundle bundle = null;
 
@@ -34,13 +22,43 @@ public abstract class Request implements Runnable {
 	 * 
 	 * @param activity
 	 *            Activity we run runOnUiThread on.
-	 * @param observer
-	 *            Request observer.
 	 */
-	public Request(Activity activity, Request.Observer observer) {
+	public Request(Activity activity) {
 		this.activity = activity;
-		this.observer = observer;
-		executionState = EXECUTION_NOT_STARTED;
+	}
+
+	/**
+	 * This method is supposed to be called from separate thread. At first
+	 * abstract runOnThread method is called. After that this Request is sent to
+	 * UI thread using Activity.runOnUiThread method. This method returns only
+	 * after run() method has been called from UI thread.
+	 */
+	public final synchronized void execute() {
+		// First check if execution should be stopped stopped.
+		if (!executionStopped) {
+			try {
+				// Execute code meant to be ran on separate thread.
+				runOnThread();
+				// Send this Request to UI thread queue.
+				activity.runOnUiThread(this);
+			} catch (Exception ex) {
+				// On error simply mark this Request as stopped.
+				stop();
+			}
+		}
+		// It is possible this Request has been marked as stopped at this point.
+		// This might happen in a situation in which run() method has finished
+		// before reaching this code. Let's wait only if execution has not
+		// stopped.
+		if (!executionStopped) {
+			try {
+				// Execution is blocked until notify() is called. This
+				// should happen in run() method once UI thread handles our
+				// request.
+				wait();
+			} catch (Exception ex) {
+			}
+		}
 	}
 
 	/**
@@ -53,39 +71,18 @@ public abstract class Request implements Runnable {
 		return bundle;
 	}
 
-	/**
-	 * Method for checking if this Request is done with its execution already.
-	 * 
-	 * @return True if this Request is stopped or done with its execution.
-	 */
-	public final boolean hasStopped() {
-		return executionState == EXECUTION_UI_THREAD
-				|| executionState == EXECUTION_STOPPED;
-	}
-
 	@Override
 	public final void run() {
-		switch (executionState) {
-		case EXECUTION_NOT_STARTED:
-			executionState = EXECUTION_THREAD;
-			try {
-				runOnThread();
-				activity.runOnUiThread(this);
-			} catch (Exception ex) {
-				stop();
-				observer.onComplete();
-			}
-			break;
-		case EXECUTION_THREAD:
-			executionState = EXECUTION_UI_THREAD;
+		// Execute runOnUiThread only if this Request is still active.
+		if (!executionStopped) {
 			try {
 				runOnUiThread();
 			} catch (Exception ex) {
 			}
-			stop();
-			observer.onComplete();
-			break;
 		}
+		// Mark this Request as done. Calling stop() also sends notification to
+		// execute() method which is possible waiting for it.
+		stop();
 	}
 
 	/**
@@ -120,18 +117,8 @@ public abstract class Request implements Runnable {
 	/**
 	 * Marks this Request as stopped.
 	 */
-	public final void stop() {
-		executionState = EXECUTION_STOPPED;
-	}
-
-	/**
-	 * Request.Observer interface.
-	 */
-	public interface Observer {
-		/**
-		 * Called if Request fails within Thread or once runOnUiThread is
-		 * finished.
-		 */
-		public void onComplete();
+	public final synchronized void stop() {
+		executionStopped = true;
+		notify();
 	}
 }

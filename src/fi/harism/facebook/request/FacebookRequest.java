@@ -30,8 +30,6 @@ public class FacebookRequest extends Request {
 	 * 
 	 * @param activity
 	 *            Activity needed for
-	 * @param requestObserver
-	 *            Request observer for base class.
 	 * @param requestPath
 	 *            Facebook Graph API path.
 	 * @param requestBundle
@@ -39,10 +37,9 @@ public class FacebookRequest extends Request {
 	 * @param observer
 	 *            Facebook request observer.
 	 */
-	public FacebookRequest(BaseActivity activity,
-			Request.Observer requestObserver, String requestPath,
+	public FacebookRequest(BaseActivity activity, String requestPath,
 			Bundle requestBundle, FacebookRequest.Observer observer) {
-		super(activity, requestObserver);
+		super(activity);
 		this.requestPath = requestPath;
 		this.requestBundle = requestBundle;
 		this.observer = observer;
