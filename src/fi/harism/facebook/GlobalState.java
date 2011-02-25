@@ -3,6 +3,7 @@ package fi.harism.facebook;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import fi.harism.facebook.util.BitmapCache;
 import fi.harism.facebook.util.FacebookController;
 
 /**
@@ -15,12 +16,27 @@ public class GlobalState extends Application {
 
 	// Instance of FacebookController.
 	private FacebookController facebookController = null;
+	// Instance of BitmapCache.
+	private BitmapCache bitmapCache = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 
 	/**
-	 * Returns instance of FacebookController. Creates one once this method is
-	 * called for the first time.
+	 * Returns application wide instance of BitmapCache. Creates one once this
+	 * method is called for the first time.
+	 * 
+	 * @return BitmapCache instance.
+	 */
+	public BitmapCache getBitmapCache() {
+		if (bitmapCache == null) {
+			bitmapCache = new BitmapCache();
+		}
+		return bitmapCache;
+	}
+
+	/**
+	 * Returns application wide instance of FacebookController. Creates one once
+	 * this method is called for the first time.
 	 * 
 	 * @return FacebookController instance.
 	 */

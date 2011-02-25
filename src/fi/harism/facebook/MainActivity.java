@@ -137,6 +137,7 @@ public class MainActivity extends BaseActivity {
 		ImageRequest.Observer observer = new PictureObserver();
 		ImageRequest request = requestController.createImageRequest(pictureUrl,
 				observer);
+		request.setCacheBitmap(true);
 		requestController.addRequest(request);
 	}
 

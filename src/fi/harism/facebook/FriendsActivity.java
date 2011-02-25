@@ -269,6 +269,7 @@ public class FriendsActivity extends BaseActivity {
 				Bundle bundle = new Bundle();
 				bundle.putString("id", userId);
 				imageRequest.setBundle(bundle);
+				imageRequest.setCacheBitmap(true);
 
 				// Add profile picture request to queue.
 				requestController.addRequest(imageRequest);

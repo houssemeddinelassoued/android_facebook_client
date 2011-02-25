@@ -3,9 +3,10 @@ package fi.harism.facebook.request;
 import java.io.InputStream;
 import java.net.URL;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import fi.harism.facebook.BaseActivity;
+import fi.harism.facebook.util.BitmapCache;
 
 /**
  * ImageRequest class for loading images asynchronously.
@@ -20,6 +21,10 @@ public class ImageRequest extends Request {
 	private ImageRequest.Observer observer;
 	// Bitmap we loaded.
 	private Bitmap bitmap;
+	// Flag whether Bitmap should be cached.
+	private boolean cacheBitmap;
+	// Caller activity.
+	private BaseActivity activity;
 
 	/**
 	 * Constructor for ImageRequest.
@@ -31,12 +36,14 @@ public class ImageRequest extends Request {
 	 * @param observer
 	 *            ImageRequest observer.
 	 */
-	public ImageRequest(Activity activity, String url,
+	public ImageRequest(BaseActivity activity, String url,
 			ImageRequest.Observer observer) {
 		super(activity);
+		this.activity = activity;
 		this.url = url;
 		this.observer = observer;
 		bitmap = null;
+		cacheBitmap = false;
 	}
 
 	/**
@@ -51,19 +58,31 @@ public class ImageRequest extends Request {
 
 	@Override
 	public void runOnThread() throws Exception {
-		try {
-			URL u = new URL(url);
-			InputStream is = u.openStream();
-			bitmap = BitmapFactory.decodeStream(is);
-		} catch (Exception ex) {
-			observer.onError(ex);
-			throw ex;
+		BitmapCache bitmapCache = activity.getGlobalState().getBitmapCache();
+		if (bitmapCache.hasBitmap(url)) {
+			bitmap = bitmapCache.getBitmap(url);
+		} else {
+			try {
+				URL u = new URL(url);
+				InputStream is = u.openStream();
+				bitmap = BitmapFactory.decodeStream(is);
+				if (cacheBitmap) {
+					bitmapCache.setBitmap(url, bitmap);
+				}
+			} catch (Exception ex) {
+				observer.onError(ex);
+				throw ex;
+			}
 		}
 	}
 
 	@Override
 	public void runOnUiThread() throws Exception {
 		observer.onComplete(this);
+	}
+
+	public void setCacheBitmap(boolean cacheBitmap) {
+		this.cacheBitmap = cacheBitmap;
 	}
 
 	/**
