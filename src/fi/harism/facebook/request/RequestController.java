@@ -48,7 +48,20 @@ public final class RequestController {
 		synchronized (requestList) {
 			requestList.notify();
 		}
+	}
 
+	/**
+	 * Adds request to top of the queue and starts processing it if there are no
+	 * other Requests being ran at the time.
+	 * 
+	 * @param request
+	 *            Request object to be added to queue.
+	 */
+	public final void addRequestFirst(Request request) {
+		requestList.add(0, request);
+		synchronized (requestList) {
+			requestList.notify();
+		}
 	}
 
 	/**
