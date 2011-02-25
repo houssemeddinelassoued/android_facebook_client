@@ -169,7 +169,7 @@ public class FriendsActivity extends BaseActivity {
 		// Facebook request parameters.
 		Bundle parameters = new Bundle();
 		// We are only interested in id and name.
-		parameters.putString("fields", "id,name");
+		parameters.putString("fields", "id,name,picture");
 		// Observer for receiving response asynchronously.
 		FacebookRequest.Observer observer = new FacebookMeFriendsObserver();
 		// Create actual request.
@@ -229,7 +229,7 @@ public class FriendsActivity extends BaseActivity {
 			}
 		}
 
-		// Comparator for sorting frind JSONObjects by name.
+		// Comparator for sorting friend JSONObjects by name.
 		Comparator<JSONObject> comparator = new Comparator<JSONObject>() {
 			@Override
 			public int compare(JSONObject arg0, JSONObject arg1) {
@@ -253,8 +253,7 @@ public class FriendsActivity extends BaseActivity {
 
 				String userId = friend.getString("id");
 				String name = friend.getString("name");
-				String pictureUrl = "http://graph.facebook.com/" + userId
-						+ "/picture";
+				String pictureUrl = friend.getString("picture");
 
 				// Create default friend item view.
 				View friendItemView = createFriendItem(userId, name);
