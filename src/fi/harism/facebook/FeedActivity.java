@@ -59,8 +59,8 @@ public class FeedActivity extends BaseActivity {
 			String message = feedItemObject.optString("message");
 			String created = feedItemObject.optString("created_time");
 
-			View feedItemView = getLayoutInflater().inflate(R.layout.feed_item,
-					null);
+			View feedItemView = getLayoutInflater().inflate(
+					R.layout.feed_item_status, null);
 
 			TextView nameView = (TextView) feedItemView
 					.findViewById(R.id.feed_item_name);
@@ -74,6 +74,15 @@ public class FeedActivity extends BaseActivity {
 
 			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 			itemList.addView(feedItemView);
+		} else if (type.equals("link")) {
+			// TODO: Implement me.
+		} else if (type.equals("video")) {
+			// TODO: Implement me.
+		} else if (type.equals("photo")) {
+			// TODO: Implement me.
+		} else {
+			int i = 0;
+			++i;
 		}
 	}
 
@@ -83,6 +92,7 @@ public class FeedActivity extends BaseActivity {
 		@Override
 		public void onComplete(FacebookRequest facebookRequest) {
 			hideProgressDialog();
+			// TODO: Sort feed array by creation time.
 			JSONObject feedObject = facebookRequest.getJSONObject();
 			JSONArray dataArray = feedObject.optJSONArray("data");
 			if (dataArray != null) {
@@ -93,16 +103,11 @@ public class FeedActivity extends BaseActivity {
 					}
 				}
 			}
-
-			int i = 0;
-			++i;
 		}
 
 		@Override
 		public void onError(Exception ex) {
 			hideProgressDialog();
-			int i = 0;
-			i++;
 		}
 
 	}
