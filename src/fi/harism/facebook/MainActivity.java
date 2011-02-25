@@ -165,6 +165,7 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onError(Exception ex) {
+			// We don't care about errors here.
 		}
 	}
 
@@ -189,6 +190,7 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onError(Exception ex) {
+			// We don't care about errors here.
 		}
 	}
 
@@ -206,6 +208,7 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onError(Exception ex) {
+			// We don't care about errors here.
 		}
 
 	}
