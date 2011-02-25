@@ -1,5 +1,6 @@
 package fi.harism.facebook.request;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -60,14 +61,24 @@ public class ImageRequest extends Request {
 	public void runOnThread() throws Exception {
 		BitmapCache bitmapCache = activity.getGlobalState().getBitmapCache();
 		if (bitmapCache.hasBitmap(url)) {
-			bitmap = bitmapCache.getBitmap(url);
+			byte bitmapData[] = bitmapCache.getBitmap(url);
+			bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
 		} else {
 			try {
 				URL u = new URL(url);
 				InputStream is = u.openStream();
-				bitmap = BitmapFactory.decodeStream(is);
+				byte buffer[] = new byte[1024];
+				ByteArrayOutputStream imageBuffer = new ByteArrayOutputStream();
+				
+				int readLength;
+				while ((readLength = is.read(buffer)) != -1) {
+					imageBuffer.write(buffer, 0, readLength);
+				}
+				
+				buffer = imageBuffer.toByteArray();
+				bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
 				if (cacheBitmap) {
-					bitmapCache.setBitmap(url, bitmap);
+					bitmapCache.setBitmap(url, buffer);
 				}
 			} catch (Exception ex) {
 				observer.onError(ex);

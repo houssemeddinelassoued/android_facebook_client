@@ -2,24 +2,24 @@ package fi.harism.facebook.util;
 
 import java.util.HashMap;
 
-import android.graphics.Bitmap;
-
 /**
  * Very simple memory based Bitmap cache. Pictures are only stored as HashMap
  * using picture url as key.
+ * 
+ * TODO: Rename class and methods as this class stores byte arrays instead.
  * 
  * @author harism
  */
 public class BitmapCache {
 
 	// Our Bitmap storage.
-	private HashMap<String, Bitmap> bitmapMap = null;
+	private HashMap<String, byte[]> bitmapMap = null;
 
 	/**
 	 * Default constructor.
 	 */
 	public BitmapCache() {
-		bitmapMap = new HashMap<String, Bitmap>();
+		bitmapMap = new HashMap<String, byte[]>();
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class BitmapCache {
 	 *            Url for Bitmap.
 	 * @return Stored Bitmap instance.
 	 */
-	public Bitmap getBitmap(String bitmapUrl) {
+	public byte[] getBitmap(String bitmapUrl) {
 		return bitmapMap.get(bitmapUrl);
 	}
 
@@ -54,7 +54,7 @@ public class BitmapCache {
 	 * @param bitmap
 	 *            Bitmap to be stored.
 	 */
-	public void setBitmap(String bitmapUrl, Bitmap bitmap) {
+	public void setBitmap(String bitmapUrl, byte[] bitmap) {
 		bitmapMap.put(bitmapUrl, bitmap);
 	}
 
