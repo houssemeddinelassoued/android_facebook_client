@@ -2,5 +2,6 @@
 <resources>
 
 	<string name="friends_search_text">Search</string>
+	<string name="friends_item_name_text">Name:</string>
 	
 </resources>

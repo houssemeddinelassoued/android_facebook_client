@@ -2,21 +2,36 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:background="@drawable/background_gradient"
     android:layout_height="wrap_content"
+    android:background="@drawable/background_gradient"
     android:clickable="true" >
+    
   	<LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5px" >
+        android:layout_margin="5px" >
         <ImageView
             android:layout_height="40px"
             android:layout_width="40px"
             android:id="@+id/friends_item_picture" />
     </LinearLayout>
-    <TextView
-        android:layout_height="wrap_content"
-        android:id="@+id/friends_item_name"
+    
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:text="Name" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="5px"
+        android:gravity="center_vertical" >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="5pt"
+            android:text="@string/friends_item_name_text" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="8pt"
+            android:id="@+id/friends_item_name" />
+    </LinearLayout>
+    
 </LinearLayout>
