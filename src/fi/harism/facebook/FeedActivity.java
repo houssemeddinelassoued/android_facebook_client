@@ -52,98 +52,101 @@ public class FeedActivity extends BaseActivity {
 
 	private void createFeedItem(JSONObject feedItemObject) {
 		String itemId = feedItemObject.optString("id", null);
-		String fromName = "Error: 'from' not received.";
-		String fromId = null;
-		JSONObject fromObject = feedItemObject.optJSONObject("from");
-		if (fromObject != null) {
-			fromName = fromObject.optString("name",
-					"Error: 'name' not reveived.");
-			fromId = fromObject.optString("id", null);
-		}
+		if (itemId != null) {
+			View feedItemView = getLayoutInflater().inflate(R.layout.feed_item,
+					null);
+			feedItemView.setTag(R.id.feed_item_id, itemId);
 
-		String message = feedItemObject.optString("message",
-				"Error: 'message' not received.");
-		String created = feedItemObject.optString("created_time",
-				"Error: 'created_time' not received.");
-
-		View feedItemView = null;
-
-		String type = feedItemObject.optString("type");
-		if (type.equals("status")) {
-			feedItemView = getLayoutInflater().inflate(
-					R.layout.feed_item_status, null);
-		} else if (type.equals("link")) {
-			// TODO: Implement me.
-			feedItemView = getLayoutInflater().inflate(
-					R.layout.feed_item_status, null);
-			message = "Description: " + feedItemObject.optString("description");
-		} else if (type.equals("video")) {
-			// TODO: Implement me.
-			feedItemView = getLayoutInflater().inflate(
-					R.layout.feed_item_status, null);
-			message = "Description: " + feedItemObject.optString("description");
-		} else if (type.equals("photo")) {
-			// TODO: Implement me.
-			feedItemView = getLayoutInflater().inflate(
-					R.layout.feed_item_status, null);
-			message = "Description: " + feedItemObject.optString("description");
-		} else {
-			showAlertDialog("Feed type '" + type + "' not implemented :(");
-		}
-
-		if (feedItemView != null) {
-			if (itemId != null) {
-				feedItemView.setTag(R.id.feed_item_id, itemId);
+			String fromName = null;
+			String fromId = null;
+			JSONObject fromObject = feedItemObject.optJSONObject("from");
+			if (fromObject != null) {
+				fromName = fromObject.optString("name", null);
+				fromId = fromObject.optString("id", null);
 			}
 
-			TextView nameView = (TextView) feedItemView
-					.findViewById(R.id.feed_item_name);
-			nameView.setText(fromName);
-			TextView messageView = (TextView) feedItemView
-					.findViewById(R.id.feed_item_message);
-			messageView.setText(message);
-			TextView createdView = (TextView) feedItemView
-					.findViewById(R.id.feed_item_created);
-			createdView.setText(created);
+			View fromView = feedItemView
+					.findViewById(R.id.feed_item_from_layout);
+			if (fromName != null) {
+				TextView tv = (TextView) fromView
+						.findViewById(R.id.feed_item_from_text);
+				tv.setText(fromName);
+			} else {
+				fromView.setVisibility(View.GONE);
+			}
+
+			String message = feedItemObject.optString("message", null);
+			View messageView = feedItemView
+					.findViewById(R.id.feed_item_message_layout);
+			if (message != null) {
+				TextView tv = (TextView) messageView
+						.findViewById(R.id.feed_item_message_text);
+				tv.setText(message);
+			} else {
+				messageView.setVisibility(View.GONE);
+			}
+
+			String name = feedItemObject.optString("name", null);
+			View nameView = feedItemView
+					.findViewById(R.id.feed_item_name_layout);
+			if (name != null) {
+				TextView tv = (TextView) nameView
+						.findViewById(R.id.feed_item_name_text);
+				tv.setText(name);
+			} else {
+				nameView.setVisibility(View.GONE);
+			}
+
+			String description = feedItemObject.optString("description", null);
+			View descriptionView = feedItemView
+					.findViewById(R.id.feed_item_description_layout);
+			if (description != null) {
+				TextView tv = (TextView) descriptionView
+						.findViewById(R.id.feed_item_description_text);
+				tv.setText(description);
+			} else {
+				descriptionView.setVisibility(View.GONE);
+			}
+
+			String created = feedItemObject.optString("created_time", null);
+			View createdView = feedItemView
+					.findViewById(R.id.feed_item_created_layout);
+			if (created != null) {
+				TextView tv = (TextView) createdView
+						.findViewById(R.id.feed_item_created_text);
+				tv.setText(created);
+			} else {
+				createdView.setVisibility(View.GONE);
+			}
 
 			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 			itemList.addView(feedItemView);
 
-			Bundle fromPictureParameters = new Bundle();
-			fromPictureParameters.putString("fields", "id,picture");
-			FacebookFromPictureObserver fromPictureObserver = new FacebookFromPictureObserver();
-			FacebookRequest fromPictureRequest = requestController
-					.createFacebookRequest(fromId, fromPictureParameters,
-							fromPictureObserver);
-			Bundle b = new Bundle();
-			b.putString("itemId", itemId);
-			fromPictureRequest.setBundle(b);
-			requestController.addRequest(fromPictureRequest);
-		}
-	}
+			if (fromId != null) {
+				Bundle fromPictureParameters = new Bundle();
+				fromPictureParameters.putString("fields", "id,picture");
+				FacebookFromPictureObserver fromPictureObserver = new FacebookFromPictureObserver();
+				FacebookRequest fromPictureRequest = requestController
+						.createFacebookRequest(fromId, fromPictureParameters,
+								fromPictureObserver);
+				Bundle b = new Bundle();
+				b.putString("itemId", itemId);
+				fromPictureRequest.setBundle(b);
+				requestController.addRequest(fromPictureRequest);
+			}
 
-	private final class FacebookFromPictureObserver implements
-			FacebookRequest.Observer {
-
-		@Override
-		public void onComplete(FacebookRequest facebookRequest) {
-			String pictureUrl = facebookRequest.getJSONObject().optString(
-					"picture", null);
-			
+			String pictureUrl = feedItemObject.optString("picture", null);
 			if (pictureUrl != null) {
-				FromPictureObserver pictureObserver = new FromPictureObserver();
-				ImageRequest r = requestController.createImageRequest(pictureUrl, pictureObserver);
-				r.setBundle(facebookRequest.getBundle());
-				r.setCacheBitmap(true);
+				ItemPictureObserver pictureObserver = new ItemPictureObserver();
+				ImageRequest r = requestController.createImageRequest(
+						pictureUrl, pictureObserver);
+				Bundle b = new Bundle();
+				b.putString("itemId", itemId);
+				r.setBundle(b);
 				requestController.addRequestFirst(r);
 			}
-		}
 
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
 		}
-
 	}
 
 	private final class FacebookFeedObserver implements
@@ -171,7 +174,32 @@ public class FeedActivity extends BaseActivity {
 		}
 
 	}
-	
+
+	private final class FacebookFromPictureObserver implements
+			FacebookRequest.Observer {
+
+		@Override
+		public void onComplete(FacebookRequest facebookRequest) {
+			String pictureUrl = facebookRequest.getJSONObject().optString(
+					"picture", null);
+
+			if (pictureUrl != null) {
+				FromPictureObserver pictureObserver = new FromPictureObserver();
+				ImageRequest r = requestController.createImageRequest(
+						pictureUrl, pictureObserver);
+				r.setBundle(facebookRequest.getBundle());
+				r.setCacheBitmap(true);
+				requestController.addRequestFirst(r);
+			}
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// We don't care about errors.
+		}
+
+	}
+
 	private final class FromPictureObserver implements ImageRequest.Observer {
 
 		@Override
@@ -179,11 +207,40 @@ public class FeedActivity extends BaseActivity {
 			String itemId = imageRequest.getBundle().getString("itemId");
 			if (itemId != null) {
 				LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
-				for (int i=0; i<itemList.getChildCount(); ++i) {
+				for (int i = 0; i < itemList.getChildCount(); ++i) {
 					View v = itemList.getChildAt(i);
 					if (itemId.equals(v.getTag(R.id.feed_item_id))) {
-						ImageView iv = (ImageView)v.findViewById(R.id.feed_item_picture);
+						ImageView iv = (ImageView) v
+								.findViewById(R.id.feed_item_from_image);
 						iv.setImageBitmap(imageRequest.getBitmap());
+						break;
+					}
+				}
+			}
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// We don't care about errors.
+		}
+	}
+
+	private final class ItemPictureObserver implements ImageRequest.Observer {
+
+		@Override
+		public void onComplete(ImageRequest imageRequest) {
+			String itemId = imageRequest.getBundle().getString("itemId");
+			if (itemId != null) {
+				LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
+				for (int i = 0; i < itemList.getChildCount(); ++i) {
+					View v = itemList.getChildAt(i);
+					if (itemId.equals(v.getTag(R.id.feed_item_id))) {
+						ImageView iv = (ImageView) v
+								.findViewById(R.id.feed_item_picture_image);
+						iv.setImageBitmap(imageRequest.getBitmap());
+
+						View vl = v.findViewById(R.id.feed_item_picture_layout);
+						vl.setVisibility(View.VISIBLE);
 						break;
 					}
 				}
