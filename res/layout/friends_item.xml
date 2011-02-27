@@ -6,34 +6,25 @@
     android:paddingTop="@dimen/friends_item_spacing"
     android:clickable="true" >
     
-  	<LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:duplicateParentState="true"
-        android:padding="@dimen/friends_item_picture_padding"
-        android:layout_marginRight="-1dp"
-        android:background="@drawable/bg_friend_item_picture" >
-        <ImageView
-            android:layout_height="@dimen/friends_item_picture_width"
-            android:layout_width="@dimen/friends_item_picture_height"
-            android:id="@+id/friends_item_picture" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginLeft="-1dp"
-        android:padding="@dimen/friends_item_content_padding"
-        android:minHeight="@dimen/friends_item_content_minHeight"
-        android:duplicateParentState="true"
-        android:background="@drawable/bg_friend_item_content"
-        android:gravity="center_vertical" >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/font_size_normal"
-            android:id="@+id/friends_item_name" />
-    </LinearLayout>
+	<ImageView
+	    android:layout_height="@dimen/friends_item_picture_width"
+	    android:layout_width="@dimen/friends_item_picture_height"
+	    android:padding="@dimen/friends_item_picture_padding"
+	    android:background="@drawable/bg_friend_item_picture"
+	    android:duplicateParentState="true"
+	    android:layout_marginRight="-1dp"
+	    android:id="@+id/friends_item_picture" />
+	
+	<TextView
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:padding="@dimen/friends_item_content_padding"
+	    android:background="@drawable/bg_friend_item_content"
+	    android:textSize="@dimen/font_size_normal"
+	    android:duplicateParentState="true"
+	    android:minHeight="@dimen/friends_item_content_minHeight"
+	    android:gravity="center_vertical"
+	    android:layout_marginLeft="-1dp"
+	    android:id="@+id/friends_item_name" />
     
 </LinearLayout>
