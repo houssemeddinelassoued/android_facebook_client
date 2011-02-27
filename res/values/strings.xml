@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Application name -->
-    <string name="app_name">Facebook Client</string>
+	<!-- Application name -->
+	<string name="app_name">Facebook Client</string>
 
-    <!--  Feed Activity -->
-    <string name="feed_item_message_title">Says...</string>
-    
-    <!-- Friends Activity -->
-    <string name="friends_search_text">Search</string>
+	<!-- Feed Activity -->
+	<string name="feed_item_message_title">Says...</string>
 
-    <!--  Login Activity -->
-    <string name="login_main_text"><b>Facebook</b>\nClient\nExample</string>
-    <string name="login_button_text">Login</string>
-    
-    <!--  Main Activity -->
-    <string name="main_name_text">Name</string>
-    <string name="main_status_text">Status</string>
-    <string name="main_button_feed_text">Feed</string>
-    <string name="main_button_friends_text">Friends</string>
+	<!-- Friends Activity -->
+	<string name="friends_search_text">Search</string>
+
+	<!-- Login Activity -->
+	<string name="login_main_text"><b>Facebook</b>\nClient\nExample</string>
+	<string name="login_button_text">Login</string>
+
+	<!-- Main Activity -->
+	<string name="main_name_text">Name</string>
+	<string name="main_status_text">Status</string>
+	<string name="main_button_feed_text">Feed</string>
+	<string name="main_button_friends_text">Friends</string>
 
 </resources>
