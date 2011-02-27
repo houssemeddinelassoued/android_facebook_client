@@ -5,7 +5,6 @@
     <string name="app_name">Facebook Client</string>
 
     <!--  Feed Activity -->
-    <string name="feed_item_from_title">From:</string>
     <string name="feed_item_message_title">Message:</string>
     <string name="feed_item_name_title">Name:</string>
     <string name="feed_item_picture_title">Picture:</string>

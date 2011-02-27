@@ -3,6 +3,7 @@ package fi.harism.facebook;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,15 +12,22 @@ import android.widget.TextView;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestController;
+import fi.harism.facebook.util.BitmapUtils;
 
 public class FeedActivity extends BaseActivity {
 
 	private RequestController requestController;
+	private Bitmap defaultPicture = null;
+	private static final int PICTURE_ROUND_RADIUS = 7;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.feed);
+
+		defaultPicture = getGlobalState().getDefaultPicture();
+		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
+				PICTURE_ROUND_RADIUS);
 
 		requestController = new RequestController(this);
 
@@ -61,18 +69,12 @@ public class FeedActivity extends BaseActivity {
 			String fromId = null;
 			JSONObject fromObject = feedItemObject.optJSONObject("from");
 			if (fromObject != null) {
-				fromName = fromObject.optString("name", null);
+				fromName = fromObject.optString("name");
 				fromId = fromObject.optString("id", null);
-			}
 
-			View fromView = feedItemView
-					.findViewById(R.id.feed_item_from_layout);
-			if (fromName != null) {
-				TextView tv = (TextView) fromView
+				TextView tv = (TextView) feedItemView
 						.findViewById(R.id.feed_item_from_text);
 				tv.setText(fromName);
-			} else {
-				fromView.setVisibility(View.GONE);
 			}
 
 			String message = feedItemObject.optString("message", null);
@@ -118,6 +120,10 @@ public class FeedActivity extends BaseActivity {
 			} else {
 				createdView.setVisibility(View.GONE);
 			}
+
+			ImageView fromPictureImage = (ImageView) feedItemView
+					.findViewById(R.id.feed_item_from_image);
+			fromPictureImage.setImageBitmap(defaultPicture);
 
 			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 			itemList.addView(feedItemView);
@@ -211,7 +217,9 @@ public class FeedActivity extends BaseActivity {
 				if (itemView != null) {
 					ImageView iv = (ImageView) itemView
 							.findViewById(R.id.feed_item_from_image);
-					iv.setImageBitmap(imageRequest.getBitmap());
+					Bitmap bitmap = imageRequest.getBitmap();
+					iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
+							PICTURE_ROUND_RADIUS));
 				}
 			}
 		}
