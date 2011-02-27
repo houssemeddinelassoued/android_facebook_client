@@ -107,7 +107,7 @@ public class FriendsActivity extends BaseActivity {
 		imageView.setImageBitmap(defaultPicture);
 
 		// Store user id as a tag to friend item View.
-		friendItemView.setTag(R.id.view_user_id, userId);
+		friendItemView.setTag(userId);
 
 		// This is rather useless at the moment, as we are calling this method
 		// mostly once search text has not been changed. But just in case for
@@ -124,40 +124,9 @@ public class FriendsActivity extends BaseActivity {
 				// TODO: Do something more creative with user id here. Also it's
 				// rather pointless to create new observer for every friend item
 				// View.
-				showAlertDialog((String) v.getTag(R.id.view_user_id));
+				showAlertDialog((String) v.getTag());
 			}
 		});
-
-		return friendItemView;
-	}
-
-	/**
-	 * Searches for given userId as a tag through user item Views. Returns one
-	 * with given tag, if found, or null otherwise.
-	 * 
-	 * @param userId
-	 *            User id to search friend item Views for.
-	 * @return Friend item View with a userId tag. Or null if not found.
-	 */
-	private final View findFriendItem(String userId) {
-		// By default we return null;
-		View friendItemView = null;
-
-		// Get LinearLayout containing all friend item Views.
-		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
-
-		// Iterate through friend items.
-		for (int i = 0; i < scrollView.getChildCount(); ++i) {
-			// Get friend item View at position i.
-			View v = scrollView.getChildAt(i);
-			// Get tag from View.
-			String view_user_id = (String) v.getTag(R.id.view_user_id);
-			if (userId.equals(view_user_id)) {
-				// We have a match, break from the loop.
-				friendItemView = v;
-				break;
-			}
-		}
 
 		return friendItemView;
 	}
@@ -193,7 +162,11 @@ public class FriendsActivity extends BaseActivity {
 		String userId = bundle.getString("id");
 
 		// Search for corresponding friend item View.
-		View friendView = findFriendItem(userId);
+		View friendView = null;
+		if (userId != null) {
+			View friendItemsView = findViewById(R.id.friends_list);		
+			friendView = friendItemsView.findViewWithTag(userId);
+		}
 
 		// If we found one.
 		if (friendView != null) {

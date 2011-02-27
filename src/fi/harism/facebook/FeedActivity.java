@@ -55,7 +55,7 @@ public class FeedActivity extends BaseActivity {
 		if (itemId != null) {
 			View feedItemView = getLayoutInflater().inflate(R.layout.feed_item,
 					null);
-			feedItemView.setTag(R.id.feed_item_id, itemId);
+			feedItemView.setTag(itemId);
 
 			String fromName = null;
 			String fromId = null;
@@ -206,15 +206,12 @@ public class FeedActivity extends BaseActivity {
 		public void onComplete(ImageRequest imageRequest) {
 			String itemId = imageRequest.getBundle().getString("itemId");
 			if (itemId != null) {
-				LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
-				for (int i = 0; i < itemList.getChildCount(); ++i) {
-					View v = itemList.getChildAt(i);
-					if (itemId.equals(v.getTag(R.id.feed_item_id))) {
-						ImageView iv = (ImageView) v
-								.findViewById(R.id.feed_item_from_image);
-						iv.setImageBitmap(imageRequest.getBitmap());
-						break;
-					}
+				View itemList = findViewById(R.id.feed_list);
+				View itemView = itemList.findViewWithTag(itemId);
+				if (itemView != null) {
+					ImageView iv = (ImageView) itemView
+							.findViewById(R.id.feed_item_from_image);
+					iv.setImageBitmap(imageRequest.getBitmap());
 				}
 			}
 		}
@@ -231,18 +228,16 @@ public class FeedActivity extends BaseActivity {
 		public void onComplete(ImageRequest imageRequest) {
 			String itemId = imageRequest.getBundle().getString("itemId");
 			if (itemId != null) {
-				LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
-				for (int i = 0; i < itemList.getChildCount(); ++i) {
-					View v = itemList.getChildAt(i);
-					if (itemId.equals(v.getTag(R.id.feed_item_id))) {
-						ImageView iv = (ImageView) v
-								.findViewById(R.id.feed_item_picture_image);
-						iv.setImageBitmap(imageRequest.getBitmap());
+				View itemList = findViewById(R.id.feed_list);
+				View itemView = itemList.findViewWithTag(itemId);
+				if (itemView != null) {
+					ImageView iv = (ImageView) itemView
+							.findViewById(R.id.feed_item_picture_image);
+					iv.setImageBitmap(imageRequest.getBitmap());
 
-						View vl = v.findViewById(R.id.feed_item_picture_layout);
-						vl.setVisibility(View.VISIBLE);
-						break;
-					}
+					View pictureLayout = itemView
+							.findViewById(R.id.feed_item_picture_layout);
+					pictureLayout.setVisibility(View.VISIBLE);
 				}
 			}
 		}
