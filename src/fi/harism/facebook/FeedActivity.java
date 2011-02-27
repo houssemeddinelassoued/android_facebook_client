@@ -31,9 +31,12 @@ public class FeedActivity extends BaseActivity {
 
 		requestController = new RequestController(this);
 
+		Bundle requestParameters = new Bundle();
+		requestParameters.putString("fields",
+				"id,from,message,picture,name,description,created_time");
 		FacebookRequest.Observer observer = new FacebookFeedObserver();
 		FacebookRequest request = requestController.createFacebookRequest(
-				"me/home", observer);
+				"me/home", requestParameters, observer);
 		requestController.addRequest(request);
 
 		showProgressDialog();
@@ -89,34 +92,28 @@ public class FeedActivity extends BaseActivity {
 			}
 
 			String name = feedItemObject.optString("name", null);
-			View nameView = feedItemView
-					.findViewById(R.id.feed_item_name_layout);
+			TextView nameView = (TextView)feedItemView
+					.findViewById(R.id.feed_item_name_text);
 			if (name != null) {
-				TextView tv = (TextView) nameView
-						.findViewById(R.id.feed_item_name_text);
-				tv.setText(name);
+				nameView.setText(name);
 			} else {
 				nameView.setVisibility(View.GONE);
 			}
 
 			String description = feedItemObject.optString("description", null);
-			View descriptionView = feedItemView
-					.findViewById(R.id.feed_item_description_layout);
+			TextView descriptionView = (TextView)feedItemView
+					.findViewById(R.id.feed_item_description_text);
 			if (description != null) {
-				TextView tv = (TextView) descriptionView
-						.findViewById(R.id.feed_item_description_text);
-				tv.setText(description);
+				descriptionView.setText(description);
 			} else {
 				descriptionView.setVisibility(View.GONE);
 			}
 
 			String created = feedItemObject.optString("created_time", null);
-			View createdView = feedItemView
-					.findViewById(R.id.feed_item_created_layout);
+			TextView createdView = (TextView)feedItemView
+					.findViewById(R.id.feed_item_created_text);
 			if (created != null) {
-				TextView tv = (TextView) createdView
-						.findViewById(R.id.feed_item_created_text);
-				tv.setText(created);
+				createdView.setText(created);
 			} else {
 				createdView.setVisibility(View.GONE);
 			}
@@ -161,7 +158,6 @@ public class FeedActivity extends BaseActivity {
 		@Override
 		public void onComplete(FacebookRequest facebookRequest) {
 			hideProgressDialog();
-			// TODO: Sort feed array by creation time.
 			JSONObject feedObject = facebookRequest.getJSONObject();
 			JSONArray dataArray = feedObject.optJSONArray("data");
 			if (dataArray != null) {
@@ -177,6 +173,7 @@ public class FeedActivity extends BaseActivity {
 		@Override
 		public void onError(Exception ex) {
 			hideProgressDialog();
+			showAlertDialog(ex.getLocalizedMessage());
 		}
 
 	}
@@ -242,10 +239,7 @@ public class FeedActivity extends BaseActivity {
 					ImageView iv = (ImageView) itemView
 							.findViewById(R.id.feed_item_picture_image);
 					iv.setImageBitmap(imageRequest.getBitmap());
-
-					View pictureLayout = itemView
-							.findViewById(R.id.feed_item_picture_layout);
-					pictureLayout.setVisibility(View.VISIBLE);
+					iv.setVisibility(View.VISIBLE);
 				}
 			}
 		}
