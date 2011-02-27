@@ -20,7 +20,7 @@
            <TextView
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:layout_marginLeft="@dimen/feed_item_from_name_left_margin"
+               android:layout_marginLeft="@dimen/feed_item_from_name_marginLeft"
                android:textSize="@dimen/font_size_normal"
                android:id="@+id/feed_item_from_text" />
     </LinearLayout>
@@ -36,64 +36,56 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:id="@+id/feed_item_message_layout" >
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_message_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/font_size_normal"
+                android:layout_marginLeft="@dimen/feed_item_content_message_marginLeft"
                 android:id="@+id/feed_item_message_text" />
         </LinearLayout>
         
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/feed_item_name_layout" >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_small"
-                android:text="@string/feed_item_name_title" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_normal"
-                android:id="@+id/feed_item_name_text" />
+            android:gravity="center_vertical" >
+	        <LinearLayout
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical"
+	            android:visibility="gone"
+	            android:id="@+id/feed_item_picture_layout" >
+	            <ImageView
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:id="@+id/feed_item_picture_image" />            
+	        </LinearLayout>
+	        
+	        <LinearLayout
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical"
+	            android:layout_marginLeft="@dimen/feed_item_content_name_marginLeft"
+	            android:id="@+id/feed_item_name_layout" >
+	            <TextView
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:textSize="@dimen/font_size_normal"
+	                android:id="@+id/feed_item_name_text" />
+	        </LinearLayout>
         </LinearLayout>
         
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:id="@+id/feed_item_picture_layout" >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_small"
-                android:text="@string/feed_item_picture_title" />
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/feed_item_picture_image" />            
-        </LinearLayout>
         
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/feed_item_description_layout" >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_small"
-                android:text="@string/feed_item_description_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -110,11 +102,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/font_size_small"
-                android:text="@string/feed_item_created_title" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_normal"
                 android:id="@+id/feed_item_created_text" />
         </LinearLayout>
         
