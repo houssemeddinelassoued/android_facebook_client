@@ -3,34 +3,36 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_gradient"
+    android:paddingTop="@dimen/friends_item_spacing"
     android:clickable="true" >
     
   	<LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="5px" >
+        android:duplicateParentState="true"
+        android:padding="@dimen/friends_item_picture_padding"
+        android:layout_marginRight="-1dp"
+        android:background="@drawable/background_item_picture" >
         <ImageView
-            android:layout_height="40px"
-            android:layout_width="40px"
+            android:layout_height="@dimen/friends_item_picture_width"
+            android:layout_width="@dimen/friends_item_picture_height"
             android:id="@+id/friends_item_picture" />
     </LinearLayout>
     
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_margin="5px"
+        android:layout_marginLeft="-1dp"
+        android:padding="@dimen/friends_item_content_padding"
+        android:minHeight="@dimen/friends_item_content_minHeight"
+        android:duplicateParentState="true"
+        android:background="@drawable/background_item_content"
         android:gravity="center_vertical" >
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="5pt"
-            android:text="@string/friends_item_name_text" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="8pt"
+            android:textSize="@dimen/font_size_normal"
             android:id="@+id/friends_item_name" />
     </LinearLayout>
     

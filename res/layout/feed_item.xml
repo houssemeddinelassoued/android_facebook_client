@@ -3,15 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_gradient" >
+    android:paddingTop="@dimen/feed_item_spacing" >
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="5px" >
+        android:padding="@dimen/feed_item_from_picture_padding"
+        android:layout_marginRight="-1dp"
+        android:background="@drawable/background_item_picture" >
         <ImageView
-            android:layout_width="40px"
-            android:layout_height="40px"
+            android:layout_width="@dimen/feed_item_from_picture_width"
+            android:layout_height="@dimen/feed_item_from_picture_height"
             android:src="@drawable/icon"
             android:id="@+id/feed_item_from_image" />
     </LinearLayout>
@@ -19,7 +21,11 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:layout_marginLeft="-1dp"
+        android:minHeight="@dimen/feed_item_content_minHeight"
+        android:padding="@dimen/feed_item_content_padding"
+        android:background="@drawable/background_item_content" >
         
         <LinearLayout
             android:layout_width="wrap_content"
@@ -29,12 +35,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
+                android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_from_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="8pt"
+                android:textSize="@dimen/font_size_normal"
                 android:id="@+id/feed_item_from_text" />
         </LinearLayout>
         
@@ -46,12 +52,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
+                android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_message_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="8pt"
+                android:textSize="@dimen/font_size_normal"
                 android:id="@+id/feed_item_message_text" />
         </LinearLayout>
         
@@ -63,12 +69,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
+                android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_name_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="8pt"
+                android:textSize="@dimen/font_size_normal"
                 android:id="@+id/feed_item_name_text" />
         </LinearLayout>
         
@@ -81,7 +87,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
+                android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_picture_title" />
             <ImageView
                 android:layout_width="wrap_content"
@@ -97,12 +103,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
+                android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_description_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="8pt"
+                android:textSize="@dimen/font_size_normal"
                 android:id="@+id/feed_item_description_text" />
         </LinearLayout>
 
@@ -114,12 +120,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
+                android:textSize="@dimen/font_size_small"
                 android:text="@string/feed_item_created_title" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="8pt"
+                android:textSize="@dimen/font_size_normal"
                 android:id="@+id/feed_item_created_text" />
         </LinearLayout>
         

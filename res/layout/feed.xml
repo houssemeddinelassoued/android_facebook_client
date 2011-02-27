@@ -2,10 +2,17 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent" android:orientation="vertical">
-    <TextView android:text="TextView" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-    <Button android:text="Button" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-    <ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent">
-        <LinearLayout android:id="@+id/feed_list" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="vertical"></LinearLayout>
+  android:layout_height="fill_parent"
+  android:orientation="vertical" >
+    
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+        <LinearLayout
+            android:id="@+id/feed_list"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
     </ScrollView>
+    
 </LinearLayout>
