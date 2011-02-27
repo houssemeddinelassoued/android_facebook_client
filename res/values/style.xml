@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--  Font sizes used within application -->
     <dimen name="font_size_small">10sp</dimen>
     <dimen name="font_size_normal">16sp</dimen>
-    <dimen name="font_size_big">26sp</dimen>
+    <dimen name="font_size_large">26sp</dimen>
     
-    <color name="background_item_picture_normal">#707070</color>
-    <color name="background_item_picture_clicked">#7070A0</color>
-    <dimen name="background_item_picture_corner_radius">10dp</dimen>
+    <!--  Background image values -->
+    <color name="bg_item_normal">#707070</color>
+    <color name="bg_item_clicked">#7070A0</color>
+    <dimen name="bg_item_corner_radius">10dp</dimen>
     
     <!-- Friends Activity -->
     <dimen name="friends_item_spacing">2dp</dimen>
     <dimen name="friends_item_picture_padding">5dp</dimen>
-    <dimen name="friends_item_content_padding">5dp</dimen>
     <dimen name="friends_item_picture_width">40dp</dimen>
     <dimen name="friends_item_picture_height">40dp</dimen>
-    <dimen name="friends_item_content_minHeight">55dp</dimen>
+    <dimen name="friends_item_content_padding">5dp</dimen>
+    <dimen name="friends_item_content_minHeight">60dp</dimen>
     
     <!-- Feed Activity -->
     <dimen name="feed_item_spacing">2dp</dimen>

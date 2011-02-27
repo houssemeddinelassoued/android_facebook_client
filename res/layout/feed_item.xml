@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/feed_item_from_picture_padding"
         android:layout_marginRight="-1dp"
-        android:background="@drawable/background_item_picture" >
+        android:background="@drawable/bg_friend_item_picture" >
         <ImageView
             android:layout_width="@dimen/feed_item_from_picture_width"
             android:layout_height="@dimen/feed_item_from_picture_height"
@@ -25,7 +25,7 @@
         android:layout_marginLeft="-1dp"
         android:minHeight="@dimen/feed_item_content_minHeight"
         android:padding="@dimen/feed_item_content_padding"
-        android:background="@drawable/background_item_content" >
+        android:background="@drawable/bg_friend_item_content" >
         
         <LinearLayout
             android:layout_width="wrap_content"

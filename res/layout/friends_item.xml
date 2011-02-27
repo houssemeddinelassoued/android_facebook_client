@@ -12,7 +12,7 @@
         android:duplicateParentState="true"
         android:padding="@dimen/friends_item_picture_padding"
         android:layout_marginRight="-1dp"
-        android:background="@drawable/background_item_picture" >
+        android:background="@drawable/bg_friend_item_picture" >
         <ImageView
             android:layout_height="@dimen/friends_item_picture_width"
             android:layout_width="@dimen/friends_item_picture_height"
@@ -27,7 +27,7 @@
         android:padding="@dimen/friends_item_content_padding"
         android:minHeight="@dimen/friends_item_content_minHeight"
         android:duplicateParentState="true"
-        android:background="@drawable/background_item_content"
+        android:background="@drawable/bg_friend_item_content"
         android:gravity="center_vertical" >
         <TextView
             android:layout_width="wrap_content"
