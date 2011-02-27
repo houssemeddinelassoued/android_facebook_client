@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Facebook Client</string>
-    <item type="id" name="view_user_id"/>
-</resources>
