@@ -1,61 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical" >
 
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:background="@drawable/background_gradient" >
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5px">
-            <ImageView
-                android:layout_height="50px"
-                android:layout_width="50px"
-                android:id="@+id/main_user_image" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:orientation="vertical"
-            android:gravity="center" >
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/main_name_text"
-                android:id="@+id/main_user_name" />
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/main_status_text"
-                android:id="@+id/main_user_status" />
-        </LinearLayout>
-    </LinearLayout>
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:background="@drawable/background_gradient" >
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="5px" >
+			<ImageView
+				android:layout_height="50px"
+				android:layout_width="50px"
+				android:id="@+id/main_user_image" />
+		</LinearLayout>
+		<LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:orientation="vertical"
+			android:gravity="center" >
+			<TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/main_name_text"
+				android:id="@+id/main_user_name" />
+			<TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/main_status_text"
+				android:id="@+id/main_user_status" />
+		</LinearLayout>
+	</LinearLayout>
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="@drawable/background_gradient" >
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:padding="10px" >
-            <Button
-                android:layout_height="wrap_content"
-                android:layout_width="fill_parent"
-                android:id="@+id/main_button_feed"
-                android:text="@string/main_button_feed_text" />
-            <Button
-                android:layout_height="wrap_content"
-                android:layout_width="fill_parent"
-                android:id="@+id/main_button_friends"
-                android:text="@string/main_button_friends_text" />
-        </LinearLayout>
-    </ScrollView>
+	<ScrollView
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:background="@drawable/background_gradient" >
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="10px" >
+			<Button
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:id="@+id/main_button_feed"
+				android:text="@string/main_button_feed_text" />
+			<Button
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:id="@+id/main_button_friends"
+				android:text="@string/main_button_friends_text" />
+		</LinearLayout>
+	</ScrollView>
 
 </LinearLayout>
