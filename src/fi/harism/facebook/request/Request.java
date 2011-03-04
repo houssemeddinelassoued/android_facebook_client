@@ -10,12 +10,19 @@ import android.os.Bundle;
  */
 public abstract class Request implements Runnable {
 
+	// Predefined priority values.
+	public static final int PRIORITY_HIGH = 600;
+	public static final int PRIORITY_NORMAL = 400;
+	public static final int PRIORITY_LOW = 200;
+
 	// Boolean for marking execution stopped state.
 	private boolean executionStopped = false;
 	// Activity we execute runOnUiThread on.
 	private Activity activity = null;
 	// Data stored among with this Request.
 	private Bundle bundle = null;
+	// Priority for this Request.
+	private int priority = PRIORITY_NORMAL;
 
 	/**
 	 * Constructor for Request objects.
@@ -55,7 +62,7 @@ public abstract class Request implements Runnable {
 				// Execution is blocked until notify() is called. This
 				// should happen in run() method once UI thread handles our
 				// request.
-				synchronized(this) {
+				synchronized (this) {
 					wait();
 				}
 			} catch (Exception ex) {
@@ -71,6 +78,15 @@ public abstract class Request implements Runnable {
 	 */
 	public final Bundle getBundle() {
 		return bundle;
+	}
+
+	/**
+	 * Getter for Request priority value.
+	 * 
+	 * @return Request priority value.
+	 */
+	public final int getPriority() {
+		return priority;
 	}
 
 	@Override
@@ -117,11 +133,21 @@ public abstract class Request implements Runnable {
 	}
 
 	/**
+	 * Setter for Request priority value. Default priority is PRIORITY_NORMAL.
+	 * 
+	 * @param priority
+	 *            Priority for this Request.
+	 */
+	public final void setPriority(int priority) {
+		this.priority = priority;
+	}
+
+	/**
 	 * Marks this Request as stopped.
 	 */
 	public final void stop() {
 		executionStopped = true;
-		synchronized(this) {
+		synchronized (this) {
 			notify();
 		}
 	}

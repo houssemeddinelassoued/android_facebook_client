@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
+import fi.harism.facebook.request.Request;
 import fi.harism.facebook.request.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 
@@ -92,7 +93,7 @@ public class FeedActivity extends BaseActivity {
 			}
 
 			String name = feedItemObject.optString("name", null);
-			TextView nameView = (TextView)feedItemView
+			TextView nameView = (TextView) feedItemView
 					.findViewById(R.id.feed_item_name_text);
 			if (name != null) {
 				nameView.setText(name);
@@ -101,7 +102,7 @@ public class FeedActivity extends BaseActivity {
 			}
 
 			String description = feedItemObject.optString("description", null);
-			TextView descriptionView = (TextView)feedItemView
+			TextView descriptionView = (TextView) feedItemView
 					.findViewById(R.id.feed_item_description_text);
 			if (description != null) {
 				descriptionView.setText(description);
@@ -110,7 +111,7 @@ public class FeedActivity extends BaseActivity {
 			}
 
 			String created = feedItemObject.optString("created_time", null);
-			TextView createdView = (TextView)feedItemView
+			TextView createdView = (TextView) feedItemView
 					.findViewById(R.id.feed_item_created_text);
 			if (created != null) {
 				createdView.setText(created);
@@ -143,10 +144,11 @@ public class FeedActivity extends BaseActivity {
 				ItemPictureObserver pictureObserver = new ItemPictureObserver();
 				ImageRequest r = requestController.createImageRequest(
 						pictureUrl, pictureObserver);
+				r.setPriority(Request.PRIORITY_HIGH + 1);
 				Bundle b = new Bundle();
 				b.putString("itemId", itemId);
 				r.setBundle(b);
-				requestController.addRequestFirst(r);
+				requestController.addRequest(r);
 			}
 
 		}
@@ -190,9 +192,10 @@ public class FeedActivity extends BaseActivity {
 				FromPictureObserver pictureObserver = new FromPictureObserver();
 				ImageRequest r = requestController.createImageRequest(
 						pictureUrl, pictureObserver);
+				r.setPriority(Request.PRIORITY_HIGH);
 				r.setBundle(facebookRequest.getBundle());
 				r.setCacheBitmap(true);
-				requestController.addRequestFirst(r);
+				requestController.addRequest(r);
 			}
 		}
 

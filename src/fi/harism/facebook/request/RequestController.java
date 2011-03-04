@@ -38,27 +38,21 @@ public final class RequestController {
 
 	/**
 	 * Adds new Request object to queue and starts processing it if there are no
-	 * other Requests being ran at the time.
+	 * other Requests being ran at the time. Request is added to list of Request
+	 * based on its priority value. Priority should be set before calling this
+	 * method. Changing priority later does not have effect.
 	 * 
 	 * @param request
 	 *            Request object to be added to queue.
 	 */
 	public final void addRequest(Request request) {
-		requestList.add(request);
-		synchronized (requestList) {
-			requestList.notify();
+		int index = 0;
+		while (index < requestList.size()
+				&& requestList.get(index).getPriority() >= request
+						.getPriority()) {
+			++index;
 		}
-	}
-
-	/**
-	 * Adds request to top of the queue and starts processing it if there are no
-	 * other Requests being ran at the time.
-	 * 
-	 * @param request
-	 *            Request object to be added to queue.
-	 */
-	public final void addRequestFirst(Request request) {
-		requestList.add(0, request);
+		requestList.add(index, request);
 		synchronized (requestList) {
 			requestList.notify();
 		}
