@@ -16,5 +16,6 @@ It's maybe easiest done using EGit Eclipse plugin but feel free to use Git clien
 ToDo
 ====
 
-1. Create item views for other news feed items than statuses.
-2. Implement simple image caching (into memory only at this point).
+1. Re-implement image and other network loading.
+  - One "static" application wide controller.
+  - Containers for Facebook results and data.
