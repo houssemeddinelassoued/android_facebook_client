@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.Bundle;
-import fi.harism.facebook.data.FacebookController;
+import fi.harism.facebook.data.FacebookClient;
 
 /**
  * FacebookRequest class is implemented for making asynchronous Facebook Graph
@@ -19,7 +19,7 @@ public class FacebookRequest extends Request {
 	// Facebook Graph API parameters.
 	private Bundle requestBundle;
 	// FacebookController instance.
-	private FacebookController facebookController;
+	private FacebookClient facebookController;
 	// Reuqest observer.
 	private FacebookRequest.Observer observer;
 	// Response from server.
@@ -40,7 +40,7 @@ public class FacebookRequest extends Request {
 	 *            Facebook request observer.
 	 */
 	public FacebookRequest(Activity activity, String requestPath,
-			Bundle requestBundle, FacebookController facebookController, FacebookRequest.Observer observer) {
+			Bundle requestBundle, FacebookClient facebookController, FacebookRequest.Observer observer) {
 		super(activity);
 		this.requestPath = requestPath;
 		this.requestBundle = requestBundle;

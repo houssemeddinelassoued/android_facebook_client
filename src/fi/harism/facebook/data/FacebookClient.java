@@ -10,14 +10,14 @@ import com.facebook.android.FacebookError;
 
 import fi.harism.facebook.data.Controller.AuthorizeObserver;
 
-public class FacebookController {
+public class FacebookClient {
 
 	public static final String TOKEN = Facebook.TOKEN;
 	private static final String FACEBOOK_APP_ID = "190087744355420";
 	private Facebook facebook = null;
 	private boolean facebookAuthorized;
 
-	public FacebookController() {
+	public FacebookClient() {
 		facebook = new Facebook(FACEBOOK_APP_ID);
 		facebookAuthorized = false;
 	}

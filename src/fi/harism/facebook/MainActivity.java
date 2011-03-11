@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.data.Controller;
 import fi.harism.facebook.data.FacebookBitmap;
-import fi.harism.facebook.data.FacebookController;
+import fi.harism.facebook.data.FacebookClient;
 import fi.harism.facebook.data.FacebookNameAndPicture;
 import fi.harism.facebook.data.FacebookStatus;
 import fi.harism.facebook.dialog.ProfileDialog;

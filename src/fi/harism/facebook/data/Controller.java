@@ -16,13 +16,13 @@ import fi.harism.facebook.request.RequestQueue;
 
 public class Controller {
 	
-	private FacebookController facebookController = null;
+	private FacebookClient facebookController = null;
 	private DataCache dataCache = null;
 	private RequestQueue requestController = null;
 
 	
 	public Controller() {
-		facebookController = new FacebookController();
+		facebookController = new FacebookClient();
 		dataCache = new DataCache();
 		requestController = new RequestQueue();		
 	}
@@ -37,7 +37,7 @@ public class Controller {
 	
 	public void getNameAndPicture(Activity activity, String id, final RequestObserver<FacebookNameAndPicture> observer) {
 		Bundle b = new Bundle();
-		b.putString(FacebookController.TOKEN, facebookController.getAccessToken());
+		b.putString(FacebookClient.TOKEN, facebookController.getAccessToken());
 		b.putString("fields", "id,name,picture");
 		FacebookRequest r = new FacebookRequest(activity, id, b, facebookController, new FacebookRequest.Observer() {
 			@Override
