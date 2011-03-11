@@ -12,19 +12,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
-import fi.harism.facebook.request.RequestController;
+import fi.harism.facebook.request.RequestQueue;
 
 public class Controller {
 	
 	private FacebookController facebookController = null;
 	private DataCache dataCache = null;
-	private RequestController requestController = null;
+	private RequestQueue requestController = null;
 
 	
 	public Controller() {
 		facebookController = new FacebookController();
 		dataCache = new DataCache();
-		requestController = new RequestController();		
+		requestController = new RequestQueue();		
 	}
 	
 	public void authorize(Activity activity, AuthorizeObserver observer) {

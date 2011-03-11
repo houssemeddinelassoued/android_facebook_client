@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import fi.harism.facebook.BaseActivity;
 import fi.harism.facebook.R;
 import fi.harism.facebook.request.Request;
-import fi.harism.facebook.request.RequestController;
+import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.request.FacebookRequest;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -16,11 +16,11 @@ import android.widget.TextView;
 
 public class ProfileDialog extends Dialog {
 
-	private RequestController requestController;
+	private RequestQueue requestController;
 	private String profilePath;
 
 	public ProfileDialog(BaseActivity baseActivity,
-			RequestController requestController, String profilePath) {
+			RequestQueue requestController, String profilePath) {
 		super(baseActivity);
 		this.requestController = requestController;
 		this.profilePath = profilePath;

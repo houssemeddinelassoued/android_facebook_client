@@ -11,7 +11,7 @@ import android.app.Activity;
  * 
  * @author harism
  */
-public final class RequestController {
+public final class RequestQueue {
 
 	private ArrayList<Activity> pausedList = null;
 	// List of requests.
@@ -27,7 +27,7 @@ public final class RequestController {
 	 * @param activity
 	 *            Activity this controller is created for.
 	 */
-	public RequestController() {
+	public RequestQueue() {
 		pausedList = new ArrayList<Activity>();
 		requestList = new ArrayList<Request>();
 		workerThread = new WorkerThread();
@@ -85,6 +85,7 @@ public final class RequestController {
 			currentRequest.stop();
 			currentRequest = null;
 		}
+		pausedList.remove(activity);
 		synchronized (requestList) {
 			requestList.notify();
 		}

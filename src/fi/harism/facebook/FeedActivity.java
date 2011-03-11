@@ -18,7 +18,7 @@ import fi.harism.facebook.data.FacebookNameAndPicture;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.Request;
-import fi.harism.facebook.request.RequestController;
+import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
