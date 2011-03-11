@@ -2,8 +2,8 @@ package fi.harism.facebook.request;
 
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.os.Bundle;
-import fi.harism.facebook.BaseActivity;
 import fi.harism.facebook.data.FacebookController;
 
 /**
@@ -18,32 +18,34 @@ public class FacebookRequest extends Request {
 	private String requestPath;
 	// Facebook Graph API parameters.
 	private Bundle requestBundle;
-	// Observer.
+	// FacebookController instance.
+	private FacebookController facebookController;
+	// Reuqest observer.
 	private FacebookRequest.Observer observer;
 	// Response from server.
 	private JSONObject response;
-	// We need Activity to retrieve FacebookController instance.
-	private BaseActivity baseActivity;
 
 	/**
 	 * Constructor for Facebook request.
 	 * 
 	 * @param activity
-	 *            Activity needed for
+	 *            Activity used for identifying this request.
 	 * @param requestPath
 	 *            Facebook Graph API path.
 	 * @param requestBundle
 	 *            Facebook Graph API parameters.
+	 * @param facebookController
+	 * 		      FacebookController instance.
 	 * @param observer
 	 *            Facebook request observer.
 	 */
-	public FacebookRequest(BaseActivity activity, String requestPath,
-			Bundle requestBundle, FacebookRequest.Observer observer) {
+	public FacebookRequest(Activity activity, String requestPath,
+			Bundle requestBundle, FacebookController facebookController, FacebookRequest.Observer observer) {
 		super(activity);
 		this.requestPath = requestPath;
 		this.requestBundle = requestBundle;
+		this.facebookController = facebookController;
 		this.observer = observer;
-		this.baseActivity = activity;
 		response = null;
 	}
 
@@ -53,7 +55,7 @@ public class FacebookRequest extends Request {
 	 * 
 	 * @return Response we received from the server.
 	 */
-	public JSONObject getJSONObject() {
+	public JSONObject getResponse() {
 		return response;
 	}
 
@@ -61,14 +63,10 @@ public class FacebookRequest extends Request {
 	public void runOnThread() throws Exception {
 		try {
 			String r;
-			// Get application wide instance of FacebookController.
-			FacebookController c = baseActivity.getGlobalState()
-					.getFacebookController();
-			// Make actual request.
 			if (requestBundle != null) {
-				r = c.request(requestPath, requestBundle);
+				r = facebookController.request(requestPath, requestBundle);
 			} else {
-				r = c.request(requestPath);
+				r = facebookController.request(requestPath);
 			}
 
 			// Create JSONObject from response string.

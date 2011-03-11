@@ -1,7 +1,6 @@
 package fi.harism.facebook.request;
 
 import android.app.Activity;
-import android.os.Bundle;
 
 /**
  * Base class for all requests being handled by RequestController.
@@ -14,13 +13,11 @@ public abstract class Request implements Runnable {
 	public static final int PRIORITY_HIGH = 600;
 	public static final int PRIORITY_NORMAL = 400;
 	public static final int PRIORITY_LOW = 200;
-
+	
 	// Boolean for marking execution stopped state.
 	private boolean executionStopped = false;
 	// Activity we execute runOnUiThread on.
 	private Activity activity = null;
-	// Data stored among with this Request.
-	private Bundle bundle = null;
 	// Priority for this Request.
 	private int priority = PRIORITY_NORMAL;
 
@@ -71,16 +68,6 @@ public abstract class Request implements Runnable {
 	}
 
 	/**
-	 * Returns Bundle stored with this request.
-	 * 
-	 * @see setBundle(Bundle bundle)
-	 * @return Bundle stored with this Request.
-	 */
-	public final Bundle getBundle() {
-		return bundle;
-	}
-
-	/**
 	 * Getter for Request priority value.
 	 * 
 	 * @return Request priority value.
@@ -120,18 +107,11 @@ public abstract class Request implements Runnable {
 	 * @throws Exception
 	 */
 	public abstract void runOnUiThread() throws Exception;
-
-	/**
-	 * Sets Bundle to be stored with this Request.
-	 * 
-	 * @see getBundle()
-	 * @param bundle
-	 *            Bundle to be stored with this Request.
-	 */
-	public final void setBundle(Bundle bundle) {
-		this.bundle = bundle;
+	
+	public final Activity getActivity() {
+		return activity;
 	}
-
+	
 	/**
 	 * Setter for Request priority value. Default priority is PRIORITY_NORMAL.
 	 * 

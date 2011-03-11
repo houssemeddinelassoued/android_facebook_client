@@ -4,10 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import fi.harism.facebook.BaseActivity;
-import fi.harism.facebook.data.DataCache;
 
 /**
  * ImageRequest class for loading images asynchronously.
@@ -22,10 +21,6 @@ public class ImageRequest extends Request {
 	private ImageRequest.Observer observer;
 	// Bitmap we loaded.
 	private Bitmap bitmap;
-	// Flag whether Bitmap should be cached.
-	private boolean cacheBitmap;
-	// Caller activity.
-	private BaseActivity activity;
 
 	/**
 	 * Constructor for ImageRequest.
@@ -37,14 +32,12 @@ public class ImageRequest extends Request {
 	 * @param observer
 	 *            ImageRequest observer.
 	 */
-	public ImageRequest(BaseActivity activity, String url,
+	public ImageRequest(Activity activity, String url,
 			ImageRequest.Observer observer) {
 		super(activity);
-		this.activity = activity;
 		this.url = url;
 		this.observer = observer;
 		bitmap = null;
-		cacheBitmap = false;
 	}
 
 	/**
@@ -59,15 +52,15 @@ public class ImageRequest extends Request {
 
 	@Override
 	public void runOnThread() throws Exception {
-		DataCache dataCache = activity.getGlobalState().getDataCache();
+		//DataCache dataCache = activity.getGlobalState().getDataCache();
 		// Always check dataCache for cached image.
-		if (dataCache.containsKey(url)) {
-			byte bitmapData[] = dataCache.getData(url);
-			bitmap = BitmapFactory.decodeByteArray(bitmapData, 0,
-					bitmapData.length);
-		}
+		//if (dataCache.containsKey(url)) {
+		//	byte bitmapData[] = dataCache.getData(url);
+		//	bitmap = BitmapFactory.decodeByteArray(bitmapData, 0,
+		//			bitmapData.length);
+		//}
 		// No cached data found.
-		else {
+		//else {
 			try {
 				// Open InputStream for given url.
 				URL u = new URL(url);
@@ -84,32 +77,16 @@ public class ImageRequest extends Request {
 				buffer = imageBuffer.toByteArray();
 				bitmap = BitmapFactory
 						.decodeByteArray(buffer, 0, buffer.length);
-
-				// If cacheBitmap is set, store loaded data into dataCache.
-				if (cacheBitmap) {
-					dataCache.setData(url, buffer);
-				}
 			} catch (Exception ex) {
 				observer.onError(ex);
 				throw ex;
 			}
-		}
+		//}
 	}
 
 	@Override
 	public void runOnUiThread() throws Exception {
 		observer.onComplete(this);
-	}
-
-	/**
-	 * Sets flag whether this ImageRequest should store bitmap data to DataCache
-	 * once image data has been loaded. Image caching is turned off by default.
-	 * 
-	 * @param cacheBitmap
-	 *            Boolean whether loaded image should be put to DataCache.
-	 */
-	public void setCacheBitmap(boolean cacheBitmap) {
-		this.cacheBitmap = cacheBitmap;
 	}
 
 	/**

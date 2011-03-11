@@ -2,24 +2,22 @@ package fi.harism.facebook.request;
 
 import java.util.ArrayList;
 
-import android.os.Bundle;
-import fi.harism.facebook.BaseActivity;
+import android.app.Activity;
 
 /**
  * RequestController provides a queue for handling Requests. Every
  * RequestController creates one WorkerThread which is used for executing one
  * Request asynchronously at time.
  * 
- * TODO: It might be a good idea to have one worker thread application wide.
- * 
  * @author harism
  */
 public final class RequestController {
 
+	private ArrayList<Activity> pausedList = null;
 	// List of requests.
 	private ArrayList<Request> requestList = null;
-	// Activity this RequestController was created for.
-	private BaseActivity activity = null;
+	// Currently processed request.
+	private Request currentRequest = null;
 	// WorkerThread for this RequestController instance.
 	private WorkerThread workerThread = null;
 
@@ -29,9 +27,9 @@ public final class RequestController {
 	 * @param activity
 	 *            Activity this controller is created for.
 	 */
-	public RequestController(BaseActivity activity) {
+	public RequestController() {
+		pausedList = new ArrayList<Activity>();
 		requestList = new ArrayList<Request>();
-		this.activity = activity;
 		workerThread = new WorkerThread();
 		workerThread.start();
 	}
@@ -57,54 +55,39 @@ public final class RequestController {
 			requestList.notify();
 		}
 	}
-
-	/**
-	 * Helper method for creating new Facebook request.
-	 * 
-	 * @param requestPath
-	 *            Facebook Graph API path.
-	 * @param requestBundle
-	 *            Request parameters.
-	 * @param observer
-	 *            Observer for listening to this request.
-	 * @return New FacebookRequest object.
-	 */
-	public final FacebookRequest createFacebookRequest(String requestPath,
-			Bundle requestBundle, FacebookRequest.Observer observer) {
-		FacebookRequest request = new FacebookRequest(activity, requestPath,
-				requestBundle, observer);
-		return request;
+	
+	public final void setPaused(Activity activity, boolean paused) {
+		if (paused == true) {
+			if (!pausedList.contains(activity)) {
+				pausedList.add(activity);
+			}
+		}
+		else {
+			pausedList.remove(activity);
+		}
+		synchronized (requestList) {
+			requestList.notify();
+		}
 	}
-
-	/**
-	 * Helper method for creating new Facebook request.
-	 * 
-	 * @param requestPath
-	 *            Facebook Graph API path.
-	 * @param observer
-	 *            Observer for listening to this request.
-	 * @return New FacebookRequest object.
-	 */
-	public final FacebookRequest createFacebookRequest(String requestPath,
-			FacebookRequest.Observer observer) {
-		FacebookRequest request = new FacebookRequest(activity, requestPath,
-				null, observer);
-		return request;
-	}
-
-	/**
-	 * Helper method for creating new Image request.
-	 * 
-	 * @param url
-	 *            Image URL.
-	 * @param observer
-	 *            Observer for listening to this request.
-	 * @return New ImageRequest object.
-	 */
-	public final ImageRequest createImageRequest(String url,
-			ImageRequest.Observer observer) {
-		ImageRequest request = new ImageRequest(activity, url, observer);
-		return request;
+	
+	public final void removeRequests(Activity activity) {
+		for (int i=0; i<requestList.size();) {
+			Request r = requestList.get(i);
+			if (r.getActivity() == activity) {
+				requestList.remove(i);
+			}
+			else {
+				++i;
+			}
+		}
+		// If there is a current Request, stop its execution at once.
+		if (currentRequest != null && currentRequest.getActivity() == activity) {
+			currentRequest.stop();
+			currentRequest = null;
+		}
+		synchronized (requestList) {
+			requestList.notify();
+		}
 	}
 
 	/**
@@ -113,41 +96,26 @@ public final class RequestController {
 	 */
 	public final void destroy() {
 		workerThread.destroyWorker();
+		// Send notification in case run() method is in wait state.
+		synchronized (requestList) {
+			requestList.notify();
+		}
 		workerThread = null;
 		requestList.clear();
 		requestList = null;
-		activity = null;
-	}
-
-	/**
-	 * Sets this RequestController to paused state. This means no new requests
-	 * are not being processed until resume() is called.
-	 * 
-	 * @see resume()
-	 */
-	public final void pause() {
-		workerThread.pauseWorker();
-	}
-
-	/**
-	 * Continues processing requests within this RequestController.
-	 * 
-	 * @see pause()
-	 */
-	public final void resume() {
-		workerThread.resumeWorker();
+		// If there is a current Request, stop its execution at once.
+		if (currentRequest != null) {
+			currentRequest.stop();
+			currentRequest = null;
+		}
 	}
 
 	/**
 	 * Private WorkerThread implementation.
 	 */
 	private final class WorkerThread extends Thread {
-		// Boolean to indicate this worker is in paused mode.
-		private boolean isPaused = false;
 		// Boolean to indicate this worker should keep running.
 		private boolean keepRunning = true;
-		// Currently processed request.
-		private Request currentRequest = null;
 
 		/**
 		 * Destroys this worker. Execution of run() will be ended as soon as
@@ -157,33 +125,6 @@ public final class RequestController {
 		public void destroyWorker() {
 			// Mark this worker as done.
 			keepRunning = false;
-			// Send notification in case run() method is in wait state.
-			synchronized (requestList) {
-				requestList.notify();
-			}
-			// If there is a current Request, stop its execution at once.
-			if (currentRequest != null) {
-				currentRequest.stop();
-			}
-		}
-
-		/**
-		 * Puts this worker into paused mode. If there is a Request being
-		 * processed when this method is called, it is finished before worker
-		 * enters paused state.
-		 */
-		public void pauseWorker() {
-			isPaused = true;
-		}
-
-		/**
-		 * Puts this worker back to running mode.
-		 */
-		public void resumeWorker() {
-			isPaused = false;
-			synchronized (requestList) {
-				requestList.notify();
-			}
 		}
 
 		@Override
@@ -194,7 +135,7 @@ public final class RequestController {
 					// Let's idle here while isPaused is set, or requestList is
 					// empty. We are expecting a notification being sent to us
 					// once there is a change in execution state.
-					while (isPaused || (keepRunning && requestList.isEmpty())) {
+					while (keepRunning && requestList.isEmpty()) {
 						try {
 							// Wait until someone calls notify on requestList.
 							requestList.wait();
@@ -204,12 +145,19 @@ public final class RequestController {
 					// If keepRunning is true there should be a request
 					// available for processing.
 					if (keepRunning) {
-						currentRequest = requestList.remove(0);
+						for (int i=0; i<requestList.size(); ++i) {
+							Request r = requestList.get(i);
+							if (!pausedList.contains(r.getActivity())) {
+								currentRequest = requestList.remove(i);
+								break;
+							}
+						}
+						//currentRequest = requestList.remove(0);
 					}
 				}
 				// Lets check keepRunning again, and if it's set currentRequest
 				// should contain next Request for processing.
-				if (keepRunning) {
+				if (keepRunning && currentRequest != null) {
 					// execute() returns only after Request has been processed
 					// totally. This is the reason we have to call execute()
 					// separately from previous synchronized block.

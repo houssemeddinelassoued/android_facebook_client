@@ -30,17 +30,17 @@ public class ProfileDialog extends Dialog {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dialog_profile);
 		
-		FacebookRequest.Observer observer = new FacebookProfileObserver();
-		FacebookRequest request = requestController.createFacebookRequest(profilePath, observer);
-		request.setPriority(Request.PRIORITY_HIGH + 1);
-		requestController.addRequest(request);
+		//FacebookRequest.Observer observer = new FacebookProfileObserver();
+		//FacebookRequest request = requestController.createFacebookRequest(profilePath, observer);
+		//request.setPriority(Request.PRIORITY_HIGH + 1);
+		//requestController.addRequest(request);
 	}
 	
 	private class FacebookProfileObserver implements FacebookRequest.Observer {
 
 		@Override
 		public void onComplete(FacebookRequest facebookRequest) {
-			JSONObject resp = facebookRequest.getJSONObject();
+			JSONObject resp = facebookRequest.getResponse();
 			
 			StringWriter out = new StringWriter();
 			Iterator it = resp.keys();

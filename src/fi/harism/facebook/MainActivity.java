@@ -10,7 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import fi.harism.facebook.data.Controller;
+import fi.harism.facebook.data.FacebookBitmap;
 import fi.harism.facebook.data.FacebookController;
+import fi.harism.facebook.data.FacebookNameAndPicture;
+import fi.harism.facebook.data.FacebookStatus;
 import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
@@ -26,9 +30,11 @@ import fi.harism.facebook.util.BitmapUtils;
 public class MainActivity extends BaseActivity {
 
 	// Global instance of FacebookController
-	private FacebookController facebookController = null;
+	//private FacebookController facebookController = null;
 	// RequestController instance for handling asynchronous requests.
-	private RequestController requestController = null;
+	//private RequestController requestController = null;
+	
+	private Controller controller = null;
 
 	private static final int ID_DIALOG_PROFILE = 1;
 
@@ -39,11 +45,13 @@ public class MainActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		controller = getGlobalState().getController();
 
 		// Get global instance of FacebookController.
-		facebookController = getGlobalState().getFacebookController();
+		//facebookController = getGlobalState().getFacebookController();
 		// Create RequestController for this Activity.
-		requestController = new RequestController(this);
+		//requestController = new RequestController(this);
 
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
@@ -95,9 +103,9 @@ public class MainActivity extends BaseActivity {
 	public final Dialog onCreateDialog(int id, Bundle bundle) {
 		switch (id) {
 		case ID_DIALOG_PROFILE:
-			ProfileDialog profileDialog = new ProfileDialog(this,
-					requestController, "me");
-			return profileDialog;
+			//ProfileDialog profileDialog = new ProfileDialog(this,
+			//		requestController, "me");
+			//return profileDialog;
 		}
 		return null;
 	}
@@ -105,54 +113,28 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		facebookController = null;
-		requestController.destroy();
-		requestController = null;
+		controller.removeRequests(this);
+		controller = null;
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		requestController.pause();
+		controller.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		requestController.resume();
+		controller.setPaused(this, false);
 	}
 
 	/**
 	 * Starts to load currently logged in user information.
 	 */
 	private final void loadProfileInfo() {
-		// We need to give some request parameters for FacebookRequest.
-		Bundle meParameters = new Bundle();
-		// Select only name and picture fields.
-		meParameters.putString("fields", "name,picture");
-		// Retrieving picture requires access token to be given.
-		meParameters.putString(FacebookController.TOKEN,
-				facebookController.getAccessToken());
-		// Create observer for FacebookRequest.
-		FacebookRequest.Observer meObserver = new FacebookMeObserver();
-		// Create actual request, here we ask for http://graph.facebook.com/me.
-		FacebookRequest meRequest = requestController.createFacebookRequest(
-				"me", meParameters, meObserver);
-		requestController.addRequest(meRequest);
-
-		// Start loading latest status message for current user.
-		Bundle meStatusesParameters = new Bundle();
-		// We want only latest status.
-		meStatusesParameters.putString("limit", "1");
-		// We need only message value.
-		meStatusesParameters.putString("fields", "message");
-		// Create observer for FacebookRequest.
-		FacebookRequest.Observer meStatusesObserver = new FacebookMeStatusesObserver();
-		// Create actual request.
-		FacebookRequest meStatusesRequest = requestController
-				.createFacebookRequest("me/statuses", meStatusesParameters,
-						meStatusesObserver);
-		requestController.addRequest(meStatusesRequest);
+		controller.getNameAndPicture(this, "me", new FacebookMeObserver());
+		controller.getStatus(this, "me", new FacebookStatusObserver());
 	}
 
 	/**
@@ -163,34 +145,24 @@ public class MainActivity extends BaseActivity {
 	 *            URL for profile picture.
 	 */
 	private final void loadProfilePicture(String pictureUrl) {
-		ImageRequest.Observer observer = new PictureObserver();
-		ImageRequest request = requestController.createImageRequest(pictureUrl,
-				observer);
-		request.setCacheBitmap(true);
-		requestController.addRequest(request);
+		PictureObserver observer = new PictureObserver();
+		controller.getBitmap(this, null, pictureUrl, observer);
+		
+		//ImageRequest request = requestController.createImageRequest(pictureUrl,
+		//		observer);
+		//request.setCacheBitmap(true);
+		//requestController.addRequest(request);
 	}
 
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
-	private final class FacebookMeObserver implements FacebookRequest.Observer {
+	private final class FacebookMeObserver implements Controller.RequestObserver<FacebookNameAndPicture> {
 		@Override
-		public void onComplete(FacebookRequest facebookRequest) {
-			JSONObject o = facebookRequest.getJSONObject();
-
-			// If response contains field "name" set it as name to view.
-			String name = o.optString("name");
-			if (name.length() > 0) {
-				TextView tv = (TextView) findViewById(R.id.main_user_name);
-				tv.setText(name);
-			}
-
-			// If response contains field "picture" trigger asynchronous loading
-			// of profile picture.
-			String pictureUrl = o.optString("picture");
-			if (pictureUrl.length() > 0) {
-				loadProfilePicture(pictureUrl);
-			}
+		public void onComplete(FacebookNameAndPicture resp) {
+			TextView tv = (TextView) findViewById(R.id.main_user_name);
+			tv.setText(resp.getName());
+			loadProfilePicture(resp.getPicture());
 		}
 
 		@Override
@@ -202,20 +174,12 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me/statuses" request.
 	 */
-	private final class FacebookMeStatusesObserver implements
-			FacebookRequest.Observer {
+	private final class FacebookStatusObserver implements
+			Controller.RequestObserver<FacebookStatus> {
 		@Override
-		public void onComplete(FacebookRequest facebookRequest) {
-			JSONObject o = facebookRequest.getJSONObject();
-			try {
-				// Response should contain "data" field which should be an array
-				// containing 1 JSONObject.
-				String message = o.getJSONArray("data").getJSONObject(0)
-						.getString("message");
-				TextView tv = (TextView) findViewById(R.id.main_user_status);
-				tv.setText(message);
-			} catch (Exception ex) {
-			}
+		public void onComplete(FacebookStatus response) {
+			TextView tv = (TextView) findViewById(R.id.main_user_status);
+			tv.setText(response.getMessage());
 		}
 
 		@Override
@@ -227,11 +191,11 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements ImageRequest.Observer {
+	private final class PictureObserver implements Controller.RequestObserver<FacebookBitmap> {
 		@Override
-		public void onComplete(ImageRequest imageRequest) {
+		public void onComplete(FacebookBitmap bitmap) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-			Bitmap picture = imageRequest.getBitmap();
+			Bitmap picture = bitmap.getBitmap();
 			iv.setImageBitmap(BitmapUtils.roundBitmap(picture,
 					PICTURE_ROUND_RADIUS));
 		}

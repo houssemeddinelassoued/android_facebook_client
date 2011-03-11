@@ -3,8 +3,7 @@ package fi.harism.facebook;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import fi.harism.facebook.data.DataCache;
-import fi.harism.facebook.data.FacebookController;
+import fi.harism.facebook.data.Controller;
 
 /**
  * GlobalStateImpl class extends Application and is used as base class for our
@@ -14,20 +13,10 @@ import fi.harism.facebook.data.FacebookController;
  */
 public class GlobalStateImpl extends Application implements GlobalState {
 
-	// Instance of FacebookController.
-	private FacebookController facebookController = null;
-	// Instance of DataCache.
-	private DataCache dataCache = null;
+	// Instance of DataHandler.
+	private Controller controller = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
-
-	@Override
-	public DataCache getDataCache() {
-		if (dataCache == null) {
-			dataCache = new DataCache();
-		}
-		return dataCache;
-	}
 
 	@Override
 	public Bitmap getDefaultPicture() {
@@ -39,11 +28,11 @@ public class GlobalStateImpl extends Application implements GlobalState {
 	}
 
 	@Override
-	public FacebookController getFacebookController() {
-		if (facebookController == null) {
-			facebookController = new FacebookController();
+	public Controller getController() {
+		if (controller == null) {
+			controller = new Controller();
 		}
-		return facebookController;
+		return controller;
 	}
 
 }

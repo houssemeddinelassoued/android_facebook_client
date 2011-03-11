@@ -8,6 +8,8 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
 
+import fi.harism.facebook.data.Controller.AuthorizeObserver;
+
 public class FacebookController {
 
 	public static final String TOKEN = Facebook.TOKEN;
@@ -20,7 +22,7 @@ public class FacebookController {
 		facebookAuthorized = false;
 	}
 
-	public void authorize(Activity activity, final LoginObserver observer) {
+	public void authorize(Activity activity, final AuthorizeObserver observer) {
 
 		if (facebookAuthorized) {
 			observer.onComplete();
@@ -71,14 +73,6 @@ public class FacebookController {
 
 	public String request(String path, Bundle bundle) throws Exception {
 		return facebook.request(path, bundle);
-	}
-
-	public interface LoginObserver {
-		public void onCancel();
-
-		public void onComplete();
-
-		public void onError(Exception ex);
 	}
 
 }

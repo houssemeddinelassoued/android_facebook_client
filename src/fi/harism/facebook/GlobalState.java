@@ -1,8 +1,7 @@
 package fi.harism.facebook;
 
 import android.graphics.Bitmap;
-import fi.harism.facebook.data.DataCache;
-import fi.harism.facebook.data.FacebookController;
+import fi.harism.facebook.data.Controller;
 
 /**
  * GlobalState interface.
@@ -10,14 +9,6 @@ import fi.harism.facebook.data.FacebookController;
  * @author harism
  */
 public interface GlobalState {
-
-	/**
-	 * Returns application wide instance of DataCache. Creates one once this
-	 * method is called for the first time.
-	 * 
-	 * @return DataCache instance.
-	 */
-	public DataCache getDataCache();
 
 	/**
 	 * Returns instance of default profile picture. Creates one once this method
@@ -28,11 +19,11 @@ public interface GlobalState {
 	public Bitmap getDefaultPicture();
 
 	/**
-	 * Returns application wide instance of FacebookController. Creates one once
+	 * Returns application wide instance of Controller. Creates one once
 	 * this method is called for the first time.
 	 * 
-	 * @return FacebookController instance.
+	 * @return Controller instance.
 	 */
-	public FacebookController getFacebookController();
+	public Controller getController();
 
 }
