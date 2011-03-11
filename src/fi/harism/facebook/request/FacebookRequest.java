@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import fi.harism.facebook.BaseActivity;
-import fi.harism.facebook.util.FacebookController;
+import fi.harism.facebook.data.FacebookController;
 
 /**
  * FacebookRequest class is implemented for making asynchronous Facebook Graph

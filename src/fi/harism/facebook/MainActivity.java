@@ -10,12 +10,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import fi.harism.facebook.data.FacebookController;
 import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
-import fi.harism.facebook.util.FacebookController;
 
 /**
  * Main Activity of this application. Once Activity is launched it starts to

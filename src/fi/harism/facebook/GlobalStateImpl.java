@@ -3,8 +3,8 @@ package fi.harism.facebook;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import fi.harism.facebook.util.DataCache;
-import fi.harism.facebook.util.FacebookController;
+import fi.harism.facebook.data.DataCache;
+import fi.harism.facebook.data.FacebookController;
 
 /**
  * GlobalStateImpl class extends Application and is used as base class for our

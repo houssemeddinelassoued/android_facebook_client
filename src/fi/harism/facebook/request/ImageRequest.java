@@ -7,7 +7,7 @@ import java.net.URL;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import fi.harism.facebook.BaseActivity;
-import fi.harism.facebook.util.DataCache;
+import fi.harism.facebook.data.DataCache;
 
 /**
  * ImageRequest class for loading images asynchronously.

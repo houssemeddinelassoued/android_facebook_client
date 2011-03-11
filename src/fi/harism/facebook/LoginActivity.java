@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import fi.harism.facebook.util.FacebookController;
+import fi.harism.facebook.data.FacebookController;
 
 /**
  * Our main activity, in a sense it's the first activity user sees once our

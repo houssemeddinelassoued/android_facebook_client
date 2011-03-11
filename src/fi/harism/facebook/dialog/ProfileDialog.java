@@ -10,7 +10,6 @@ import fi.harism.facebook.R;
 import fi.harism.facebook.request.Request;
 import fi.harism.facebook.request.RequestController;
 import fi.harism.facebook.request.FacebookRequest;
-import fi.harism.facebook.util.FacebookController;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.widget.TextView;

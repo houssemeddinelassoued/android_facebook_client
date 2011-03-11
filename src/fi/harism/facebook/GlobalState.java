@@ -1,8 +1,8 @@
 package fi.harism.facebook;
 
 import android.graphics.Bitmap;
-import fi.harism.facebook.util.DataCache;
-import fi.harism.facebook.util.FacebookController;
+import fi.harism.facebook.data.DataCache;
+import fi.harism.facebook.data.FacebookController;
 
 /**
  * GlobalState interface.
