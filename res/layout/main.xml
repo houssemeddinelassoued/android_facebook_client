@@ -55,6 +55,11 @@
 				android:layout_width="fill_parent"
 				android:id="@+id/main_button_friends"
 				android:text="@string/main_button_friends_text" />
+			<Button
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:id="@+id/main_button_profile"
+				android:text="@string/main_button_profile_text" />
 		</LinearLayout>
 	</ScrollView>
 

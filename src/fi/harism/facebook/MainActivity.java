@@ -2,6 +2,7 @@ package fi.harism.facebook;
 
 import org.json.JSONObject;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestController;
@@ -27,6 +29,8 @@ public class MainActivity extends BaseActivity {
 	private FacebookController facebookController = null;
 	// RequestController instance for handling asynchronous requests.
 	private RequestController requestController = null;
+
+	private static final int ID_DIALOG_PROFILE = 1;
 
 	// Profile picture corner rounding radius.
 	private static final int PICTURE_ROUND_RADIUS = 7;
@@ -69,8 +73,33 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
+		// Add onClick listener to "Profile" button.
+		Button profileButton = (Button) findViewById(R.id.main_button_profile);
+		profileButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// On click trigger feed activity.
+				showDialog(ID_DIALOG_PROFILE);
+			}
+		});
+
 		// Start loading user information asynchronously.
 		loadProfileInfo();
+	}
+
+	@Override
+	public final Dialog onCreateDialog(int id) {
+		return onCreateDialog(id, null);
+	}
+
+	public final Dialog onCreateDialog(int id, Bundle bundle) {
+		switch (id) {
+		case ID_DIALOG_PROFILE:
+			ProfileDialog profileDialog = new ProfileDialog(this,
+					requestController, "me");
+			return profileDialog;
+		}
+		return null;
 	}
 
 	@Override
