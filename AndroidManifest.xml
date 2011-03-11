@@ -7,7 +7,7 @@
 
     <application android:icon="@drawable/icon"
                  android:label="@string/app_name"
-                 android:name="fi.harism.facebook.GlobalState" >
+                 android:name="fi.harism.facebook.GlobalStateImpl" >
         <activity android:name="LoginActivity"
                   android:label="@string/app_name">
             <intent-filter>
