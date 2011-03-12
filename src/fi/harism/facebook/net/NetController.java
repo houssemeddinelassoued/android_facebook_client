@@ -1,8 +1,10 @@
 package fi.harism.facebook.net;
 
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.json.JSONArray;
@@ -16,6 +18,7 @@ import android.os.Bundle;
 import fi.harism.facebook.dao.DAONewsFeedItem;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.dao.DAOMessage;
+import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestQueue;
@@ -27,16 +30,18 @@ public class NetController {
 	private RequestQueue requestController = null;
 
 	private Vector<String> friendIdList = null;
-	private HashMap<String, DAONameAndPicture> profileMap = null;
+	private HashMap<String, DAONameAndPicture> nameAndPictureMap = null;
 	private HashMap<String, DAOMessage> statusMap = null;
 	private Vector<DAONewsFeedItem> newsFeedList = null;
+	private HashMap<String, DAOProfile> profileMap = null;
 
 	public NetController() {
 		facebookController = new FacebookClient();
 		imageCache = new DataCache(1024000);
 		requestController = new RequestQueue();
-		profileMap = new HashMap<String, DAONameAndPicture>();
+		nameAndPictureMap = new HashMap<String, DAONameAndPicture>();
 		statusMap = new HashMap<String, DAOMessage>();
+		profileMap = new HashMap<String, DAOProfile>();
 	}
 
 	public void authorize(Activity activity, AuthorizeObserver observer) {
@@ -90,7 +95,8 @@ public class NetController {
 				public void run() {
 					Vector<DAONameAndPicture> list = new Vector<DAONameAndPicture>();
 					for (int i = 0; i < friendIdList.size(); ++i) {
-						list.add(profileMap.get(friendIdList.elementAt(i)));
+						list.add(nameAndPictureMap.get(friendIdList
+								.elementAt(i)));
 					}
 					observer.onComplete(list);
 				}
@@ -137,7 +143,8 @@ public class NetController {
 									DAONameAndPicture profile = friendList
 											.elementAt(i);
 									friendIdList.add(profile.getId());
-									profileMap.put(profile.getId(), profile);
+									nameAndPictureMap.put(profile.getId(),
+											profile);
 								}
 
 								observer.onComplete(friendList);
@@ -160,6 +167,7 @@ public class NetController {
 
 		if (statusMap.containsKey(id)) {
 			activity.runOnUiThread(new Runnable() {
+				@Override
 				public void run() {
 					observer.onComplete(statusMap.get(id));
 				}
@@ -196,10 +204,11 @@ public class NetController {
 	public void getNameAndPicture(Activity activity, final String id,
 			final RequestObserver<DAONameAndPicture> observer) {
 
-		if (profileMap.containsKey(id)) {
+		if (nameAndPictureMap.containsKey(id)) {
 			activity.runOnUiThread(new Runnable() {
+				@Override
 				public void run() {
-					observer.onComplete(profileMap.get(id));
+					observer.onComplete(nameAndPictureMap.get(id));
 				}
 			});
 		} else {
@@ -218,6 +227,7 @@ public class NetController {
 								String picture = resp.getString("picture");
 								DAONameAndPicture r = new DAONameAndPicture(id,
 										name, picture);
+								nameAndPictureMap.put(id, r);
 								observer.onComplete(r);
 							} catch (Exception ex) {
 								observer.onError(ex);
@@ -238,6 +248,7 @@ public class NetController {
 
 		if (newsFeedList != null) {
 			activity.runOnUiThread(new Runnable() {
+				@Override
 				public void run() {
 					observer.onComplete(newsFeedList);
 				}
@@ -279,6 +290,48 @@ public class NetController {
 											createdTime));
 								}
 								observer.onComplete(newsFeedList);
+							} catch (Exception ex) {
+								observer.onError(ex);
+							}
+						}
+
+						@Override
+						public void onError(Exception ex) {
+							observer.onError(ex);
+						}
+					});
+			requestController.addRequest(r);
+		}
+	}
+	
+	public void getProfile(Activity activity, final String id, final RequestObserver<DAOProfile> observer) {
+		if (profileMap.containsKey(id)) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					observer.onComplete(profileMap.get(id));
+				}
+			});
+		} else {
+			FacebookRequest r = new FacebookRequest(activity, id, null,
+					facebookController, new FacebookRequest.Observer() {
+						@Override
+						public void onComplete(FacebookRequest facebookRequest) {
+							try {
+								JSONObject resp = facebookRequest.getResponse();
+								StringWriter out = new StringWriter();
+								
+								Iterator keys = resp.keys();
+								while (keys.hasNext()) {
+									String key = (String)keys.next();
+									String value = resp.getString(key);									
+									out.write(key + ": ");
+									out.write(value + "\n");
+								}
+								
+								DAOProfile r = new DAOProfile(out.toString());
+								profileMap.put(id, r);
+								observer.onComplete(r);
 							} catch (Exception ex) {
 								observer.onError(ex);
 							}

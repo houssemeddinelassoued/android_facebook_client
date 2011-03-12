@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.dao.DAOMessage;
+import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.net.NetController;
 import fi.harism.facebook.util.BitmapUtils;
 
@@ -88,9 +89,9 @@ public class MainActivity extends BaseActivity {
 	public final Dialog onCreateDialog(int id, Bundle bundle) {
 		switch (id) {
 		case ID_DIALOG_PROFILE:
-			//ProfileDialog profileDialog = new ProfileDialog(this,
-			//		requestController, "me");
-			//return profileDialog;
+			ProfileDialog profileDialog = new ProfileDialog(this,
+					netController, "me");
+			return profileDialog;
 		}
 		return null;
 	}
