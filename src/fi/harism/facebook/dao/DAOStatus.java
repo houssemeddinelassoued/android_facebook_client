@@ -1,10 +1,10 @@
-package fi.harism.facebook.data;
+package fi.harism.facebook.dao;
 
-public class FacebookStatus {
+public class DAOStatus {
 
 	private String message;
 	
-	public FacebookStatus(String message) {
+	public DAOStatus(String message) {
 		this.message = message;
 	}
 	

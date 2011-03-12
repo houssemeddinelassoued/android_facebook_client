@@ -1,4 +1,4 @@
-package fi.harism.facebook.data;
+package fi.harism.facebook.net;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,19 +9,23 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import fi.harism.facebook.dao.DAOFeedItem;
+import fi.harism.facebook.dao.DAONameAndPicture;
+import fi.harism.facebook.dao.DAOStatus;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestQueue;
 
-public class Controller {
+public class NetController {
 	
 	private FacebookClient facebookController = null;
 	private DataCache dataCache = null;
 	private RequestQueue requestController = null;
 
 	
-	public Controller() {
+	public NetController() {
 		facebookController = new FacebookClient();
 		dataCache = new DataCache();
 		requestController = new RequestQueue();		
@@ -35,7 +39,7 @@ public class Controller {
 		facebookController.authorizeCallback(requestCode, resultCode, data);
 	}
 	
-	public void getNameAndPicture(Activity activity, String id, final RequestObserver<FacebookNameAndPicture> observer) {
+	public void getNameAndPicture(Activity activity, String id, final RequestObserver<DAONameAndPicture> observer) {
 		Bundle b = new Bundle();
 		b.putString(FacebookClient.TOKEN, facebookController.getAccessToken());
 		b.putString("fields", "id,name,picture");
@@ -51,7 +55,7 @@ public class Controller {
 					String id = resp.getString("id");
 					String name = resp.getString("name");
 					String picture = resp.getString("picture");
-					FacebookNameAndPicture r = new FacebookNameAndPicture(id, name, picture);					
+					DAONameAndPicture r = new DAONameAndPicture(id, name, picture);					
 					observer.onComplete(r);
 				}
 				catch (Exception ex) {
@@ -62,7 +66,7 @@ public class Controller {
 		requestController.addRequest(r);		
 	}
 	
-	public void getStatus(Activity activity, String id, final RequestObserver<FacebookStatus> observer) {
+	public void getStatus(Activity activity, String id, final RequestObserver<DAOStatus> observer) {
 		Bundle b = new Bundle();
 		b.putString("limit", "1");
 		b.putString("fields", "message");
@@ -76,7 +80,7 @@ public class Controller {
 				try {
 					JSONObject resp = facebookRequest.getResponse();
 					String message = resp.getJSONArray("data").getJSONObject(0).getString("message");
-					FacebookStatus r = new FacebookStatus(message);
+					DAOStatus r = new DAOStatus(message);
 					observer.onComplete(r);
 				}
 				catch (Exception ex) {
@@ -87,7 +91,7 @@ public class Controller {
 		requestController.addRequest(r);		
 	}
 	
-	public void getFriendList(Activity activity, final RequestObserver<Vector<FacebookNameAndPicture>> observer) {
+	public void getFriendList(Activity activity, final RequestObserver<Vector<DAONameAndPicture>> observer) {
 		Bundle b = new Bundle();
 		b.putString("fields", "id,name,picture");
 		FacebookRequest r = new FacebookRequest(activity, "me/friends", b, facebookController, new FacebookRequest.Observer() {
@@ -100,19 +104,19 @@ public class Controller {
 				try {
 					JSONArray friendArray = facebookRequest.getResponse().getJSONArray("data");
 					
-					Vector<FacebookNameAndPicture> friendList = new Vector<FacebookNameAndPicture>();
+					Vector<DAONameAndPicture> friendList = new Vector<DAONameAndPicture>();
 					for (int i = 0; i < friendArray.length(); ++i) {
 						JSONObject f = friendArray.getJSONObject(i);
 						String id = f.getString("id");
 						String name = f.getString("name");
 						String picture = f.getString("picture");
-						friendList.add(new FacebookNameAndPicture(id, name, picture));
+						friendList.add(new DAONameAndPicture(id, name, picture));
 					}
 
 					// Comparator for sorting friend JSONObjects by name.
-					Comparator<FacebookNameAndPicture> comparator = new Comparator<FacebookNameAndPicture>() {
+					Comparator<DAONameAndPicture> comparator = new Comparator<DAONameAndPicture>() {
 						@Override
-						public int compare(FacebookNameAndPicture arg0, FacebookNameAndPicture arg1) {
+						public int compare(DAONameAndPicture arg0, DAONameAndPicture arg1) {
 							String arg0Name = arg0.getName();
 							String arg1Name = arg1.getName();
 							return arg0Name.compareToIgnoreCase(arg1Name);
@@ -137,7 +141,7 @@ public class Controller {
 		requestController.addRequest(r);		
 	}
 	
-	public void getNewsFeed(Activity activity, final RequestObserver<Vector<FacebookFeedItem>> observer) {
+	public void getNewsFeed(Activity activity, final RequestObserver<Vector<DAOFeedItem>> observer) {
 		Bundle b = new Bundle();
 		b.putString("fields", "id,from,message,picture,name,description,created_time");
 		FacebookRequest r = new FacebookRequest(activity, "me/home", b, facebookController, new FacebookRequest.Observer() {
@@ -149,7 +153,7 @@ public class Controller {
 			public void onComplete(FacebookRequest facebookRequest) {
 				try {
 					JSONArray feedItems = facebookRequest.getResponse().getJSONArray("data");
-					Vector<FacebookFeedItem> feedList = new Vector<FacebookFeedItem>();
+					Vector<DAOFeedItem> feedList = new Vector<DAOFeedItem>();
 					for (int i=0; i<feedItems.length(); ++i) {
 						JSONObject item = feedItems.getJSONObject(i);
 						String id = item.getString("id");
@@ -160,7 +164,7 @@ public class Controller {
 						String name = item.optString("name", null);
 						String description = item.optString("description", null);
 						String createdTime = item.optString("created_time", null);
-						feedList.add(new FacebookFeedItem(id, fromId, fromName, message, picture, name, description, createdTime));
+						feedList.add(new DAOFeedItem(id, fromId, fromName, message, picture, name, description, createdTime));
 					}
 					observer.onComplete(feedList);
 				}
@@ -172,7 +176,7 @@ public class Controller {
 		requestController.addRequest(r);		
 	}
 	
-	public void getBitmap(Activity activity, final String id, String url, final RequestObserver<FacebookBitmap> observer) {
+	public void getBitmap(Activity activity, String url, final RequestObserver<Bitmap> observer) {
 		ImageRequest r = new ImageRequest(activity, url, new ImageRequest.Observer() {
 			
 			@Override
@@ -182,8 +186,7 @@ public class Controller {
 			
 			@Override
 			public void onComplete(ImageRequest imageRequest) {
-				FacebookBitmap r = new FacebookBitmap(id, imageRequest.getBitmap());
-				observer.onComplete(r);
+				observer.onComplete(imageRequest.getBitmap());
 			}
 		});
 		requestController.addRequest(r);

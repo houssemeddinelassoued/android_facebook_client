@@ -1,6 +1,6 @@
-package fi.harism.facebook.data;
+package fi.harism.facebook.dao;
 
-public class FacebookFeedItem {
+public class DAOFeedItem {
 	
 	private String id;
 	private String fromId;
@@ -11,7 +11,7 @@ public class FacebookFeedItem {
 	private String description;
 	private String createdTime;
 	
-	public FacebookFeedItem(String id, String fromId, String fromName, String message, String picture, String name, String description, String createdTime) {
+	public DAOFeedItem(String id, String fromId, String fromName, String message, String picture, String name, String description, String createdTime) {
 		this.id = id;
 		this.fromId = fromId;
 		this.fromName = fromName;

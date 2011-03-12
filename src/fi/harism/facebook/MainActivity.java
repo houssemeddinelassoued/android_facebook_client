@@ -10,12 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import fi.harism.facebook.data.Controller;
-import fi.harism.facebook.data.FacebookBitmap;
-import fi.harism.facebook.data.FacebookClient;
-import fi.harism.facebook.data.FacebookNameAndPicture;
-import fi.harism.facebook.data.FacebookStatus;
+import fi.harism.facebook.dao.DAONameAndPicture;
+import fi.harism.facebook.dao.DAOStatus;
 import fi.harism.facebook.dialog.ProfileDialog;
+import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.net.FacebookClient;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestQueue;
@@ -34,7 +33,7 @@ public class MainActivity extends BaseActivity {
 	// RequestController instance for handling asynchronous requests.
 	//private RequestController requestController = null;
 	
-	private Controller controller = null;
+	private NetController controller = null;
 
 	private static final int ID_DIALOG_PROFILE = 1;
 
@@ -146,7 +145,7 @@ public class MainActivity extends BaseActivity {
 	 */
 	private final void loadProfilePicture(String pictureUrl) {
 		PictureObserver observer = new PictureObserver();
-		controller.getBitmap(this, null, pictureUrl, observer);
+		controller.getBitmap(this, pictureUrl, observer);
 		
 		//ImageRequest request = requestController.createImageRequest(pictureUrl,
 		//		observer);
@@ -157,9 +156,9 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
-	private final class FacebookMeObserver implements Controller.RequestObserver<FacebookNameAndPicture> {
+	private final class FacebookMeObserver implements NetController.RequestObserver<DAONameAndPicture> {
 		@Override
-		public void onComplete(FacebookNameAndPicture resp) {
+		public void onComplete(DAONameAndPicture resp) {
 			TextView tv = (TextView) findViewById(R.id.main_user_name);
 			tv.setText(resp.getName());
 			loadProfilePicture(resp.getPicture());
@@ -175,9 +174,9 @@ public class MainActivity extends BaseActivity {
 	 * Private FacebookRequest observer for handling "me/statuses" request.
 	 */
 	private final class FacebookStatusObserver implements
-			Controller.RequestObserver<FacebookStatus> {
+			NetController.RequestObserver<DAOStatus> {
 		@Override
-		public void onComplete(FacebookStatus response) {
+		public void onComplete(DAOStatus response) {
 			TextView tv = (TextView) findViewById(R.id.main_user_status);
 			tv.setText(response.getMessage());
 		}
@@ -191,12 +190,11 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements Controller.RequestObserver<FacebookBitmap> {
+	private final class PictureObserver implements NetController.RequestObserver<Bitmap> {
 		@Override
-		public void onComplete(FacebookBitmap bitmap) {
+		public void onComplete(Bitmap bitmap) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-			Bitmap picture = bitmap.getBitmap();
-			iv.setImageBitmap(BitmapUtils.roundBitmap(picture,
+			iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
 					PICTURE_ROUND_RADIUS));
 		}
 

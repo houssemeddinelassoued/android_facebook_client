@@ -1,4 +1,4 @@
-package fi.harism.facebook.data;
+package fi.harism.facebook.net;
 
 import java.util.Vector;
 

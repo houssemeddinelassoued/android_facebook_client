@@ -11,10 +11,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.data.Controller;
-import fi.harism.facebook.data.FacebookBitmap;
-import fi.harism.facebook.data.FacebookFeedItem;
-import fi.harism.facebook.data.FacebookNameAndPicture;
+import fi.harism.facebook.dao.DAOFeedItem;
+import fi.harism.facebook.dao.DAONameAndPicture;
+import fi.harism.facebook.net.NetController;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.Request;
@@ -28,7 +27,7 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class FeedActivity extends BaseActivity {
 
-	private Controller controller = null;
+	private NetController controller = null;
 	// Local instance of RequestController.
 	//private RequestController requestController;
 	// Default picture used as sender's profile picture.
@@ -86,8 +85,8 @@ public class FeedActivity extends BaseActivity {
 		//requestController.resume();
 	}
 	
-	private void loadFromPicture(String itemId, FacebookNameAndPicture resp) {
-		controller.getBitmap(this, itemId, resp.getPicture(), new FromPictureObserver());
+	private void loadFromPicture(String itemId, DAONameAndPicture resp) {
+		controller.getBitmap(this, resp.getPicture(), new FromPictureObserver(itemId));
 	}
 
 	/**
@@ -96,7 +95,7 @@ public class FeedActivity extends BaseActivity {
 	 * @param feedItemObject
 	 *            Feed item JSONObject to be added.
 	 */
-	private void createFeedItem(FacebookFeedItem feedItem) {
+	private void createFeedItem(DAOFeedItem feedItem) {
 		String itemId = feedItem.getId();
 		
 		// Create default Feed Item view.
@@ -174,7 +173,7 @@ public class FeedActivity extends BaseActivity {
 		controller.getNameAndPicture(this, fromId, new FacebookFromPictureObserver(itemId));
 		
 		if (feedItem.getPicture() != null) {
-			controller.getBitmap(this, itemId, feedItem.getPicture(), new ItemPictureObserver());
+			controller.getBitmap(this, feedItem.getPicture(), new ItemPictureObserver(itemId));
 		}
 		
 		/*
@@ -225,10 +224,10 @@ public class FeedActivity extends BaseActivity {
 	 * @author harism
 	 */
 	private final class FacebookFeedObserver implements
-			Controller.RequestObserver<Vector<FacebookFeedItem>> {
+			NetController.RequestObserver<Vector<DAOFeedItem>> {
 
 		@Override
-		public void onComplete(Vector<FacebookFeedItem> resp) {
+		public void onComplete(Vector<DAOFeedItem> resp) {
 			// First hide progress dialog.
 			hideProgressDialog();
 			
@@ -269,7 +268,7 @@ public class FeedActivity extends BaseActivity {
 	 * @author harism
 	 */
 	private final class FacebookFromPictureObserver implements
-			Controller.RequestObserver<FacebookNameAndPicture> {
+			NetController.RequestObserver<DAONameAndPicture> {
 		
 		private String itemId = null;
 		
@@ -278,7 +277,7 @@ public class FeedActivity extends BaseActivity {
 		}
 
 		@Override
-		public void onComplete(FacebookNameAndPicture resp) {
+		public void onComplete(DAONameAndPicture resp) {
 			
 			loadFromPicture(itemId, resp);
 			
@@ -311,12 +310,16 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements Controller.RequestObserver<FacebookBitmap> {
+	private final class FromPictureObserver implements NetController.RequestObserver<Bitmap> {
+		
+		private String itemId = null;
+		
+		public FromPictureObserver(String itemId) {
+			this.itemId = itemId;
+		}
 
 		@Override
-		public void onComplete(FacebookBitmap resp) {
-			// Get itemId from request.
-			String itemId = resp.getId();
+		public void onComplete(Bitmap bitmap) {
 			// Get feed item list view.
 			View itemList = findViewById(R.id.feed_list);
 			// Find our item view using itemId.
@@ -326,7 +329,6 @@ public class FeedActivity extends BaseActivity {
 				// Set image to feed item view.
 				ImageView iv = (ImageView) itemView
 						.findViewById(R.id.feed_item_from_image);
-				Bitmap bitmap = resp.getBitmap();
 				iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
 						PICTURE_ROUND_RADIUS));
 			}
@@ -343,12 +345,16 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class ItemPictureObserver implements Controller.RequestObserver<FacebookBitmap> {
+	private final class ItemPictureObserver implements NetController.RequestObserver<Bitmap> {
+		
+		private String itemId = null;
+		
+		public ItemPictureObserver(String itemId) {
+			this.itemId = itemId;
+		}
 
 		@Override
-		public void onComplete(FacebookBitmap resp) {
-			// Get itemId from request.
-			String itemId = resp.getId();
+		public void onComplete(Bitmap bitmap) {
 			// Get feed item list view.
 			View itemList = findViewById(R.id.feed_list);
 			// Find feed item using itemId.
@@ -358,7 +364,7 @@ public class FeedActivity extends BaseActivity {
 				// Set image to feed item.
 				ImageView iv = (ImageView) itemView
 						.findViewById(R.id.feed_item_picture_image);
-				iv.setImageBitmap(resp.getBitmap());
+				iv.setImageBitmap(bitmap);
 				iv.setVisibility(View.VISIBLE);
 			}
 		}

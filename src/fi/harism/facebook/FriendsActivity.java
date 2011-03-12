@@ -16,9 +16,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.data.Controller;
-import fi.harism.facebook.data.FacebookBitmap;
-import fi.harism.facebook.data.FacebookNameAndPicture;
+import fi.harism.facebook.dao.DAONameAndPicture;
+import fi.harism.facebook.net.NetController;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestQueue;
@@ -35,7 +34,7 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	private Controller controller = null;
+	private NetController controller = null;
 	// RequestController instance.
 	//private RequestController requestController;
 	// Default profile picture.
@@ -157,37 +156,6 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 * Method for handling completed ImageRequests. First it gets user_id from
-	 * request Bundle and then tries to locate corresponding friend item View.
-	 * If one is found it sets picture of that friend item view to one received.
-	 * 
-	 * @param imageRequest
-	 *            Successfully completed ImageRequest object.
-	 */
-	private final void onPictureReceived(FacebookBitmap resp) {
-		// Get stored user id from ImageRequest.
-		//Bundle bundle = imageRequest.getBundle();
-		String userId = resp.getId();
-
-		// Search for corresponding friend item View.
-		View friendItemsView = findViewById(R.id.friends_list);		
-		View friendView = friendItemsView.findViewWithTag(userId);
-
-		// If we found one.
-		if (friendView != null) {
-			// Try to find picture ImageView.
-			ImageView imageView = (ImageView) friendView
-					.findViewById(R.id.friends_item_picture);
-			// Bitmap we received.
-			Bitmap picture = resp.getBitmap();
-			// Round its corners.
-			picture = BitmapUtils.roundBitmap(picture, PICTURE_ROUND_RADIUS);
-			// Update ImageView's bitmap with one received.
-			imageView.setImageBitmap(picture);
-		}
-	}
-
-	/**
 	 * Method for processing friends array received from Facebook Graph API.
 	 * First array is sorted, then corresponding friend items are added to
 	 * scrollable view. This method triggers also asynchronous profile picture
@@ -196,12 +164,12 @@ public class FriendsActivity extends BaseActivity {
 	 * @param friendArray
 	 *            JSONArray containing friends list.
 	 */
-	private final void processFriendsList(Vector<FacebookNameAndPicture> friendList) {
+	private final void processFriendsList(Vector<DAONameAndPicture> friendList) {
 		// LinearLayout which is inside ScrollView.
 		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 		
 		for (int i = 0; i < friendList.size(); ++i) {
-			FacebookNameAndPicture friend = friendList.elementAt(i);
+			DAONameAndPicture friend = friendList.elementAt(i);
 
 			String userId = friend.getId();
 			String name = friend.getName();
@@ -212,7 +180,7 @@ public class FriendsActivity extends BaseActivity {
 			// Add friend item view to scrollable list.
 			scrollView.addView(friendItemView);
 			
-			controller.getBitmap(this, userId, pictureUrl, new PictureObserver());
+			controller.getBitmap(this, pictureUrl, new PictureObserver(userId));
 
 			// Create profile picture request.
 			//ImageRequest imageRequest = requestController
@@ -266,9 +234,9 @@ public class FriendsActivity extends BaseActivity {
 	 * Observer for handling "me/friends" request.
 	 */
 	private final class FacebookFriendsObserver implements
-			Controller.RequestObserver<Vector<FacebookNameAndPicture>> {
+			NetController.RequestObserver<Vector<DAONameAndPicture>> {
 		@Override
-		public void onComplete(Vector<FacebookNameAndPicture> resp) {
+		public void onComplete(Vector<DAONameAndPicture> resp) {
 			// First hide progress dialog.
 			hideProgressDialog();
 			try {
@@ -291,11 +259,30 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements Controller.RequestObserver<FacebookBitmap> {
+	private final class PictureObserver implements NetController.RequestObserver<Bitmap> {
+		
+		private String userId;
+		
+		public PictureObserver(String userId) {
+			this.userId = userId;
+		}
+		
 		@Override
-		public void onComplete(FacebookBitmap resp) {
-			// Handle imageRequest to appropriate method.
-			onPictureReceived(resp);
+		public void onComplete(Bitmap bitmap) {
+			// Search for corresponding friend item View.
+			View friendItemsView = findViewById(R.id.friends_list);		
+			View friendView = friendItemsView.findViewWithTag(userId);
+
+			// If we found one.
+			if (friendView != null) {
+				// Try to find picture ImageView.
+				ImageView imageView = (ImageView) friendView
+						.findViewById(R.id.friends_item_picture);
+				// Round its corners.
+				bitmap = BitmapUtils.roundBitmap(bitmap, PICTURE_ROUND_RADIUS);
+				// Update ImageView's bitmap with one received.
+				imageView.setImageBitmap(bitmap);
+			}
 		}
 
 		@Override

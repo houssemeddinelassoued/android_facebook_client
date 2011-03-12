@@ -1,4 +1,4 @@
-package fi.harism.facebook.data;
+package fi.harism.facebook.net;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,7 +8,7 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
 
-import fi.harism.facebook.data.Controller.AuthorizeObserver;
+import fi.harism.facebook.net.NetController.AuthorizeObserver;
 
 public class FacebookClient {
 
