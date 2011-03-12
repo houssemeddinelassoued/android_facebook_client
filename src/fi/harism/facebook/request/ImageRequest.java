@@ -20,7 +20,9 @@ public class ImageRequest extends Request {
 	// Observer for ImageRequest.
 	private ImageRequest.Observer observer;
 	// Bitmap we loaded.
-	private Bitmap bitmap;
+	private Bitmap bitmap = null;
+	// Bitmap data.
+	private byte[] bitmapData = null;
 
 	/**
 	 * Constructor for ImageRequest.
@@ -37,7 +39,6 @@ public class ImageRequest extends Request {
 		super(activity);
 		this.url = url;
 		this.observer = observer;
-		bitmap = null;
 	}
 
 	/**
@@ -49,39 +50,33 @@ public class ImageRequest extends Request {
 	public Bitmap getBitmap() {
 		return bitmap;
 	}
+	
+	public byte[] getBitmapData() {
+		return bitmapData;
+	}
 
 	@Override
 	public void runOnThread() throws Exception {
-		//DataCache dataCache = activity.getGlobalState().getDataCache();
-		// Always check dataCache for cached image.
-		//if (dataCache.containsKey(url)) {
-		//	byte bitmapData[] = dataCache.getData(url);
-		//	bitmap = BitmapFactory.decodeByteArray(bitmapData, 0,
-		//			bitmapData.length);
-		//}
-		// No cached data found.
-		//else {
-			try {
-				// Open InputStream for given url.
-				URL u = new URL(url);
-				InputStream is = u.openStream();
-				ByteArrayOutputStream imageBuffer = new ByteArrayOutputStream();
+		try {
+			// Open InputStream for given url.
+			URL u = new URL(url);
+			InputStream is = u.openStream();
+			ByteArrayOutputStream imageBuffer = new ByteArrayOutputStream();
 
-				// Read actual data from InputStream.
-				int readLength;
-				byte buffer[] = new byte[1024];
-				while ((readLength = is.read(buffer)) != -1) {
-					imageBuffer.write(buffer, 0, readLength);
-				}
-
-				buffer = imageBuffer.toByteArray();
-				bitmap = BitmapFactory
-						.decodeByteArray(buffer, 0, buffer.length);
-			} catch (Exception ex) {
-				observer.onError(ex);
-				throw ex;
+			// Read actual data from InputStream.
+			int readLength;
+			byte buffer[] = new byte[1024];
+			while ((readLength = is.read(buffer)) != -1) {
+				imageBuffer.write(buffer, 0, readLength);
 			}
-		//}
+
+			bitmapData = imageBuffer.toByteArray();
+			bitmap = BitmapFactory
+					.decodeByteArray(bitmapData, 0, bitmapData.length);
+		} catch (Exception ex) {
+			observer.onError(ex);
+			throw ex;
+		}
 	}
 
 	@Override

@@ -55,38 +55,37 @@ public final class RequestQueue {
 			requestList.notify();
 		}
 	}
-	
+
 	public final void setPaused(Activity activity, boolean paused) {
 		if (paused == true) {
 			if (!pausedList.contains(activity)) {
 				pausedList.add(activity);
 			}
-		}
-		else {
+		} else {
 			pausedList.remove(activity);
 		}
 		synchronized (requestList) {
 			requestList.notify();
 		}
 	}
-	
+
 	public final void removeRequests(Activity activity) {
-		for (int i=0; i<requestList.size();) {
-			Request r = requestList.get(i);
-			if (r.getActivity() == activity) {
-				requestList.remove(i);
-			}
-			else {
-				++i;
-			}
-		}
-		// If there is a current Request, stop its execution at once.
-		if (currentRequest != null && currentRequest.getActivity() == activity) {
-			currentRequest.stop();
-			currentRequest = null;
-		}
-		pausedList.remove(activity);
 		synchronized (requestList) {
+			for (int i = 0; i < requestList.size();) {
+				Request r = requestList.get(i);
+				if (r.getActivity() == activity) {
+					requestList.remove(i);
+				} else {
+					++i;
+				}
+			}
+			// If there is a current Request, stop its execution at once.
+			if (currentRequest != null
+					&& currentRequest.getActivity() == activity) {
+				currentRequest.stop();
+				currentRequest = null;
+			}
+			pausedList.remove(activity);
 			requestList.notify();
 		}
 	}
@@ -97,13 +96,13 @@ public final class RequestQueue {
 	 */
 	public final void destroy() {
 		workerThread.destroyWorker();
+		workerThread = null;
 		// Send notification in case run() method is in wait state.
 		synchronized (requestList) {
 			requestList.notify();
+			requestList.clear();
+			requestList = null;
 		}
-		workerThread = null;
-		requestList.clear();
-		requestList = null;
 		// If there is a current Request, stop its execution at once.
 		if (currentRequest != null) {
 			currentRequest.stop();
@@ -146,14 +145,14 @@ public final class RequestQueue {
 					// If keepRunning is true there should be a request
 					// available for processing.
 					if (keepRunning) {
-						for (int i=0; i<requestList.size(); ++i) {
+						for (int i = 0; i < requestList.size(); ++i) {
 							Request r = requestList.get(i);
 							if (!pausedList.contains(r.getActivity())) {
 								currentRequest = requestList.remove(i);
 								break;
 							}
 						}
-						//currentRequest = requestList.remove(0);
+						// currentRequest = requestList.remove(0);
 					}
 				}
 				// Lets check keepRunning again, and if it's set currentRequest
