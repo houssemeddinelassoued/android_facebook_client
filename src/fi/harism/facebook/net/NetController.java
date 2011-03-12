@@ -21,13 +21,13 @@ import fi.harism.facebook.request.RequestQueue;
 public class NetController {
 	
 	private FacebookClient facebookController = null;
-	private DataCache dataCache = null;
+	private DataCache imageCache = null;
 	private RequestQueue requestController = null;
 
 	
 	public NetController() {
 		facebookController = new FacebookClient();
-		dataCache = new DataCache();
+		imageCache = new DataCache(1024000);
 		requestController = new RequestQueue();		
 	}
 	
@@ -124,14 +124,8 @@ public class NetController {
 					};
 
 					// Sort friends Vector.
-					Collections.sort(friendList, comparator);
-					
+					Collections.sort(friendList, comparator);					
 					observer.onComplete(friendList);
-					
-					//JSONObject resp = facebookRequest.getResponse();
-					//String message = resp.getJSONArray("data").getJSONObject(0).getString("message");
-					//FacebookStatus r = new FacebookStatus(message);
-					//observer.onComplete(r);
 				}
 				catch (Exception ex) {
 					observer.onError(ex);

@@ -15,13 +15,14 @@ public class DataCache {
 	// Current size of cache;
 	private int cacheSize;
 	// Maximum size of cache in bytes.
-	private static final int CACHE_MAX_SIZE = 1024000;
+	private int cacheMaxSize;
 
 	/**
 	 * Default constructor.
 	 */
-	public DataCache() {
+	public DataCache(int cacheMaxSize) {
 		cacheList = new Vector<CacheItem>();
+		this.cacheMaxSize = cacheMaxSize;
 		cacheSize = 0;
 	}
 
@@ -67,7 +68,7 @@ public class DataCache {
 		// First check if given key exists already.
 		CacheItem cacheItem = findCacheItem(key);
 		// If there is room to store data at all.
-		if (data.length <= CACHE_MAX_SIZE) {
+		if (data.length <= cacheMaxSize) {
 			// If CacheItem was not found.
 			if (cacheItem == null) {
 				// Create new CacheItem.
@@ -75,7 +76,7 @@ public class DataCache {
 				cacheItem.key = key;
 				cacheItem.data = data;
 				// Remove CacheItems until there is room for new CacheItem.
-				while (cacheSize + data.length > CACHE_MAX_SIZE) {
+				while (cacheSize + data.length > cacheMaxSize) {
 					// Update cacheSize.
 					cacheSize -= cacheList.get(0).data.length;
 					// Remove CacheItem from cacheList.
@@ -92,7 +93,7 @@ public class DataCache {
 				cacheList.remove(cacheItem);
 				cacheList.add(cacheItem);
 				// Remove CacheItems until there is room for updated data size.
-				while (cacheSize + data.length - cacheItem.data.length > CACHE_MAX_SIZE) {
+				while (cacheSize + data.length - cacheItem.data.length > cacheMaxSize) {
 					// Update cacheSize and remove 'oldest' CacheItem.
 					cacheSize -= cacheList.get(0).data.length;
 					cacheList.remove(0);
