@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAOFeedItem;
+import fi.harism.facebook.dao.DAONewsFeedItem;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.net.NetController;
 import fi.harism.facebook.util.BitmapUtils;
@@ -40,6 +40,8 @@ public class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		netController = getGlobalState().getNetController();
+		
+		showProgressDialog();
 		netController.getNewsFeed(this, new FacebookFeedObserver());
 
 	}
@@ -68,7 +70,7 @@ public class FeedActivity extends BaseActivity {
 	 * @param feedItemObject
 	 *            Feed item JSONObject to be added.
 	 */
-	private void createFeedItem(DAOFeedItem feedItem) {
+	private void createFeedItem(DAONewsFeedItem feedItem) {
 		String itemId = feedItem.getId();
 
 		// Create default Feed Item view.
@@ -157,10 +159,10 @@ public class FeedActivity extends BaseActivity {
 	 * @author harism
 	 */
 	private final class FacebookFeedObserver implements
-			NetController.RequestObserver<Vector<DAOFeedItem>> {
+			NetController.RequestObserver<Vector<DAONewsFeedItem>> {
 
 		@Override
-		public void onComplete(Vector<DAOFeedItem> resp) {
+		public void onComplete(Vector<DAONewsFeedItem> resp) {
 			// First hide progress dialog.
 			hideProgressDialog();
 

@@ -1,8 +1,9 @@
 package fi.harism.facebook.dao;
 
-public class DAOFeedItem {
+public class DAONewsFeedItem {
 	
 	private String id;
+	private String type;
 	private String fromId;
 	private String fromName;
 	private String message;
@@ -11,8 +12,9 @@ public class DAOFeedItem {
 	private String description;
 	private String createdTime;
 	
-	public DAOFeedItem(String id, String fromId, String fromName, String message, String picture, String name, String description, String createdTime) {
+	public DAONewsFeedItem(String id, String type, String fromId, String fromName, String message, String picture, String name, String description, String createdTime) {
 		this.id = id;
+		this.type = type;
 		this.fromId = fromId;
 		this.fromName = fromName;
 		this.message = message;
@@ -24,6 +26,10 @@ public class DAOFeedItem {
 	
 	public String getId() {
 		return id;
+	}
+	
+	public String getType() {
+		return type;
 	}
 	
 	public String getFromId() {

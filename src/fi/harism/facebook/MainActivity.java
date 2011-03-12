@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAONameAndPicture;
-import fi.harism.facebook.dao.DAOStatus;
+import fi.harism.facebook.dao.DAOMessage;
 import fi.harism.facebook.net.NetController;
 import fi.harism.facebook.util.BitmapUtils;
 
@@ -143,9 +143,9 @@ public class MainActivity extends BaseActivity {
 	 * Private FacebookRequest observer for handling "me/statuses" request.
 	 */
 	private final class FacebookStatusObserver implements
-			NetController.RequestObserver<DAOStatus> {
+			NetController.RequestObserver<DAOMessage> {
 		@Override
-		public void onComplete(DAOStatus response) {
+		public void onComplete(DAOMessage response) {
 			TextView tv = (TextView) findViewById(R.id.main_user_status);
 			tv.setText(response.getMessage());
 		}
