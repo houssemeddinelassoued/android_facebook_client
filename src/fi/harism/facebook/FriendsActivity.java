@@ -1,12 +1,8 @@
 package fi.harism.facebook;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Vector;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,9 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.net.NetController;
-import fi.harism.facebook.request.FacebookRequest;
-import fi.harism.facebook.request.ImageRequest;
-import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
@@ -34,9 +27,8 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	private NetController controller = null;
-	// RequestController instance.
-	//private RequestController requestController;
+	// NetController instance.
+	private NetController netController = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 	// Radius value for rounding profile images.
@@ -47,8 +39,7 @@ public class FriendsActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.friends);
 
-		//requestController = new RequestController(this);
-		controller = getGlobalState().getController();
+		netController = getGlobalState().getNetController();
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -61,28 +52,27 @@ public class FriendsActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		// Show progress dialog.
-		//showProgressDialog();
+		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		getFriendsList();
+		netController.getFriendList(this, new FacebookFriendListObserver(this));
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		//requestController.destroy();
-		//requestController = null;
+		netController.removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		//requestController.pause();
+		netController.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		//requestController.resume();
+		netController.setPaused(this, false);
 	}
 
 	/**
@@ -136,69 +126,6 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 * Triggers a Facebook "me/friends" request.
-	 */
-	private final void getFriendsList() {
-		
-		controller.getFriendList(this, new FacebookFriendsObserver());
-		
-		// Facebook request parameters.
-		//Bundle parameters = new Bundle();
-		// We are only interested in id and name.
-		//parameters.putString("fields", "id,name,picture");
-		// Observer for receiving response asynchronously.
-		//FacebookRequest.Observer observer = new FacebookMeFriendsObserver();
-		// Create actual request.
-		//FacebookRequest facebookRequest = requestController
-		//		.createFacebookRequest("me/friends", parameters, observer);
-		// Add request to processing queue.
-		//requestController.addRequest(facebookRequest);
-	}
-
-	/**
-	 * Method for processing friends array received from Facebook Graph API.
-	 * First array is sorted, then corresponding friend items are added to
-	 * scrollable view. This method triggers also asynchronous profile picture
-	 * loading.
-	 * 
-	 * @param friendArray
-	 *            JSONArray containing friends list.
-	 */
-	private final void processFriendsList(Vector<DAONameAndPicture> friendList) {
-		// LinearLayout which is inside ScrollView.
-		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
-		
-		for (int i = 0; i < friendList.size(); ++i) {
-			DAONameAndPicture friend = friendList.elementAt(i);
-
-			String userId = friend.getId();
-			String name = friend.getName();
-			String pictureUrl = friend.getPicture();
-
-			// Create default friend item view.
-			View friendItemView = createFriendItem(userId, name);
-			// Add friend item view to scrollable list.
-			scrollView.addView(friendItemView);
-			
-			controller.getBitmap(this, pictureUrl, new PictureObserver(userId));
-
-			// Create profile picture request.
-			//ImageRequest imageRequest = requestController
-			//		.createImageRequest(pictureUrl, pictureObserver);
-			
-			// Add user id to ImageRequest, we are using it to update
-			// corresponding ImageView once image is received.
-			//Bundle bundle = new Bundle();
-			//bundle.putString("id", userId);
-			//imageRequest.setBundle(bundle);
-			//imageRequest.setCacheBitmap(true);
-
-			// Add profile picture request to queue.
-			//requestController.addRequest(imageRequest);
-		}
-	}
-
-	/**
 	 * Toggles friend item View's visibility according to given search text.
 	 * Method tries to find given search text within the name TextView found
 	 * inside given friendItem.
@@ -233,19 +160,37 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling "me/friends" request.
 	 */
-	private final class FacebookFriendsObserver implements
+	private final class FacebookFriendListObserver implements
 			NetController.RequestObserver<Vector<DAONameAndPicture>> {
+
+		private Activity activity = null;
+
+		public FacebookFriendListObserver(Activity activity) {
+			this.activity = activity;
+		}
+
 		@Override
-		public void onComplete(Vector<DAONameAndPicture> resp) {
+		public void onComplete(Vector<DAONameAndPicture> friendList) {
 			// First hide progress dialog.
 			hideProgressDialog();
-			try {
-				// Friend array is found under name "data"
-				//JSONArray friendArray = facebookRequest.getResponse()
-				//		.getJSONArray("data");
-				// Handle friendArray processing to appropriate method.
-				processFriendsList(resp);
-			} catch (Exception ex) {
+
+			// LinearLayout which is inside ScrollView.
+			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
+
+			for (int i = 0; i < friendList.size(); ++i) {
+				DAONameAndPicture friend = friendList.elementAt(i);
+
+				String userId = friend.getId();
+				String name = friend.getName();
+				String pictureUrl = friend.getPicture();
+
+				// Create default friend item view.
+				View friendItemView = createFriendItem(userId, name);
+				// Add friend item view to scrollable list.
+				scrollView.addView(friendItemView);
+
+				netController.getBitmap(activity, pictureUrl,
+						new PictureObserver(userId));
 			}
 		}
 
@@ -259,18 +204,19 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements NetController.RequestObserver<Bitmap> {
-		
+	private final class PictureObserver implements
+			NetController.RequestObserver<Bitmap> {
+
 		private String userId;
-		
+
 		public PictureObserver(String userId) {
 			this.userId = userId;
 		}
-		
+
 		@Override
 		public void onComplete(Bitmap bitmap) {
 			// Search for corresponding friend item View.
-			View friendItemsView = findViewById(R.id.friends_list);		
+			View friendItemsView = findViewById(R.id.friends_list);
 			View friendView = friendItemsView.findViewWithTag(userId);
 
 			// If we found one.

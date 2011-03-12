@@ -1,7 +1,6 @@
 package fi.harism.facebook;
 
-import org.json.JSONObject;
-
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,12 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.dao.DAOStatus;
-import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.net.NetController;
-import fi.harism.facebook.net.FacebookClient;
-import fi.harism.facebook.request.FacebookRequest;
-import fi.harism.facebook.request.ImageRequest;
-import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
@@ -28,12 +22,8 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class MainActivity extends BaseActivity {
 
-	// Global instance of FacebookController
-	//private FacebookController facebookController = null;
-	// RequestController instance for handling asynchronous requests.
-	//private RequestController requestController = null;
-	
-	private NetController controller = null;
+	// Global instance of NetController.
+	private NetController netController = null;
 
 	private static final int ID_DIALOG_PROFILE = 1;
 
@@ -45,12 +35,7 @@ public class MainActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
-		controller = getGlobalState().getController();
-
-		// Get global instance of FacebookController.
-		//facebookController = getGlobalState().getFacebookController();
-		// Create RequestController for this Activity.
-		//requestController = new RequestController(this);
+		netController = getGlobalState().getNetController();
 
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
@@ -91,7 +76,8 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Start loading user information asynchronously.
-		loadProfileInfo();
+		netController.getNameAndPicture(this, "me", new FacebookMeObserver(this));
+		netController.getLatestStatus(this, "me", new FacebookStatusObserver());
 	}
 
 	@Override
@@ -112,56 +98,39 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		controller.removeRequests(this);
-		controller = null;
+		netController.removeRequests(this);
+		netController = null;
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		controller.setPaused(this, true);
+		netController.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		controller.setPaused(this, false);
-	}
-
-	/**
-	 * Starts to load currently logged in user information.
-	 */
-	private final void loadProfileInfo() {
-		controller.getNameAndPicture(this, "me", new FacebookMeObserver());
-		controller.getStatus(this, "me", new FacebookStatusObserver());
-	}
-
-	/**
-	 * Starts loading profile picture from given URL. Once picture is loaded it
-	 * is being set to this Activity's profile picture view.
-	 * 
-	 * @param pictureUrl
-	 *            URL for profile picture.
-	 */
-	private final void loadProfilePicture(String pictureUrl) {
-		PictureObserver observer = new PictureObserver();
-		controller.getBitmap(this, pictureUrl, observer);
-		
-		//ImageRequest request = requestController.createImageRequest(pictureUrl,
-		//		observer);
-		//request.setCacheBitmap(true);
-		//requestController.addRequest(request);
+		netController.setPaused(this, false);
 	}
 
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
 	private final class FacebookMeObserver implements NetController.RequestObserver<DAONameAndPicture> {
+		
+		private Activity activity = null;
+		
+		public FacebookMeObserver(Activity activity) {
+			this.activity = activity;
+		}
+		
 		@Override
 		public void onComplete(DAONameAndPicture resp) {
 			TextView tv = (TextView) findViewById(R.id.main_user_name);
 			tv.setText(resp.getName());
-			loadProfilePicture(resp.getPicture());
+			
+			netController.getBitmap(activity, resp.getPicture(), new PictureObserver());
 		}
 
 		@Override

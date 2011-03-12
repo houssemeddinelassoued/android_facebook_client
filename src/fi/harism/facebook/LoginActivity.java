@@ -19,8 +19,8 @@ import fi.harism.facebook.net.NetController;
  */
 public class LoginActivity extends BaseActivity {
 
-	// Instance of Controller.
-	private NetController controller = null;
+	// Instance of NetController.
+	private NetController netController = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -28,9 +28,9 @@ public class LoginActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
 
-		// This is the first time getController is called and our
-		// application wide instance of Controller is created.
-		controller = getGlobalState().getController();
+		// This is the first time getNetController is called and our
+		// application wide instance of NetController is created.
+		netController = getGlobalState().getNetController();
 
 		// Add onClickListener to 'login' button.
 		Button b = (Button) findViewById(R.id.login_button);
@@ -45,7 +45,7 @@ public class LoginActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		controller = null;
+		netController = null;
 	}
 
 	/**
@@ -53,13 +53,13 @@ public class LoginActivity extends BaseActivity {
 	 */
 	private final void facebookAuthorize() {
 		NetController.AuthorizeObserver loginObserver = new FacebookAuthorizeObserver();
-		controller.authorize(this, loginObserver);
+		netController.authorize(this, loginObserver);
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		controller.authorizeCallback(requestCode, resultCode, data);
+		netController.authorizeCallback(requestCode, resultCode, data);
 	}
 
 	/**

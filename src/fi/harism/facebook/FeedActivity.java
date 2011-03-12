@@ -2,9 +2,7 @@ package fi.harism.facebook;
 
 import java.util.Vector;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
@@ -14,10 +12,6 @@ import android.widget.TextView;
 import fi.harism.facebook.dao.DAOFeedItem;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.net.NetController;
-import fi.harism.facebook.request.FacebookRequest;
-import fi.harism.facebook.request.ImageRequest;
-import fi.harism.facebook.request.Request;
-import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
@@ -27,9 +21,8 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class FeedActivity extends BaseActivity {
 
-	private NetController controller = null;
-	// Local instance of RequestController.
-	//private RequestController requestController;
+	// NetController instance.
+	private NetController netController = null;
 	// Default picture used as sender's profile picture.
 	private Bitmap defaultPicture = null;
 	// Rounding radius for user picture.
@@ -46,47 +39,27 @@ public class FeedActivity extends BaseActivity {
 		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
 				PICTURE_ROUND_RADIUS);
 
-		controller = getGlobalState().getController();
-		// Our RequestController instance.
-		//requestController = new RequestController(this);
+		netController = getGlobalState().getNetController();
+		netController.getNewsFeed(this, new FacebookFeedObserver());
 
-		// Trigger asynchronous news feed request.
-		//Bundle requestParameters = new Bundle();
-		// We are interested only in this fields.
-		//requestParameters.putString("fields",
-		//		"id,from,message,picture,name,description,created_time");
-		//FacebookRequest.Observer observer = new FacebookFeedObserver();
-		//FacebookRequest request = requestController.createFacebookRequest(
-		//		"me/home", requestParameters, observer);
-		//requestController.addRequest(request);
-
-		//showProgressDialog();
-		
-		controller.getNewsFeed(this, new FacebookFeedObserver());
-		
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		//requestController.destroy();
-		//requestController = null;
+		netController.removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		//requestController.pause();
+		netController.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		//requestController.resume();
-	}
-	
-	private void loadFromPicture(String itemId, DAONameAndPicture resp) {
-		controller.getBitmap(this, resp.getPicture(), new FromPictureObserver(itemId));
+		netController.setPaused(this, false);
 	}
 
 	/**
@@ -97,7 +70,7 @@ public class FeedActivity extends BaseActivity {
 	 */
 	private void createFeedItem(DAOFeedItem feedItem) {
 		String itemId = feedItem.getId();
-		
+
 		// Create default Feed Item view.
 		View feedItemView = getLayoutInflater().inflate(R.layout.feed_item,
 				null);
@@ -169,53 +142,13 @@ public class FeedActivity extends BaseActivity {
 		LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 		itemList.addView(feedItemView);
 
-		
-		controller.getNameAndPicture(this, fromId, new FacebookFromPictureObserver(itemId));
-		
+		netController.getNameAndPicture(this, fromId,
+				new FacebookFromPictureObserver(this, itemId));
+
 		if (feedItem.getPicture() != null) {
-			controller.getBitmap(this, feedItem.getPicture(), new ItemPictureObserver(itemId));
+			netController.getBitmap(this, feedItem.getPicture(),
+					new ItemPictureObserver(itemId));
 		}
-		
-		/*
-		// If we have fromId trigger loading of profile picture.
-		if (fromId != null) {
-				// We are interested in picture url only.
-				Bundle fromPictureParameters = new Bundle();
-				fromPictureParameters.putString("fields", "id,picture");
-				FacebookFromPictureObserver fromPictureObserver = new FacebookFromPictureObserver();
-				//FacebookRequest fromPictureRequest = requestController
-				//		.createFacebookRequest(fromId, fromPictureParameters,
-				//				fromPictureObserver);
-				// There's no rush for fetching profile pictures.
-				//fromPictureRequest.setPriority(Request.PRIORITY_LOW);
-				// Add itemId to request so that we find this feed item once
-				// request is completed.
-				Bundle b = new Bundle();
-				b.putString("itemId", itemId);
-				//fromPictureRequest.setBundle(b);
-				//requestController.addRequest(fromPictureRequest);
-			}*/
-
-		/*
-			// If this feed item contains a picture trigger request to load it.
-			String pictureUrl = feedItemObject.optString("picture", null);
-			if (pictureUrl != null) {
-				ItemPictureObserver pictureObserver = new ItemPictureObserver();
-				//ImageRequest r = requestController.createImageRequest(
-				//		pictureUrl, pictureObserver);
-				// Set priority to really high. We want to load these pictures
-				// as soon as possible because they affect view's layout the
-				// most.
-				//r.setPriority(Request.PRIORITY_HIGH);
-				// Add itemId to this request so that we find this feed item
-				// once request is done.
-				Bundle b = new Bundle();
-				b.putString("itemId", itemId);
-				//r.setBundle(b);
-				//requestController.addRequest(r);
-			}
-			*/
-
 	}
 
 	/**
@@ -230,26 +163,10 @@ public class FeedActivity extends BaseActivity {
 		public void onComplete(Vector<DAOFeedItem> resp) {
 			// First hide progress dialog.
 			hideProgressDialog();
-			
-			for (int i=0; i<resp.size(); ++i) {
+
+			for (int i = 0; i < resp.size(); ++i) {
 				createFeedItem(resp.elementAt(i));
 			}
-
-			/*
-			// Our news feed object.
-			JSONObject feedObject = facebookRequest.getResponse();
-			// Array of feed items.
-			JSONArray dataArray = feedObject.optJSONArray("data");
-			if (dataArray != null) {
-				// Iterate through feed items.
-				for (int i = 0; i < dataArray.length(); ++i) {
-					JSONObject feedItemObject = dataArray.optJSONObject(i);
-					if (feedItemObject != null) {
-						createFeedItem(feedItemObject);
-					}
-				}
-			}
-			*/
 		}
 
 		@Override
@@ -269,33 +186,19 @@ public class FeedActivity extends BaseActivity {
 	 */
 	private final class FacebookFromPictureObserver implements
 			NetController.RequestObserver<DAONameAndPicture> {
-		
+
+		private Activity activity = null;
 		private String itemId = null;
-		
-		public FacebookFromPictureObserver(String itemId) {
+
+		public FacebookFromPictureObserver(Activity activity, String itemId) {
+			this.activity = activity;
 			this.itemId = itemId;
 		}
 
 		@Override
 		public void onComplete(DAONameAndPicture resp) {
-			
-			loadFromPicture(itemId, resp);
-			
-			// Get picture url from response.
-			//String pictureUrl = facebookRequest.getResponse().optString(
-			//		"picture", null);
-
-			// Trigger profile picture loading if we got an url.
-			//if (pictureUrl != null) {
-			//	FromPictureObserver pictureObserver = new FromPictureObserver();
-				//ImageRequest r = requestController.createImageRequest(
-				//		pictureUrl, pictureObserver);
-				//r.setPriority(Request.PRIORITY_NORMAL);
-				// Forward request bundle to this new request.
-				//r.setBundle(facebookRequest.getBundle());
-				//r.setCacheBitmap(true);
-				//requestController.addRequest(r);
-			//}
+			netController.getBitmap(activity, resp.getPicture(),
+					new FromPictureObserver(itemId));
 		}
 
 		@Override
@@ -310,10 +213,11 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements NetController.RequestObserver<Bitmap> {
-		
+	private final class FromPictureObserver implements
+			NetController.RequestObserver<Bitmap> {
+
 		private String itemId = null;
-		
+
 		public FromPictureObserver(String itemId) {
 			this.itemId = itemId;
 		}
@@ -345,10 +249,11 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class ItemPictureObserver implements NetController.RequestObserver<Bitmap> {
-		
+	private final class ItemPictureObserver implements
+			NetController.RequestObserver<Bitmap> {
+
 		private String itemId = null;
-		
+
 		public ItemPictureObserver(String itemId) {
 			this.itemId = itemId;
 		}

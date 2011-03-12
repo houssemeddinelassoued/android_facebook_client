@@ -13,8 +13,8 @@ import fi.harism.facebook.net.NetController;
  */
 public class GlobalStateImpl extends Application implements GlobalState {
 
-	// Instance of DataHandler.
-	private NetController controller = null;
+	// Instance of NetController.
+	private NetController netController = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 
@@ -28,11 +28,11 @@ public class GlobalStateImpl extends Application implements GlobalState {
 	}
 
 	@Override
-	public NetController getController() {
-		if (controller == null) {
-			controller = new NetController();
+	public NetController getNetController() {
+		if (netController == null) {
+			netController = new NetController();
 		}
-		return controller;
+		return netController;
 	}
 
 }

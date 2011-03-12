@@ -66,7 +66,7 @@ public class NetController {
 		requestController.addRequest(r);		
 	}
 	
-	public void getStatus(Activity activity, String id, final RequestObserver<DAOStatus> observer) {
+	public void getLatestStatus(Activity activity, String id, final RequestObserver<DAOStatus> observer) {
 		Bundle b = new Bundle();
 		b.putString("limit", "1");
 		b.putString("fields", "message");
@@ -199,7 +199,6 @@ public class NetController {
 	public void removeRequests(Activity activity) {
 		requestController.removeRequests(activity);
 	}
-	
 	
 	public interface AuthorizeObserver {
 		public void onCancel();
