@@ -21,8 +21,8 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class FeedActivity extends BaseActivity {
 
-	// NetController instance.
-	private RequestController netController = null;
+	// RequestController instance.
+	private RequestController requestController = null;
 	// Default picture used as sender's profile picture.
 	private Bitmap defaultPicture = null;
 	// Rounding radius for user picture.
@@ -39,28 +39,28 @@ public class FeedActivity extends BaseActivity {
 		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
 				PICTURE_ROUND_RADIUS);
 
-		netController = getGlobalState().getNetController();
+		requestController = getGlobalState().getRequestController();
 		
 		showProgressDialog();
-		netController.getNewsFeed(this, new DAONewsFeedListObserver());
+		requestController.getNewsFeed(this, new DAONewsFeedListObserver());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		netController.removeRequests(this);
+		requestController.removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		netController.setPaused(this, true);
+		requestController.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		netController.setPaused(this, false);
+		requestController.setPaused(this, false);
 	}
 
 	/**
@@ -143,11 +143,11 @@ public class FeedActivity extends BaseActivity {
 		LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 		itemList.addView(feedItemView);
 
-		netController.getProfile(this, fromId,
+		requestController.getProfile(this, fromId,
 				new DAOProfileObserver(this, itemId));
 
-		if (feedItem.getPicture() != null) {
-			netController.getBitmap(this, feedItem.getPicture(),
+		if (feedItem.getPictureUrl() != null) {
+			requestController.getBitmap(this, feedItem.getPictureUrl(),
 					new FeedItemPictureObserver(itemId));
 		}
 	}
@@ -198,7 +198,7 @@ public class FeedActivity extends BaseActivity {
 
 		@Override
 		public void onComplete(DAOProfile profile) {
-			netController.getBitmap(activity, profile.getPictureUrl(),
+			requestController.getBitmap(activity, profile.getPictureUrl(),
 					new FromPictureObserver(itemId));
 		}
 

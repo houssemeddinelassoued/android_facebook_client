@@ -24,8 +24,8 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class MainActivity extends BaseActivity {
 
-	// Global instance of NetController.
-	private RequestController netController = null;
+	// Global instance of RequestController.
+	private RequestController requestController = null;
 
 	private static final int ID_DIALOG_PROFILE = 1;
 
@@ -37,7 +37,7 @@ public class MainActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
-		netController = getGlobalState().getNetController();
+		requestController = getGlobalState().getRequestController();
 
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
@@ -78,8 +78,8 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Start loading user information asynchronously.
-		netController.getProfile(this, "me", new DAOProfileObserver(this));
-		netController.getStatus(this, "me", new DAOStatusObserver());
+		requestController.getProfile(this, "me", new DAOProfileObserver(this));
+		requestController.getStatus(this, "me", new DAOStatusObserver());
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class MainActivity extends BaseActivity {
 		switch (id) {
 		case ID_DIALOG_PROFILE:
 			ProfileDialog profileDialog = new ProfileDialog(this,
-					netController, "me");
+					requestController, "me");
 			return profileDialog;
 		}
 		return null;
@@ -100,20 +100,20 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		netController.removeRequests(this);
-		netController = null;
+		requestController.removeRequests(this);
+		requestController = null;
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		netController.setPaused(this, true);
+		requestController.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		netController.setPaused(this, false);
+		requestController.setPaused(this, false);
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class MainActivity extends BaseActivity {
 			TextView tv = (TextView) findViewById(R.id.main_user_name);
 			tv.setText(profile.getName());
 			
-			netController.getBitmap(activity, profile.getPictureUrl(), new BitmapObserver());
+			requestController.getBitmap(activity, profile.getPictureUrl(), new BitmapObserver());
 		}
 
 		@Override

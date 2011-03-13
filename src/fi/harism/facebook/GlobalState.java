@@ -19,11 +19,11 @@ public interface GlobalState {
 	public Bitmap getDefaultPicture();
 
 	/**
-	 * Returns application wide instance of NetController. Creates one once
+	 * Returns application wide instance of RequestController. Creates one once
 	 * this method is called for the first time.
 	 * 
-	 * @return NetController instance.
+	 * @return RequestController instance.
 	 */
-	public RequestController getNetController();
+	public RequestController getRequestController();
 
 }

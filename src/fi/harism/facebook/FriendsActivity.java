@@ -27,8 +27,8 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	// NetController instance.
-	private RequestController netController = null;
+	// RequestController instance.
+	private RequestController requestController = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 	// Radius value for rounding profile images.
@@ -39,7 +39,7 @@ public class FriendsActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.friends);
 
-		netController = getGlobalState().getNetController();
+		requestController = getGlobalState().getRequestController();
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -54,25 +54,25 @@ public class FriendsActivity extends BaseActivity {
 		// Show progress dialog.
 		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		netController.getFriendList(this, new DAOFriendListObserver(this));
+		requestController.getFriendList(this, new DAOFriendListObserver(this));
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		netController.removeRequests(this);
+		requestController.removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		netController.setPaused(this, true);
+		requestController.setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		netController.setPaused(this, false);
+		requestController.setPaused(this, false);
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class FriendsActivity extends BaseActivity {
 				// Add friend item view to scrollable list.
 				scrollView.addView(friendItemView);
 
-				netController.getBitmap(activity, pictureUrl,
+				requestController.getBitmap(activity, pictureUrl,
 						new PictureObserver(userId));
 			}
 		}
