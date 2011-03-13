@@ -7,7 +7,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.Bundle;
-
 import fi.harism.facebook.net.FacebookClient;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.RequestQueue;
@@ -21,6 +20,10 @@ public class DAONewsFeedList {
 	public DAONewsFeedList(RequestQueue requestQueue, FacebookClient facebookClient) {
 		this.requestQueue = requestQueue;
 		this.facebookClient = facebookClient;
+	}
+	
+	public DAONewsFeedItem at(int index) {
+		return feedItemList.elementAt(index);
 	}
 	
 	public void getInstance(Activity activity, final DAOObserver<DAONewsFeedList> observer) {
@@ -82,13 +85,9 @@ public class DAONewsFeedList {
 			requestQueue.addRequest(r);
 		}		
 	}
-	
+
 	public int size() {
 		return feedItemList == null ? 0 : feedItemList.size();
-	}
-
-	public DAONewsFeedItem at(int index) {
-		return feedItemList.elementAt(index);
 	}
 
 }

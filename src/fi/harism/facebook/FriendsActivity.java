@@ -205,7 +205,7 @@ public class FriendsActivity extends BaseActivity {
 	 * Observer for handling profile picture loading.
 	 */
 	private final class PictureObserver implements
-			RequestController.RequestObserver<Bitmap> {
+			DAOObserver<Bitmap> {
 
 		private String userId;
 

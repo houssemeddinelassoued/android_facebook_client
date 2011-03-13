@@ -8,9 +8,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAONewsFeedItem;
-import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.dao.DAONewsFeedList;
 import fi.harism.facebook.dao.DAOObserver;
+import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 
@@ -143,12 +143,12 @@ public class FeedActivity extends BaseActivity {
 		LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 		itemList.addView(feedItemView);
 
-		netController.getNameAndPicture(this, fromId,
-				new FacebookFromPictureObserver(this, itemId));
+		netController.getProfile(this, fromId,
+				new DAOProfileObserver(this, itemId));
 
 		if (feedItem.getPicture() != null) {
 			netController.getBitmap(this, feedItem.getPicture(),
-					new ItemPictureObserver(itemId));
+					new FeedItemPictureObserver(itemId));
 		}
 	}
 
@@ -185,20 +185,20 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FacebookFromPictureObserver implements
-			RequestController.RequestObserver<DAONameAndPicture> {
+	private final class DAOProfileObserver implements
+			DAOObserver<DAOProfile> {
 
 		private Activity activity = null;
 		private String itemId = null;
 
-		public FacebookFromPictureObserver(Activity activity, String itemId) {
+		public DAOProfileObserver(Activity activity, String itemId) {
 			this.activity = activity;
 			this.itemId = itemId;
 		}
 
 		@Override
-		public void onComplete(DAONameAndPicture resp) {
-			netController.getBitmap(activity, resp.getPicture(),
+		public void onComplete(DAOProfile profile) {
+			netController.getBitmap(activity, profile.getPictureUrl(),
 					new FromPictureObserver(itemId));
 		}
 
@@ -210,12 +210,48 @@ public class FeedActivity extends BaseActivity {
 	}
 
 	/**
+	 * Private class for handling feed item picture requests.
+	 * 
+	 * @author harism
+	 */
+	private final class FeedItemPictureObserver implements
+			DAOObserver<Bitmap> {
+
+		private String itemId = null;
+
+		public FeedItemPictureObserver(String itemId) {
+			this.itemId = itemId;
+		}
+
+		@Override
+		public void onComplete(Bitmap bitmap) {
+			// Get feed item list view.
+			View itemList = findViewById(R.id.feed_list);
+			// Find feed item using itemId.
+			View itemView = itemList.findViewWithTag(itemId);
+			// This shouldn't happen but just in case.
+			if (itemView != null) {
+				// Set image to feed item.
+				ImageView iv = (ImageView) itemView
+						.findViewById(R.id.feed_item_picture_image);
+				iv.setImageBitmap(bitmap);
+				iv.setVisibility(View.VISIBLE);
+			}
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// We don't care about errors.
+		}
+	}
+
+	/**
 	 * Private class for handling actual profile picture requests.
 	 * 
 	 * @author harism
 	 */
 	private final class FromPictureObserver implements
-			RequestController.RequestObserver<Bitmap> {
+			DAOObserver<Bitmap> {
 
 		private String itemId = null;
 
@@ -236,42 +272,6 @@ public class FeedActivity extends BaseActivity {
 						.findViewById(R.id.feed_item_from_image);
 				iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
 						PICTURE_ROUND_RADIUS));
-			}
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
-		}
-	}
-
-	/**
-	 * Private class for handling feed item picture requests.
-	 * 
-	 * @author harism
-	 */
-	private final class ItemPictureObserver implements
-			RequestController.RequestObserver<Bitmap> {
-
-		private String itemId = null;
-
-		public ItemPictureObserver(String itemId) {
-			this.itemId = itemId;
-		}
-
-		@Override
-		public void onComplete(Bitmap bitmap) {
-			// Get feed item list view.
-			View itemList = findViewById(R.id.feed_list);
-			// Find feed item using itemId.
-			View itemView = itemList.findViewWithTag(itemId);
-			// This shouldn't happen but just in case.
-			if (itemView != null) {
-				// Set image to feed item.
-				ImageView iv = (ImageView) itemView
-						.findViewById(R.id.feed_item_picture_image);
-				iv.setImageBitmap(bitmap);
-				iv.setVisibility(View.VISIBLE);
 			}
 		}
 

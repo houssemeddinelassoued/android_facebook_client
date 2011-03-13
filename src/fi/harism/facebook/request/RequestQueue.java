@@ -56,16 +56,23 @@ public final class RequestQueue {
 		}
 	}
 
-	public final void setPaused(Activity activity, boolean paused) {
-		if (paused == true) {
-			if (!pausedList.contains(activity)) {
-				pausedList.add(activity);
-			}
-		} else {
-			pausedList.remove(activity);
-		}
+	/**
+	 * Destroys all data related to this RequestController. This method should
+	 * be called once Activity is being destroyed.
+	 */
+	public final void destroy() {
+		workerThread.destroyWorker();
+		workerThread = null;
+		// Send notification in case run() method is in wait state.
 		synchronized (requestList) {
 			requestList.notify();
+			requestList.clear();
+			requestList = null;
+		}
+		// If there is a current Request, stop its execution at once.
+		if (currentRequest != null) {
+			currentRequest.stop();
+			currentRequest = null;
 		}
 	}
 
@@ -90,23 +97,16 @@ public final class RequestQueue {
 		}
 	}
 
-	/**
-	 * Destroys all data related to this RequestController. This method should
-	 * be called once Activity is being destroyed.
-	 */
-	public final void destroy() {
-		workerThread.destroyWorker();
-		workerThread = null;
-		// Send notification in case run() method is in wait state.
+	public final void setPaused(Activity activity, boolean paused) {
+		if (paused == true) {
+			if (!pausedList.contains(activity)) {
+				pausedList.add(activity);
+			}
+		} else {
+			pausedList.remove(activity);
+		}
 		synchronized (requestList) {
 			requestList.notify();
-			requestList.clear();
-			requestList = null;
-		}
-		// If there is a current Request, stop its execution at once.
-		if (currentRequest != null) {
-			currentRequest.stop();
-			currentRequest = null;
 		}
 	}
 

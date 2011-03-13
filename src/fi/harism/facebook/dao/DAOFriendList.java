@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.Bundle;
-
 import fi.harism.facebook.net.FacebookClient;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.RequestQueue;
@@ -24,6 +23,10 @@ public class DAOFriendList {
 			FacebookClient facebookClient) {
 		this.requestQueue = requestQueue;
 		this.facebookClient = facebookClient;
+	}
+
+	public DAOFriend at(int index) {
+		return friendList.elementAt(index);
 	}
 
 	public void getInstance(Activity activity,
@@ -73,6 +76,10 @@ public class DAOFriendList {
 
 	}
 
+	public int size() {
+		return friendList == null ? 0 : friendList.size();
+	}
+
 	public void sort() {
 		// Comparator for sorting friend JSONObjects by
 		// name.
@@ -86,14 +93,6 @@ public class DAOFriendList {
 		};
 		// Sort friends Vector.
 		Collections.sort(friendList, comparator);
-	}
-
-	public int size() {
-		return friendList == null ? 0 : friendList.size();
-	}
-
-	public DAOFriend at(int index) {
-		return friendList.elementAt(index);
 	}
 
 }

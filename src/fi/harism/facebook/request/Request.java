@@ -67,6 +67,10 @@ public abstract class Request implements Runnable {
 		}
 	}
 
+	public final Activity getActivity() {
+		return activity;
+	}
+
 	/**
 	 * Getter for Request priority value.
 	 * 
@@ -98,7 +102,7 @@ public abstract class Request implements Runnable {
 	 * @throws Exception
 	 */
 	public abstract void runOnThread() throws Exception;
-
+	
 	/**
 	 * Abstract method classes extending this base class have to implement. This
 	 * method is called when Request is supposed to do execution within UI
@@ -107,10 +111,6 @@ public abstract class Request implements Runnable {
 	 * @throws Exception
 	 */
 	public abstract void runOnUiThread() throws Exception;
-	
-	public final Activity getActivity() {
-		return activity;
-	}
 	
 	/**
 	 * Setter for Request priority value. Default priority is PRIORITY_NORMAL.

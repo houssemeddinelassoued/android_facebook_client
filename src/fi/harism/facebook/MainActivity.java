@@ -9,8 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAONameAndPicture;
-import fi.harism.facebook.dao.DAOMessage;
+import fi.harism.facebook.dao.DAOObserver;
+import fi.harism.facebook.dao.DAOProfile;
+import fi.harism.facebook.dao.DAOStatus;
 import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
@@ -77,8 +78,8 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Start loading user information asynchronously.
-		netController.getNameAndPicture(this, "me", new FacebookMeObserver(this));
-		netController.getLatestStatus(this, "me", new FacebookStatusObserver());
+		netController.getProfile(this, "me", new DAOProfileObserver(this));
+		netController.getStatus(this, "me", new DAOStatusObserver());
 	}
 
 	@Override
@@ -116,51 +117,9 @@ public class MainActivity extends BaseActivity {
 	}
 
 	/**
-	 * Private FacebookRequest observer for handling "me" request.
-	 */
-	private final class FacebookMeObserver implements RequestController.RequestObserver<DAONameAndPicture> {
-		
-		private Activity activity = null;
-		
-		public FacebookMeObserver(Activity activity) {
-			this.activity = activity;
-		}
-		
-		@Override
-		public void onComplete(DAONameAndPicture resp) {
-			TextView tv = (TextView) findViewById(R.id.main_user_name);
-			tv.setText(resp.getName());
-			
-			netController.getBitmap(activity, resp.getPicture(), new PictureObserver());
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors here.
-		}
-	}
-
-	/**
-	 * Private FacebookRequest observer for handling "me/statuses" request.
-	 */
-	private final class FacebookStatusObserver implements
-			RequestController.RequestObserver<DAOMessage> {
-		@Override
-		public void onComplete(DAOMessage response) {
-			TextView tv = (TextView) findViewById(R.id.main_user_status);
-			tv.setText(response.getMessage());
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors here.
-		}
-	}
-
-	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements RequestController.RequestObserver<Bitmap> {
+	private final class BitmapObserver implements DAOObserver<Bitmap> {
 		@Override
 		public void onComplete(Bitmap bitmap) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
@@ -173,6 +132,48 @@ public class MainActivity extends BaseActivity {
 			// We don't care about errors here.
 		}
 
+	}
+
+	/**
+	 * Private FacebookRequest observer for handling "me" request.
+	 */
+	private final class DAOProfileObserver implements DAOObserver<DAOProfile> {
+		
+		private Activity activity = null;
+		
+		public DAOProfileObserver(Activity activity) {
+			this.activity = activity;
+		}
+		
+		@Override
+		public void onComplete(DAOProfile profile) {
+			TextView tv = (TextView) findViewById(R.id.main_user_name);
+			tv.setText(profile.getName());
+			
+			netController.getBitmap(activity, profile.getPictureUrl(), new BitmapObserver());
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// We don't care about errors here.
+		}
+	}
+
+	/**
+	 * Private FacebookRequest observer for handling "me/statuses" request.
+	 */
+	private final class DAOStatusObserver implements
+			DAOObserver<DAOStatus> {
+		@Override
+		public void onComplete(DAOStatus response) {
+			TextView tv = (TextView) findViewById(R.id.main_user_status);
+			tv.setText(response.getMessage());
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// We don't care about errors here.
+		}
 	}
 
 }

@@ -1,56 +1,38 @@
 package fi.harism.facebook.net;
 
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Vector;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
+import fi.harism.facebook.dao.DAOBitmap;
 import fi.harism.facebook.dao.DAOFriendList;
-import fi.harism.facebook.dao.DAONewsFeedItem;
-import fi.harism.facebook.dao.DAONameAndPicture;
-import fi.harism.facebook.dao.DAOMessage;
 import fi.harism.facebook.dao.DAONewsFeedList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
-import fi.harism.facebook.request.FacebookRequest;
-import fi.harism.facebook.request.ImageRequest;
+import fi.harism.facebook.dao.DAOProfileMap;
+import fi.harism.facebook.dao.DAOStatus;
+import fi.harism.facebook.dao.DAOStatusMap;
 import fi.harism.facebook.request.RequestQueue;
 
 public class RequestController {
 
 	private FacebookClient facebookClient = null;
-	private DataCache imageCache = null;
 	private RequestQueue requestController = null;
 	
 	private DAOFriendList friendList = null;
 	private DAONewsFeedList newsFeedList = null;
-
-	//private Vector<String> friendIdList = null;
-	private HashMap<String, DAONameAndPicture> nameAndPictureMap = null;
-	private HashMap<String, DAOMessage> statusMap = null;
-	//private Vector<DAONewsFeedItem> newsFeedList = null;
-	private HashMap<String, DAOProfile> profileMap = null;
+	private DAOStatusMap statusMap = null;
+	private DAOProfileMap profileMap = null;
+	private DAOBitmap bitmap = null;
 
 	public RequestController() {
 		facebookClient = new FacebookClient();
-		imageCache = new DataCache(1024000);
 		requestController = new RequestQueue();
-		nameAndPictureMap = new HashMap<String, DAONameAndPicture>();
-		statusMap = new HashMap<String, DAOMessage>();
-		profileMap = new HashMap<String, DAOProfile>();
 		
 		friendList = new DAOFriendList(requestController, facebookClient);
 		newsFeedList = new DAONewsFeedList(requestController, facebookClient);
+		statusMap = new DAOStatusMap(requestController, facebookClient);
+		profileMap = new DAOProfileMap(requestController, facebookClient);
+		bitmap = new DAOBitmap(requestController);
 	}
 
 	public void authorize(Activity activity, AuthorizeObserver observer) {
@@ -61,38 +43,9 @@ public class RequestController {
 		facebookClient.authorizeCallback(requestCode, resultCode, data);
 	}
 
-	public void getBitmap(Activity activity, final String url,
-			final RequestObserver<Bitmap> observer) {
-
-		if (imageCache.containsKey(url)) {
-			byte[] data = imageCache.getData(url);
-			final Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0,
-					data.length);
-
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(bitmap);
-				}
-			});
-		} else {
-			ImageRequest r = new ImageRequest(activity, url,
-					new ImageRequest.Observer() {
-
-						@Override
-						public void onComplete(ImageRequest imageRequest) {
-							imageCache.setData(url,
-									imageRequest.getBitmapData());
-							observer.onComplete(imageRequest.getBitmap());
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestController.addRequest(r);
-		}
+	public void getBitmap(Activity activity, String imageUrl,
+			DAOObserver<Bitmap> observer) {
+		bitmap.getBitmap(activity, imageUrl, observer);
 	}
 
 	public void getFriendList(Activity activity,
@@ -100,134 +53,21 @@ public class RequestController {
 		friendList.getInstance(activity, observer);
 	}
 
-	public void getLatestStatus(Activity activity, final String id,
-			final RequestObserver<DAOMessage> observer) {
-
-		if (statusMap.containsKey(id)) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(statusMap.get(id));
-				}
-			});
-		} else {
-			Bundle b = new Bundle();
-			b.putString("limit", "1");
-			b.putString("fields", "message");
-			FacebookRequest r = new FacebookRequest(activity, id + "/statuses",
-					b, facebookClient, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONObject resp = facebookRequest.getResponse();
-								String message = resp.getJSONArray("data")
-										.getJSONObject(0).getString("message");
-								DAOMessage r = new DAOMessage(message);
-								statusMap.put(id, r);
-								observer.onComplete(r);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestController.addRequest(r);
-		}
-	}
-
-	public void getNameAndPicture(Activity activity, final String id,
-			final RequestObserver<DAONameAndPicture> observer) {
-
-		if (nameAndPictureMap.containsKey(id)) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(nameAndPictureMap.get(id));
-				}
-			});
-		} else {
-			Bundle b = new Bundle();
-			b.putString(FacebookClient.TOKEN,
-					facebookClient.getAccessToken());
-			b.putString("fields", "id,name,picture");
-			FacebookRequest r = new FacebookRequest(activity, id, b,
-					facebookClient, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONObject resp = facebookRequest.getResponse();
-								String id = resp.getString("id");
-								String name = resp.getString("name");
-								String picture = resp.getString("picture");
-								DAONameAndPicture r = new DAONameAndPicture(id,
-										name, picture);
-								nameAndPictureMap.put(id, r);
-								observer.onComplete(r);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestController.addRequest(r);
-		}
-	}
-
 	public void getNewsFeed(Activity activity,
 			final DAOObserver<DAONewsFeedList> observer) {
 		newsFeedList.getInstance(activity, observer);
 	}
-	
-	public void getProfile(Activity activity, final String id, final RequestObserver<DAOProfile> observer) {
-		if (profileMap.containsKey(id)) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(profileMap.get(id));
-				}
-			});
-		} else {
-			FacebookRequest r = new FacebookRequest(activity, id, null,
-					facebookClient, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONObject resp = facebookRequest.getResponse();
-								StringWriter out = new StringWriter();
-								
-								Iterator keys = resp.keys();
-								while (keys.hasNext()) {
-									String key = (String)keys.next();
-									String value = resp.getString(key);									
-									out.write(key + ": ");
-									out.write(value + "\n");
-								}
-								
-								DAOProfile r = new DAOProfile(out.toString());
-								profileMap.put(id, r);
-								observer.onComplete(r);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
 
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestController.addRequest(r);
-		}
+	public void getProfile(Activity activity, String userId,
+			DAOObserver<DAOProfile> observer) {
+		profileMap.getProfile(activity, userId, observer);
 	}
 
+	public void getStatus(Activity activity, String userId,
+			DAOObserver<DAOStatus> observer) {
+		statusMap.getStatus(activity, userId, observer);
+	}
+	
 	public void removeRequests(Activity activity) {
 		requestController.removeRequests(activity);
 	}
@@ -244,9 +84,4 @@ public class RequestController {
 		public void onError(Exception error);
 	}
 
-	public interface RequestObserver<T> {
-		public void onComplete(T result);
-
-		public void onError(Exception error);
-	}
 }

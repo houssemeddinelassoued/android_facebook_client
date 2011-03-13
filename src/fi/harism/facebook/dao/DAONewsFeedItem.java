@@ -24,12 +24,12 @@ public class DAONewsFeedItem {
 		this.createdTime = createdTime;
 	}
 	
-	public String getId() {
-		return id;
+	public String getCreatedTime() {
+		return createdTime;
 	}
 	
-	public String getType() {
-		return type;
+	public String getDescription() {
+		return description;
 	}
 	
 	public String getFromId() {
@@ -40,24 +40,24 @@ public class DAONewsFeedItem {
 		return fromName;
 	}
 	
-	public String getMessage() {
-		return message;
+	public String getId() {
+		return id;
 	}
 	
-	public String getPicture() {
-		return picture;
+	public String getMessage() {
+		return message;
 	}
 	
 	public String getName() {
 		return name;
 	}
 	
-	public String getDescription() {
-		return description;
+	public String getPicture() {
+		return picture;
 	}
 	
-	public String getCreatedTime() {
-		return createdTime;
+	public String getType() {
+		return type;
 	}
 
 }
