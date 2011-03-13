@@ -173,6 +173,7 @@ public class FriendsActivity extends BaseActivity {
 		public void onComplete(DAOFriendList friendList) {
 			// First hide progress dialog.
 			hideProgressDialog();
+			friendList.sort();
 
 			// LinearLayout which is inside ScrollView.
 			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
