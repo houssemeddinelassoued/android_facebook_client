@@ -1,7 +1,7 @@
 package fi.harism.facebook;
 
 import android.graphics.Bitmap;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.net.RequestController;
 
 /**
  * GlobalState interface.
@@ -24,6 +24,6 @@ public interface GlobalState {
 	 * 
 	 * @return NetController instance.
 	 */
-	public NetController getNetController();
+	public RequestController getNetController();
 
 }

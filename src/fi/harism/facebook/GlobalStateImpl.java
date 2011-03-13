@@ -3,7 +3,7 @@ package fi.harism.facebook;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.net.RequestController;
 
 /**
  * GlobalStateImpl class extends Application and is used as base class for our
@@ -14,7 +14,7 @@ import fi.harism.facebook.net.NetController;
 public class GlobalStateImpl extends Application implements GlobalState {
 
 	// Instance of NetController.
-	private NetController netController = null;
+	private RequestController netController = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 
@@ -28,9 +28,9 @@ public class GlobalStateImpl extends Application implements GlobalState {
 	}
 
 	@Override
-	public NetController getNetController() {
+	public RequestController getNetController() {
 		if (netController == null) {
-			netController = new NetController();
+			netController = new RequestController();
 		}
 		return netController;
 	}

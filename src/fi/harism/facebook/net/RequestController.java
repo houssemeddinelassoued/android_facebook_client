@@ -15,41 +15,50 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import fi.harism.facebook.dao.DAOFriendList;
 import fi.harism.facebook.dao.DAONewsFeedItem;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.dao.DAOMessage;
+import fi.harism.facebook.dao.DAONewsFeedList;
+import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.ImageRequest;
 import fi.harism.facebook.request.RequestQueue;
 
-public class NetController {
+public class RequestController {
 
-	private FacebookClient facebookController = null;
+	private FacebookClient facebookClient = null;
 	private DataCache imageCache = null;
 	private RequestQueue requestController = null;
+	
+	private DAOFriendList friendList = null;
+	private DAONewsFeedList newsFeedList = null;
 
-	private Vector<String> friendIdList = null;
+	//private Vector<String> friendIdList = null;
 	private HashMap<String, DAONameAndPicture> nameAndPictureMap = null;
 	private HashMap<String, DAOMessage> statusMap = null;
-	private Vector<DAONewsFeedItem> newsFeedList = null;
+	//private Vector<DAONewsFeedItem> newsFeedList = null;
 	private HashMap<String, DAOProfile> profileMap = null;
 
-	public NetController() {
-		facebookController = new FacebookClient();
+	public RequestController() {
+		facebookClient = new FacebookClient();
 		imageCache = new DataCache(1024000);
 		requestController = new RequestQueue();
 		nameAndPictureMap = new HashMap<String, DAONameAndPicture>();
 		statusMap = new HashMap<String, DAOMessage>();
 		profileMap = new HashMap<String, DAOProfile>();
+		
+		friendList = new DAOFriendList(requestController, facebookClient);
+		newsFeedList = new DAONewsFeedList(requestController, facebookClient);
 	}
 
 	public void authorize(Activity activity, AuthorizeObserver observer) {
-		facebookController.authorize(activity, observer);
+		facebookClient.authorize(activity, observer);
 	}
 
 	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
-		facebookController.authorizeCallback(requestCode, resultCode, data);
+		facebookClient.authorizeCallback(requestCode, resultCode, data);
 	}
 
 	public void getBitmap(Activity activity, final String url,
@@ -87,79 +96,8 @@ public class NetController {
 	}
 
 	public void getFriendList(Activity activity,
-			final RequestObserver<Vector<DAONameAndPicture>> observer) {
-
-		if (friendIdList != null) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					Vector<DAONameAndPicture> list = new Vector<DAONameAndPicture>();
-					for (int i = 0; i < friendIdList.size(); ++i) {
-						list.add(nameAndPictureMap.get(friendIdList
-								.elementAt(i)));
-					}
-					observer.onComplete(list);
-				}
-			});
-		} else {
-			Bundle b = new Bundle();
-			b.putString("fields", "id,name,picture");
-			FacebookRequest r = new FacebookRequest(activity, "me/friends", b,
-					facebookController, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONArray friendArray = facebookRequest
-										.getResponse().getJSONArray("data");
-
-								Vector<DAONameAndPicture> friendList = new Vector<DAONameAndPicture>();
-								for (int i = 0; i < friendArray.length(); ++i) {
-									JSONObject f = friendArray.getJSONObject(i);
-									String id = f.getString("id");
-									String name = f.getString("name");
-									String picture = f.getString("picture");
-									friendList.add(new DAONameAndPicture(id,
-											name, picture));
-								}
-
-								// Comparator for sorting friend JSONObjects by
-								// name.
-								Comparator<DAONameAndPicture> comparator = new Comparator<DAONameAndPicture>() {
-									@Override
-									public int compare(DAONameAndPicture arg0,
-											DAONameAndPicture arg1) {
-										String arg0Name = arg0.getName();
-										String arg1Name = arg1.getName();
-										return arg0Name
-												.compareToIgnoreCase(arg1Name);
-									}
-								};
-
-								// Sort friends Vector.
-								Collections.sort(friendList, comparator);
-
-								friendIdList = new Vector<String>();
-								for (int i = 0; i < friendList.size(); ++i) {
-									DAONameAndPicture profile = friendList
-											.elementAt(i);
-									friendIdList.add(profile.getId());
-									nameAndPictureMap.put(profile.getId(),
-											profile);
-								}
-
-								observer.onComplete(friendList);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestController.addRequest(r);
-		}
+			DAOObserver<DAOFriendList> observer) {
+		friendList.getInstance(activity, observer);
 	}
 
 	public void getLatestStatus(Activity activity, final String id,
@@ -177,7 +115,7 @@ public class NetController {
 			b.putString("limit", "1");
 			b.putString("fields", "message");
 			FacebookRequest r = new FacebookRequest(activity, id + "/statuses",
-					b, facebookController, new FacebookRequest.Observer() {
+					b, facebookClient, new FacebookRequest.Observer() {
 						@Override
 						public void onComplete(FacebookRequest facebookRequest) {
 							try {
@@ -214,10 +152,10 @@ public class NetController {
 		} else {
 			Bundle b = new Bundle();
 			b.putString(FacebookClient.TOKEN,
-					facebookController.getAccessToken());
+					facebookClient.getAccessToken());
 			b.putString("fields", "id,name,picture");
 			FacebookRequest r = new FacebookRequest(activity, id, b,
-					facebookController, new FacebookRequest.Observer() {
+					facebookClient, new FacebookRequest.Observer() {
 						@Override
 						public void onComplete(FacebookRequest facebookRequest) {
 							try {
@@ -244,64 +182,8 @@ public class NetController {
 	}
 
 	public void getNewsFeed(Activity activity,
-			final RequestObserver<Vector<DAONewsFeedItem>> observer) {
-
-		if (newsFeedList != null) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(newsFeedList);
-				}
-			});
-		} else {
-			Bundle b = new Bundle();
-			b.putString("fields",
-					"id,type,from,message,picture,name,description,created_time");
-			FacebookRequest r = new FacebookRequest(activity, "me/home", b,
-					facebookController, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONArray feedItems = facebookRequest
-										.getResponse().getJSONArray("data");
-								newsFeedList = new Vector<DAONewsFeedItem>();
-								for (int i = 0; i < feedItems.length(); ++i) {
-									JSONObject item = feedItems
-											.getJSONObject(i);
-									String id = item.getString("id");
-									String type = item.getString("type");
-									String fromId = item.getJSONObject("from")
-											.getString("id");
-									String fromName = item
-											.getJSONObject("from").getString(
-													"name");
-									String message = item.optString("message",
-											null);
-									String picture = item.optString("picture",
-											null);
-									String name = item.optString("name", null);
-									String description = item.optString(
-											"description", null);
-									String createdTime = item.optString(
-											"created_time", null);
-									newsFeedList.add(new DAONewsFeedItem(id,
-											type, fromId, fromName, message,
-											picture, name, description,
-											createdTime));
-								}
-								observer.onComplete(newsFeedList);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestController.addRequest(r);
-		}
+			final DAOObserver<DAONewsFeedList> observer) {
+		newsFeedList.getInstance(activity, observer);
 	}
 	
 	public void getProfile(Activity activity, final String id, final RequestObserver<DAOProfile> observer) {
@@ -314,7 +196,7 @@ public class NetController {
 			});
 		} else {
 			FacebookRequest r = new FacebookRequest(activity, id, null,
-					facebookController, new FacebookRequest.Observer() {
+					facebookClient, new FacebookRequest.Observer() {
 						@Override
 						public void onComplete(FacebookRequest facebookRequest) {
 							try {

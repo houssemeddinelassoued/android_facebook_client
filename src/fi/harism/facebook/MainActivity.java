@@ -12,7 +12,7 @@ import android.widget.TextView;
 import fi.harism.facebook.dao.DAONameAndPicture;
 import fi.harism.facebook.dao.DAOMessage;
 import fi.harism.facebook.dialog.ProfileDialog;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
@@ -24,7 +24,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class MainActivity extends BaseActivity {
 
 	// Global instance of NetController.
-	private NetController netController = null;
+	private RequestController netController = null;
 
 	private static final int ID_DIALOG_PROFILE = 1;
 
@@ -118,7 +118,7 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
-	private final class FacebookMeObserver implements NetController.RequestObserver<DAONameAndPicture> {
+	private final class FacebookMeObserver implements RequestController.RequestObserver<DAONameAndPicture> {
 		
 		private Activity activity = null;
 		
@@ -144,7 +144,7 @@ public class MainActivity extends BaseActivity {
 	 * Private FacebookRequest observer for handling "me/statuses" request.
 	 */
 	private final class FacebookStatusObserver implements
-			NetController.RequestObserver<DAOMessage> {
+			RequestController.RequestObserver<DAOMessage> {
 		@Override
 		public void onComplete(DAOMessage response) {
 			TextView tv = (TextView) findViewById(R.id.main_user_status);
@@ -160,7 +160,7 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements NetController.RequestObserver<Bitmap> {
+	private final class PictureObserver implements RequestController.RequestObserver<Bitmap> {
 		@Override
 		public void onComplete(Bitmap bitmap) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);

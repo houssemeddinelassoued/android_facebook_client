@@ -1,7 +1,5 @@
 package fi.harism.facebook;
 
-import java.util.Vector;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,7 +9,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAONewsFeedItem;
 import fi.harism.facebook.dao.DAONameAndPicture;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.dao.DAONewsFeedList;
+import fi.harism.facebook.dao.DAOObserver;
+import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
@@ -22,7 +22,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class FeedActivity extends BaseActivity {
 
 	// NetController instance.
-	private NetController netController = null;
+	private RequestController netController = null;
 	// Default picture used as sender's profile picture.
 	private Bitmap defaultPicture = null;
 	// Rounding radius for user picture.
@@ -42,8 +42,7 @@ public class FeedActivity extends BaseActivity {
 		netController = getGlobalState().getNetController();
 		
 		showProgressDialog();
-		netController.getNewsFeed(this, new FacebookFeedObserver());
-
+		netController.getNewsFeed(this, new DAONewsFeedListObserver());
 	}
 
 	@Override
@@ -158,16 +157,16 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FacebookFeedObserver implements
-			NetController.RequestObserver<Vector<DAONewsFeedItem>> {
+	private final class DAONewsFeedListObserver implements
+			DAOObserver<DAONewsFeedList> {
 
 		@Override
-		public void onComplete(Vector<DAONewsFeedItem> resp) {
+		public void onComplete(DAONewsFeedList newsFeedList) {
 			// First hide progress dialog.
 			hideProgressDialog();
 
-			for (int i = 0; i < resp.size(); ++i) {
-				createFeedItem(resp.elementAt(i));
+			for (int i = 0; i < newsFeedList.size(); ++i) {
+				createFeedItem(newsFeedList.at(i));
 			}
 		}
 
@@ -187,7 +186,7 @@ public class FeedActivity extends BaseActivity {
 	 * @author harism
 	 */
 	private final class FacebookFromPictureObserver implements
-			NetController.RequestObserver<DAONameAndPicture> {
+			RequestController.RequestObserver<DAONameAndPicture> {
 
 		private Activity activity = null;
 		private String itemId = null;
@@ -216,7 +215,7 @@ public class FeedActivity extends BaseActivity {
 	 * @author harism
 	 */
 	private final class FromPictureObserver implements
-			NetController.RequestObserver<Bitmap> {
+			RequestController.RequestObserver<Bitmap> {
 
 		private String itemId = null;
 
@@ -252,7 +251,7 @@ public class FeedActivity extends BaseActivity {
 	 * @author harism
 	 */
 	private final class ItemPictureObserver implements
-			NetController.RequestObserver<Bitmap> {
+			RequestController.RequestObserver<Bitmap> {
 
 		private String itemId = null;
 

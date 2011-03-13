@@ -1,7 +1,5 @@
 package fi.harism.facebook;
 
-import java.util.Vector;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -12,8 +10,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAONameAndPicture;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.dao.DAOFriend;
+import fi.harism.facebook.dao.DAOFriendList;
+import fi.harism.facebook.dao.DAOObserver;
+import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 
 /**
@@ -28,7 +28,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class FriendsActivity extends BaseActivity {
 
 	// NetController instance.
-	private NetController netController = null;
+	private RequestController netController = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 	// Radius value for rounding profile images.
@@ -54,7 +54,7 @@ public class FriendsActivity extends BaseActivity {
 		// Show progress dialog.
 		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		netController.getFriendList(this, new FacebookFriendListObserver(this));
+		netController.getFriendList(this, new DAOFriendListObserver(this));
 	}
 
 	@Override
@@ -160,17 +160,17 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling "me/friends" request.
 	 */
-	private final class FacebookFriendListObserver implements
-			NetController.RequestObserver<Vector<DAONameAndPicture>> {
-
+	private final class DAOFriendListObserver implements
+			DAOObserver<DAOFriendList> {
+		
 		private Activity activity = null;
 
-		public FacebookFriendListObserver(Activity activity) {
+		public DAOFriendListObserver(Activity activity) {
 			this.activity = activity;
 		}
 
 		@Override
-		public void onComplete(Vector<DAONameAndPicture> friendList) {
+		public void onComplete(DAOFriendList friendList) {
 			// First hide progress dialog.
 			hideProgressDialog();
 
@@ -178,11 +178,11 @@ public class FriendsActivity extends BaseActivity {
 			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 
 			for (int i = 0; i < friendList.size(); ++i) {
-				DAONameAndPicture friend = friendList.elementAt(i);
+				DAOFriend friend = friendList.at(i);
 
 				String userId = friend.getId();
 				String name = friend.getName();
-				String pictureUrl = friend.getPicture();
+				String pictureUrl = friend.getPictureUrl();
 
 				// Create default friend item view.
 				View friendItemView = createFriendItem(userId, name);
@@ -205,7 +205,7 @@ public class FriendsActivity extends BaseActivity {
 	 * Observer for handling profile picture loading.
 	 */
 	private final class PictureObserver implements
-			NetController.RequestObserver<Bitmap> {
+			RequestController.RequestObserver<Bitmap> {
 
 		private String userId;
 

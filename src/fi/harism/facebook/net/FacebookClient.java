@@ -8,7 +8,7 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
 
-import fi.harism.facebook.net.NetController.AuthorizeObserver;
+import fi.harism.facebook.net.RequestController.AuthorizeObserver;
 
 public class FacebookClient {
 

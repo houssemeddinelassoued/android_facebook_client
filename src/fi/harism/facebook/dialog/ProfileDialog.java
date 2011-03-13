@@ -2,7 +2,7 @@ package fi.harism.facebook.dialog;
 
 import fi.harism.facebook.R;
 import fi.harism.facebook.dao.DAOProfile;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.net.RequestController;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -11,11 +11,11 @@ import android.widget.TextView;
 public class ProfileDialog extends Dialog {
 
 	private Activity activity;
-	private NetController netController;
+	private RequestController netController;
 	private String profileId;
 
 	public ProfileDialog(Activity activity,
-			NetController netController, String profileId) {
+			RequestController netController, String profileId) {
 		super(activity);
 		this.activity = activity;
 		this.netController = netController;
@@ -31,7 +31,7 @@ public class ProfileDialog extends Dialog {
 	}
 
 	private class FacebookProfileObserver implements
-			NetController.RequestObserver<DAOProfile> {
+			RequestController.RequestObserver<DAOProfile> {
 
 		@Override
 		public void onComplete(DAOProfile profile) {

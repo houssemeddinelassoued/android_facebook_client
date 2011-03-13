@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import fi.harism.facebook.net.NetController;
+import fi.harism.facebook.net.RequestController;
 
 /**
  * Our main activity, in a sense it's the first activity user sees once our
@@ -20,7 +20,7 @@ import fi.harism.facebook.net.NetController;
 public class LoginActivity extends BaseActivity {
 
 	// Instance of NetController.
-	private NetController netController = null;
+	private RequestController netController = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -52,7 +52,7 @@ public class LoginActivity extends BaseActivity {
 	 * Calling this method triggers the Facebook API authorization procedure.
 	 */
 	private final void facebookAuthorize() {
-		NetController.AuthorizeObserver loginObserver = new FacebookAuthorizeObserver();
+		RequestController.AuthorizeObserver loginObserver = new FacebookAuthorizeObserver();
 		netController.authorize(this, loginObserver);
 	}
 
@@ -66,7 +66,7 @@ public class LoginActivity extends BaseActivity {
 	 * FacebookAuthorizeObserver observer for Facebook authentication procedure.
 	 */
 	private final class FacebookAuthorizeObserver implements
-			NetController.AuthorizeObserver {
+			RequestController.AuthorizeObserver {
 		@Override
 		public void onCancel() {
 			// We are not interested in doing anything if user cancels Facebook
