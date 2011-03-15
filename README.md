@@ -10,8 +10,11 @@ Getting started
 2. Download sources for Android Facebook Client and import project
    into Eclipse. This Facebook client utilizes Facebook Android SDK
    and it's required to have it for compilation.
+3. Importing project is done e.g. from File menu.
+   Select "New" --> "Android Project". And tap "Create project
+   from existing source" radio button.
 
-It's maybe easiest done using EGit Eclipse plugin but feel free to use Git client of your choice.
+Fetching sources is maybe easiest done using EGit Eclipse plugin but feel free to use Git client of your choice.
 
 ToDo
 ====
