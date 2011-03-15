@@ -13,6 +13,10 @@ Getting started
 3. Importing project is done e.g. from File menu.
    Select "New" --> "Android Project". And tap "Create project
    from existing source" radio button.
+4. If you're seeing errors for missing Facebook class, make sure
+   Client project properties contains Facebook Android SDK project
+   under Android references. Sometimes it's requires to remove
+   this reference and add it again for it to work.
 
 Fetching sources is maybe easiest done using EGit Eclipse plugin but feel free to use Git client of your choice.
 
