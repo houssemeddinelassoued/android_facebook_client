@@ -8,27 +8,48 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
 
-import fi.harism.facebook.net.RequestController.AuthorizeObserver;
-
+/**
+ * FacebookClient class encapsulates all Facebook Android API functionality.
+ * 
+ * @author harism
+ */
 public class FacebookClient {
 
+	// Constant TOKEN string.
 	public static final String TOKEN = Facebook.TOKEN;
+	// Our application id.
 	private static final String FACEBOOK_APP_ID = "190087744355420";
+	// Private Facebook instance.
 	private Facebook facebook = null;
-	private boolean facebookAuthorized;
+	// Flag for checking if Facebook instance has been authorized.
+	private boolean facebookAuthorized = false;
 
+	/**
+	 * Default constructor. Before using this class authorize should be called
+	 * successfully.
+	 */
 	public FacebookClient() {
 		facebook = new Facebook(FACEBOOK_APP_ID);
-		facebookAuthorized = false;
 	}
 
-	public void authorize(Activity activity, final AuthorizeObserver observer) {
-
+	/**
+	 * This method triggers authorization procedure.
+	 * 
+	 * @param activity
+	 *            Calling activity.
+	 * @param observer
+	 *            Observer for this request.
+	 */
+	public void authorize(Activity activity,
+			final FacebookAuthorizeObserver observer) {
+		// Check if we have authorized Facebook instance already.
 		if (facebookAuthorized) {
 			observer.onComplete();
 		} else {
+			// List of permissions our application needs.
 			String permissions[] = { "user_status", "friends_status",
 					"read_stream" };
+			// Call actual authorization procedure.
 			facebook.authorize(activity, permissions,
 					new Facebook.DialogListener() {
 						@Override
@@ -67,12 +88,31 @@ public class FacebookClient {
 		return facebook.getAccessToken();
 	}
 
+	/**
+	 * Synchronous Facebook Graph API call.
+	 * 
+	 * @param path
+	 *            Facebook Graph API path.
+	 * @return JSON string presentation for response.
+	 * @throws Exception
+	 */
 	public String request(String path) throws Exception {
 		return facebook.request(path);
 	}
 
-	public String request(String path, Bundle bundle) throws Exception {
-		return facebook.request(path, bundle);
+	/**
+	 * Synchronous Facebook Graph API call.
+	 * 
+	 * @param path
+	 *            Facebook Graph API path.
+	 * @param requestParameters
+	 *            Additional request parameters.
+	 * @return JSON string presentation for response.
+	 * @throws Exception
+	 */
+	public String request(String path, Bundle requestParameters)
+			throws Exception {
+		return facebook.request(path, requestParameters);
 	}
 
 }
