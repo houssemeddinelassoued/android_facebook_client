@@ -1,5 +1,6 @@
 package fi.harism.facebook.dao;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.json.JSONArray;
@@ -11,24 +12,63 @@ import fi.harism.facebook.net.FacebookClient;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.RequestQueue;
 
-public class DAONewsFeedList {
-	
+/**
+ * Class for retrieving News Feed list and storing it into memory.
+ * 
+ * @author harism
+ */
+public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
+
+	// RequestQueue instance.
 	private RequestQueue requestQueue = null;
+	// FacebookClient instance.
 	private FacebookClient facebookClient = null;
+	// List of News Feed items.
 	private Vector<DAONewsFeedItem> feedItemList = null;
-	
-	public DAONewsFeedList(RequestQueue requestQueue, FacebookClient facebookClient) {
+	// Boolean for checking if news feed list is loaded already.
+	private boolean feedItemListLoaded = false;
+
+	/**
+	 * Constructor for News Feed list.
+	 * 
+	 * @param requestQueue
+	 *            RequestQueue instance.
+	 * @param facebookClient
+	 *            FacebookClient instance.
+	 */
+	public DAONewsFeedList(RequestQueue requestQueue,
+			FacebookClient facebookClient) {
 		this.requestQueue = requestQueue;
 		this.facebookClient = facebookClient;
+		feedItemList = new Vector<DAONewsFeedItem>();
 	}
-	
+
+	/**
+	 * Accessor for getting News Feed item at given index.
+	 * 
+	 * @param index
+	 *            Index of DAONewsFeedItem.
+	 * @return DAONewsFeedItem at given index.
+	 */
 	public DAONewsFeedItem at(int index) {
 		return feedItemList.elementAt(index);
 	}
-	
-	public void getInstance(Activity activity, final DAOObserver<DAONewsFeedList> observer) {
+
+	/**
+	 * Triggers asynchronous loading of News Feed if it hasn't been loaded yet.
+	 * Otherwise notifies observer asap.
+	 * 
+	 * @param activity
+	 *            Activity which triggered this request.
+	 * @param observer
+	 *            Observer for this request.
+	 */
+	public void getInstance(Activity activity,
+			final DAOObserver<DAONewsFeedList> observer) {
+		// We need "this" pointer later on.
 		final DAONewsFeedList self = this;
-		if (feedItemList != null) {
+		if (feedItemListLoaded) {
+			// Call observer on UI thread.
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -36,6 +76,7 @@ public class DAONewsFeedList {
 				}
 			});
 		} else {
+			// Create Facebook request.
 			Bundle b = new Bundle();
 			b.putString("fields",
 					"id,type,from,message,picture,name,description,created_time");
@@ -71,6 +112,7 @@ public class DAONewsFeedList {
 											picture, name, description,
 											createdTime));
 								}
+								feedItemListLoaded = true;
 								observer.onComplete(self);
 							} catch (Exception ex) {
 								observer.onError(ex);
@@ -83,11 +125,23 @@ public class DAONewsFeedList {
 						}
 					});
 			requestQueue.addRequest(r);
-		}		
+		}
 	}
 
+	@Override
+	public Iterator<DAONewsFeedItem> iterator() {
+		// Return Iterator for a copy of News Feed list instead.
+		Vector<DAONewsFeedItem> copy = new Vector<DAONewsFeedItem>(feedItemList);
+		return copy.iterator();
+	}
+
+	/**
+	 * Accessor for retrieving size of this list.
+	 * 
+	 * @return Number of News Feed items on this list.
+	 */
 	public int size() {
-		return feedItemList == null ? 0 : feedItemList.size();
+		return feedItemList.size();
 	}
 
 }

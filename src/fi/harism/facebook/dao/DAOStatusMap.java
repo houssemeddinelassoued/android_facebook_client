@@ -10,20 +10,51 @@ import fi.harism.facebook.net.FacebookClient;
 import fi.harism.facebook.request.FacebookRequest;
 import fi.harism.facebook.request.RequestQueue;
 
+/**
+ * This class implements storage and retrieval for user's latest status message.
+ * 
+ * @author harism
+ */
 public class DAOStatusMap {
-	
+
+	// RequestQueue instance.
 	private RequestQueue requestQueue = null;
+	// FacebookClient instance.
 	private FacebookClient facebookClient = null;
+	// HashMap for storing statuses per userId.
 	private HashMap<String, DAOStatus> statusMap = null;
-	
+
+	/**
+	 * Default constructor.
+	 * 
+	 * @param requestQueue
+	 *            RequestQueue instance.
+	 * @param facebookClient
+	 *            FacebookClient instance.
+	 */
 	public DAOStatusMap(RequestQueue requestQueue, FacebookClient facebookClient) {
 		this.requestQueue = requestQueue;
 		this.facebookClient = facebookClient;
 		statusMap = new HashMap<String, DAOStatus>();
 	}
-	
-	public void getStatus(Activity activity, final String userId, final DAOObserver<DAOStatus> observer) {
+
+	/**
+	 * Returns latest status message for given userId through observer. Status
+	 * is loaded via Facebook Graph API if needed and a local copy is returned
+	 * instantly if it's found on local storage.
+	 * 
+	 * @param activity
+	 *            Activity which is creating this request.
+	 * @param userId
+	 *            User Id for whom to retrieve latest status.
+	 * @param observer
+	 *            Observer for this request.
+	 */
+	public void getStatus(Activity activity, final String userId,
+			final DAOObserver<DAOStatus> observer) {
+		// Check if we have latest status stored.
 		if (statusMap.containsKey(userId)) {
+			// Call observer via Activity UI thread.
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -31,11 +62,13 @@ public class DAOStatusMap {
 				}
 			});
 		} else {
+			// Create status request.
 			Bundle b = new Bundle();
 			b.putString("limit", "1");
 			b.putString("fields", "message");
-			FacebookRequest r = new FacebookRequest(activity, userId + "/statuses",
-					b, facebookClient, new FacebookRequest.Observer() {
+			FacebookRequest r = new FacebookRequest(activity, userId
+					+ "/statuses", b, facebookClient,
+					new FacebookRequest.Observer() {
 						@Override
 						public void onComplete(FacebookRequest facebookRequest) {
 							try {
@@ -56,7 +89,7 @@ public class DAOStatusMap {
 						}
 					});
 			requestQueue.addRequest(r);
-		}		
+		}
 	}
 
 }
