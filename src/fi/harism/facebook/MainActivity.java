@@ -1,5 +1,7 @@
 package fi.harism.facebook;
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -26,13 +28,16 @@ import fi.harism.facebook.util.BitmapUtils;
  */
 public class MainActivity extends BaseActivity {
 
-	// Global instance of RequestController.
-	private RequestController requestController = null;
-
+	// Profile dialog ID.
 	private static final int ID_DIALOG_PROFILE = 1;
-
 	// Profile picture corner rounding radius.
 	private static final int PICTURE_ROUND_RADIUS = 7;
+	// Current Profile storage name.
+	private static final String STORAGE_CURRENT_PROFILE = "currentProfile";
+
+	// Global instance of RequestController.
+	private RequestController requestController = null;
+	private DAOProfile currentProfile = null;
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -45,6 +50,12 @@ public class MainActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 
 		requestController = getGlobalState().getRequestController();
+		
+		@SuppressWarnings("unchecked")
+		HashMap<String, Object> storage = (HashMap<String, Object>)getLastNonConfigurationInstance();
+		if (storage != null) {
+			currentProfile = (DAOProfile)storage.get(STORAGE_CURRENT_PROFILE);
+		}
 
 		// It's possible our application hasn't been killed.
 		if (requestController.isAuthorized()) {
@@ -64,7 +75,7 @@ public class MainActivity extends BaseActivity {
 		switch (id) {
 		case ID_DIALOG_PROFILE:
 			ProfileDialog profileDialog = new ProfileDialog(this,
-					requestController, "me");
+					currentProfile);
 			return profileDialog;
 		}
 		return null;
@@ -87,6 +98,17 @@ public class MainActivity extends BaseActivity {
 	public void onResume() {
 		super.onResume();
 		requestController.setPaused(this, false);
+	}
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		// This method is called when e.g. screen orientation changes.
+		// Which causes our Activity to be destroyed and created again.
+		// We can get this HashMap back on onCreate by using
+		// getLastNonConfigurationInstance() method.
+		HashMap<String, Object> storage = new HashMap<String, Object>();
+		storage.put(STORAGE_CURRENT_PROFILE, currentProfile);
+		return storage;
 	}
 
 	public final void showLoginView() {
@@ -141,8 +163,21 @@ public class MainActivity extends BaseActivity {
 		profileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// On click trigger feed activity.
-				showDialog(ID_DIALOG_PROFILE);
+				showProgressDialog();
+				requestController.getProfile(self, "me",
+						new DAOObserver<DAOProfile>() {
+							@Override
+							public void onComplete(DAOProfile response) {
+								currentProfile = response;
+								hideProgressDialog();
+								showDialog(ID_DIALOG_PROFILE);
+							}
+
+							@Override
+							public void onError(Exception error) {
+								hideProgressDialog();
+							}
+						});
 			}
 		});
 
@@ -234,6 +269,7 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onComplete() {
+			// On successful login switch to main view.
 			showMainView();
 		}
 
@@ -244,14 +280,24 @@ public class MainActivity extends BaseActivity {
 		}
 	}
 
+	/**
+	 * LogoutObserver for handling asynchronous logout procedure.
+	 */
 	private final class LogoutObserver implements FacebookLogoutObserver {
 		@Override
 		public void onComplete() {
+			currentProfile = null;
+			// First hide progress dialog.
+			hideProgressDialog();
+			// Switch to login view.
 			showLoginView();
 		}
 
 		@Override
 		public void onError(Exception ex) {
+			// Hide progress dialog.
+			hideProgressDialog();
+			// Show error alert.
 			showAlertDialog(ex.getLocalizedMessage());
 		}
 	}
