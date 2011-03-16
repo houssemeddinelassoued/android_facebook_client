@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import fi.harism.facebook.net.FacebookAuthorizeObserver;
 import fi.harism.facebook.net.RequestController;
 
 /**
@@ -52,7 +53,7 @@ public class LoginActivity extends BaseActivity {
 	 * Calling this method triggers the Facebook API authorization procedure.
 	 */
 	private final void facebookAuthorize() {
-		RequestController.AuthorizeObserver loginObserver = new FacebookAuthorizeObserver();
+		AuthorizeObserver loginObserver = new AuthorizeObserver();
 		requestController.authorize(this, loginObserver);
 	}
 
@@ -63,10 +64,10 @@ public class LoginActivity extends BaseActivity {
 	}
 
 	/**
-	 * FacebookAuthorizeObserver observer for Facebook authentication procedure.
+	 * AuthorizeObserver observer for Facebook authentication procedure.
 	 */
-	private final class FacebookAuthorizeObserver implements
-			RequestController.AuthorizeObserver {
+	private final class AuthorizeObserver implements
+			FacebookAuthorizeObserver {
 		@Override
 		public void onCancel() {
 			// We are not interested in doing anything if user cancels Facebook

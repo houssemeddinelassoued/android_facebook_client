@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		
+
 		requestController = getGlobalState().getRequestController();
 
 		// Set default picture as user picture.
@@ -87,6 +87,7 @@ public class MainActivity extends BaseActivity {
 		return onCreateDialog(id, null);
 	}
 
+	@Override
 	public final Dialog onCreateDialog(int id, Bundle bundle) {
 		switch (id) {
 		case ID_DIALOG_PROFILE:
@@ -138,19 +139,20 @@ public class MainActivity extends BaseActivity {
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
 	private final class DAOProfileObserver implements DAOObserver<DAOProfile> {
-		
+
 		private Activity activity = null;
-		
+
 		public DAOProfileObserver(Activity activity) {
 			this.activity = activity;
 		}
-		
+
 		@Override
 		public void onComplete(DAOProfile profile) {
 			TextView tv = (TextView) findViewById(R.id.main_user_name);
 			tv.setText(profile.getName());
-			
-			requestController.getBitmap(activity, profile.getPictureUrl(), new BitmapObserver());
+
+			requestController.getBitmap(activity, profile.getPictureUrl(),
+					new BitmapObserver());
 		}
 
 		@Override
@@ -162,8 +164,7 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me/statuses" request.
 	 */
-	private final class DAOStatusObserver implements
-			DAOObserver<DAOStatus> {
+	private final class DAOStatusObserver implements DAOObserver<DAOStatus> {
 		@Override
 		public void onComplete(DAOStatus response) {
 			TextView tv = (TextView) findViewById(R.id.main_user_status);

@@ -162,7 +162,7 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final class DAOFriendListObserver implements
 			DAOObserver<DAOFriendList> {
-		
+
 		private Activity activity = null;
 
 		public DAOFriendListObserver(Activity activity) {
@@ -173,14 +173,11 @@ public class FriendsActivity extends BaseActivity {
 		public void onComplete(DAOFriendList friendList) {
 			// First hide progress dialog.
 			hideProgressDialog();
-			friendList.sort();
 
 			// LinearLayout which is inside ScrollView.
 			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 
-			for (int i = 0; i < friendList.size(); ++i) {
-				DAOFriend friend = friendList.at(i);
-
+			for (DAOFriend friend : friendList) {
 				String userId = friend.getId();
 				String name = friend.getName();
 				String pictureUrl = friend.getPictureUrl();
@@ -205,8 +202,7 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements
-			DAOObserver<Bitmap> {
+	private final class PictureObserver implements DAOObserver<Bitmap> {
 
 		private String userId;
 

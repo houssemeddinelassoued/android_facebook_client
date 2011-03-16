@@ -40,7 +40,7 @@ public class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		requestController = getGlobalState().getRequestController();
-		
+
 		showProgressDialog();
 		requestController.getNewsFeed(this, new DAONewsFeedListObserver());
 	}
@@ -143,8 +143,8 @@ public class FeedActivity extends BaseActivity {
 		LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 		itemList.addView(feedItemView);
 
-		requestController.getProfile(this, fromId,
-				new DAOProfileObserver(this, itemId));
+		requestController.getProfile(this, fromId, new DAOProfileObserver(this,
+				itemId));
 
 		if (feedItem.getPictureUrl() != null) {
 			requestController.getBitmap(this, feedItem.getPictureUrl(),
@@ -165,8 +165,8 @@ public class FeedActivity extends BaseActivity {
 			// First hide progress dialog.
 			hideProgressDialog();
 
-			for (int i = 0; i < newsFeedList.size(); ++i) {
-				createFeedItem(newsFeedList.at(i));
+			for (DAONewsFeedItem item : newsFeedList) {
+				createFeedItem(item);
 			}
 		}
 
@@ -185,8 +185,7 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class DAOProfileObserver implements
-			DAOObserver<DAOProfile> {
+	private final class DAOProfileObserver implements DAOObserver<DAOProfile> {
 
 		private Activity activity = null;
 		private String itemId = null;
@@ -214,8 +213,7 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FeedItemPictureObserver implements
-			DAOObserver<Bitmap> {
+	private final class FeedItemPictureObserver implements DAOObserver<Bitmap> {
 
 		private String itemId = null;
 
@@ -250,8 +248,7 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements
-			DAOObserver<Bitmap> {
+	private final class FromPictureObserver implements DAOObserver<Bitmap> {
 
 		private String itemId = null;
 
