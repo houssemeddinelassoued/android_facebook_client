@@ -1,6 +1,6 @@
 package fi.harism.facebook.net;
 
-public interface FacebookAuthorizeObserver {
+public interface FacebookLoginObserver {
 
 	public void onCancel();
 

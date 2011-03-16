@@ -13,6 +13,8 @@ import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.dao.DAOStatus;
 import fi.harism.facebook.dialog.ProfileDialog;
+import fi.harism.facebook.net.FacebookLoginObserver;
+import fi.harism.facebook.net.FacebookLogoutObserver;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 
@@ -33,11 +35,78 @@ public class MainActivity extends BaseActivity {
 	private static final int PICTURE_ROUND_RADIUS = 7;
 
 	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		requestController.loginCallback(requestCode, resultCode, data);
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
 
 		requestController = getGlobalState().getRequestController();
+
+		// It's possible our application hasn't been killed.
+		if (requestController.isAuthorized()) {
+			showMainView();
+		} else {
+			showLoginView();
+		}
+	}
+
+	@Override
+	public final Dialog onCreateDialog(int id) {
+		return onCreateDialog(id, null);
+	}
+
+	@Override
+	public final Dialog onCreateDialog(int id, Bundle bundle) {
+		switch (id) {
+		case ID_DIALOG_PROFILE:
+			ProfileDialog profileDialog = new ProfileDialog(this,
+					requestController, "me");
+			return profileDialog;
+		}
+		return null;
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		requestController.removeRequests(this);
+		requestController = null;
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		requestController.setPaused(this, true);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		requestController.setPaused(this, false);
+	}
+
+	public final void showLoginView() {
+		setContentView(R.layout.login);
+
+		final Activity self = this;
+		// Add onClickListener to 'login' button.
+		Button b = (Button) findViewById(R.id.login_button);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				LoginObserver loginObserver = new LoginObserver();
+				requestController.login(self, loginObserver);
+			}
+		});
+	}
+
+	public final void showMainView() {
+		setContentView(R.layout.main);
+		final Activity self = this;
 
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
@@ -77,44 +146,19 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
+		// Add onClick listener to "Logout" button.
+		Button logoutButton = (Button) findViewById(R.id.main_button_logout);
+		logoutButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				LogoutObserver observer = new LogoutObserver();
+				requestController.logout(self, observer);
+			}
+		});
+
 		// Start loading user information asynchronously.
 		requestController.getProfile(this, "me", new DAOProfileObserver(this));
 		requestController.getStatus(this, "me", new DAOStatusObserver());
-	}
-
-	@Override
-	public final Dialog onCreateDialog(int id) {
-		return onCreateDialog(id, null);
-	}
-
-	@Override
-	public final Dialog onCreateDialog(int id, Bundle bundle) {
-		switch (id) {
-		case ID_DIALOG_PROFILE:
-			ProfileDialog profileDialog = new ProfileDialog(this,
-					requestController, "me");
-			return profileDialog;
-		}
-		return null;
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		requestController.removeRequests(this);
-		requestController = null;
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-		requestController.setPaused(this, true);
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		requestController.setPaused(this, false);
 	}
 
 	/**
@@ -174,6 +218,41 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void onError(Exception ex) {
 			// We don't care about errors here.
+		}
+	}
+
+	/**
+	 * LoginObserver observer for Facebook authentication procedure.
+	 */
+	private final class LoginObserver implements FacebookLoginObserver {
+		@Override
+		public void onCancel() {
+			// We are not interested in doing anything if user cancels Facebook
+			// authorization dialog. Let them click 'login' again or close the
+			// application.
+		}
+
+		@Override
+		public void onComplete() {
+			showMainView();
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// If there was an error during authorization show an alert to user.
+			showAlertDialog(ex.getLocalizedMessage());
+		}
+	}
+
+	private final class LogoutObserver implements FacebookLogoutObserver {
+		@Override
+		public void onComplete() {
+			showLoginView();
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			showAlertDialog(ex.getLocalizedMessage());
 		}
 	}
 

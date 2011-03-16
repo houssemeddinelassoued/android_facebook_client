@@ -1,6 +1,7 @@
 package fi.harism.facebook.net;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -32,6 +33,24 @@ public class FacebookClient {
 		facebook = new Facebook(FACEBOOK_APP_ID);
 	}
 
+	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
+		facebook.authorizeCallback(requestCode, resultCode, data);
+	}
+
+	public String getAccessToken() {
+		return facebook.getAccessToken();
+	}
+
+	/**
+	 * Checker method for testing if this FacebookClient instance has been
+	 * authorized already.
+	 * 
+	 * @return Returns true if Facebook instance has been authorized.
+	 */
+	public boolean isAuthorized() {
+		return facebookAuthorized;
+	}
+
 	/**
 	 * This method triggers authorization procedure.
 	 * 
@@ -40,8 +59,7 @@ public class FacebookClient {
 	 * @param observer
 	 *            Observer for this request.
 	 */
-	public void authorize(Activity activity,
-			final FacebookAuthorizeObserver observer) {
+	public void authorize(Activity activity, final FacebookLoginObserver observer) {
 		// Check if we have authorized Facebook instance already.
 		if (facebookAuthorized) {
 			observer.onComplete();
@@ -80,12 +98,17 @@ public class FacebookClient {
 		}
 	}
 
-	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
-		facebook.authorizeCallback(requestCode, resultCode, data);
-	}
-
-	public String getAccessToken() {
-		return facebook.getAccessToken();
+	/**
+	 * Sets this FacebookClient to logged out state.
+	 * 
+	 * @param context Should be same context used for authorization.
+	 * @throws Exception
+	 */
+	public void logout(Context context) throws Exception {
+		if (facebookAuthorized) {
+			facebook.logout(context);
+			facebookAuthorized = false;
+		}
 	}
 
 	/**

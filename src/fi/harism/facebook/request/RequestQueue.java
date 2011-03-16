@@ -57,8 +57,7 @@ public final class RequestQueue {
 	}
 
 	/**
-	 * Destroys all data related to this RequestController. This method should
-	 * be called once Activity is being destroyed.
+	 * Destroys all data related to this RequestController.
 	 */
 	public final void destroy() {
 		workerThread.destroyWorker();
@@ -68,6 +67,21 @@ public final class RequestQueue {
 			requestList.notify();
 			requestList.clear();
 			requestList = null;
+		}
+		// If there is a current Request, stop its execution at once.
+		if (currentRequest != null) {
+			currentRequest.stop();
+			currentRequest = null;
+		}
+	}
+	
+	/**
+	 * Removes all requests from this queue.
+	 */
+	public final void removeAllRequests() {
+		synchronized (requestList) {
+			pausedList.clear();
+			requestList.clear();
 		}
 		// If there is a current Request, stop its execution at once.
 		if (currentRequest != null) {

@@ -24,7 +24,7 @@ public class RequestController {
 	// FacebookClient instance.
 	private FacebookClient facebookClient = null;
 	// RequestQueue instance.
-	private RequestQueue requestController = null;
+	private RequestQueue requestQueue = null;
 
 	// Friend list.
 	private DAOFriendList friendList = null;
@@ -42,21 +42,13 @@ public class RequestController {
 	 */
 	public RequestController() {
 		facebookClient = new FacebookClient();
-		requestController = new RequestQueue();
+		requestQueue = new RequestQueue();
 
-		friendList = new DAOFriendList(requestController, facebookClient);
-		newsFeedList = new DAONewsFeedList(requestController, facebookClient);
-		statusMap = new DAOStatusMap(requestController, facebookClient);
-		profileMap = new DAOProfileMap(requestController, facebookClient);
-		bitmap = new DAOBitmap(requestController);
-	}
-
-	public void authorize(Activity activity, FacebookAuthorizeObserver observer) {
-		facebookClient.authorize(activity, observer);
-	}
-
-	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
-		facebookClient.authorizeCallback(requestCode, resultCode, data);
+		friendList = new DAOFriendList(requestQueue, facebookClient);
+		newsFeedList = new DAONewsFeedList(requestQueue, facebookClient);
+		statusMap = new DAOStatusMap(requestQueue, facebookClient);
+		profileMap = new DAOProfileMap(requestQueue, facebookClient);
+		bitmap = new DAOBitmap(requestQueue);
 	}
 
 	public void getBitmap(Activity activity, String imageUrl,
@@ -92,7 +84,7 @@ public class RequestController {
 	 *            Activity for which remove all requests.
 	 */
 	public void removeRequests(Activity activity) {
-		requestController.removeRequests(activity);
+		requestQueue.removeRequests(activity);
 	}
 
 	/**
@@ -106,7 +98,54 @@ public class RequestController {
 	 *            Activity.
 	 */
 	public void setPaused(Activity activity, boolean paused) {
-		requestController.setPaused(activity, paused);
+		requestQueue.setPaused(activity, paused);
+	}
+	
+	public boolean isAuthorized() {
+		return facebookClient.isAuthorized();
+	}
+
+	public void login(Activity activity, FacebookLoginObserver observer) {
+		facebookClient.authorize(activity, observer);
+	}
+	
+	public void loginCallback(int requestCode, int resultCode, Intent data) {
+		facebookClient.authorizeCallback(requestCode, resultCode, data);
+	}
+
+	public void logout(final Activity activity,
+			final FacebookLogoutObserver observer) {
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					facebookClient.logout(activity);
+					
+					// Remove all active requests from queue.
+					requestQueue.removeAllRequests();
+					// Initiate new DAO objects.
+					friendList = new DAOFriendList(requestQueue, facebookClient);
+					newsFeedList = new DAONewsFeedList(requestQueue, facebookClient);
+					statusMap = new DAOStatusMap(requestQueue, facebookClient);
+					profileMap = new DAOProfileMap(requestQueue, facebookClient);
+					bitmap = new DAOBitmap(requestQueue);
+					
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							observer.onComplete();
+						}
+					});
+				} catch (final Exception ex) {
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							observer.onError(ex);
+						}
+					});
+				}
+			}
+		}.start();
 	}
 
 }
