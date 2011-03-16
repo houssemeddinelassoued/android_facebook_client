@@ -20,5 +20,6 @@
 	<string name="main_button_feed_text">Feed</string>
 	<string name="main_button_friends_text">Friends</string>
 	<string name="main_button_profile_text">Profile</string>
+	<string name="main_button_logout_text">Logout</string>
 
 </resources>

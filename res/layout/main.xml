@@ -60,6 +60,11 @@
 				android:layout_width="fill_parent"
 				android:id="@+id/main_button_profile"
 				android:text="@string/main_button_profile_text" />
+			<Button
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:id="@+id/main_button_logout"
+				android:text="@string/main_button_logout_text" />
 		</LinearLayout>
 	</ScrollView>
 
