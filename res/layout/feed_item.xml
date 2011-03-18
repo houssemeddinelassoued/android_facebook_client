@@ -3,82 +3,102 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:orientation="vertical"
-	android:paddingTop="@dimen/feed_item_spacing" >
-
-	<LinearLayout
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:gravity="center_vertical"
-		android:layout_marginBottom="-1dp"
-		android:padding="@dimen/feed_item_from_padding"
-		android:background="@drawable/bg_feed_item_from" >
-		<ImageView
-			android:layout_width="@dimen/feed_item_from_picture_width"
-			android:layout_height="@dimen/feed_item_from_picture_height"
-			android:id="@+id/feed_item_from_image" />
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginLeft="@dimen/feed_item_from_name_marginLeft"
-			android:textSize="@dimen/font_size_normal"
-			android:id="@+id/feed_item_from_text" />
-	</LinearLayout>
+	android:padding="5dp"
+	android:orientation="vertical" >
 
 	<LinearLayout
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:orientation="vertical"
-		android:layout_marginTop="-1dp"
-		android:padding="@dimen/feed_item_content_padding"
-		android:background="@drawable/bg_feed_item_content" >
-
+		android:layout_height="wrap_content" >
+		<ImageView
+			android:layout_width="40dp"
+			android:layout_height="40dp"
+			android:id="@+id/feed_item_from_image" />
 		<LinearLayout
-			android:layout_width="wrap_content"
+			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:id="@+id/feed_item_message_layout" >
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="fill_parent"
-				android:textSize="@dimen/font_size_small"
-				android:text="@string/feed_item_message_title" />
+			android:layout_gravity="center_vertical"
+			android:layout_marginLeft="5dp"
+			android:orientation="vertical" >
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:textColor="@color/text_blue"
+				android:textStyle="bold"
 				android:textSize="@dimen/font_size_normal"
-				android:layout_marginLeft="@dimen/feed_item_content_message_marginLeft"
-				android:id="@+id/feed_item_message_text" />
-		</LinearLayout>
-
-		<LinearLayout
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:gravity="center_vertical" >
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:visibility="gone"
-				android:id="@+id/feed_item_picture_image" />
+				android:id="@+id/feed_item_from_text" />
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_marginLeft="@dimen/feed_item_content_name_marginLeft"
+				android:textColor="@color/text_black"
+				android:autoLink="all"
+				android:textColorLink="@color/text_blue"
 				android:textSize="@dimen/font_size_normal"
-				android:id="@+id/feed_item_name_text" />
+				android:id="@+id/feed_item_message_text" />				
 		</LinearLayout>
-
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="@dimen/font_size_normal"
-			android:id="@+id/feed_item_description_text" />
-
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textSize="@dimen/font_size_small"
-			android:id="@+id/feed_item_created_text" />
-
 	</LinearLayout>
+	
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="5dp"
+		android:layout_marginBottom="5dp" >
+		<ImageView
+			android:layout_height="fill_parent"
+			android:layout_width="3dp"
+			android:src="#E2E2E2" />
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="10dp"
+			android:orientation="vertical" >
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" >
+				<ImageView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:visibility="gone"
+					android:id="@+id/feed_item_picture_image" />
+				<LinearLayout
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="5dp"
+					android:layout_gravity="center_vertical"
+					android:orientation="vertical" >
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textStyle="bold"
+						android:textColor="@color/text_blue"
+						android:textSize="@dimen/font_size_normal"
+						android:id="@+id/feed_item_name_text" />
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="@dimen/font_size_normal"
+						android:textColor="@color/text_blue"
+						android:text="TODO: implement me"
+						android:id="@+id/feed_item_caption_text" />
+				</LinearLayout>
+			</LinearLayout>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_gray"
+				android:textSize="@dimen/font_size_normal"
+				android:id="@+id/feed_item_description_text" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_gray"
+				android:textSize="@dimen/font_size_normal"
+				android:id="@+id/feed_item_created_text" />
+		</LinearLayout>
+	</LinearLayout>
+	
+	<ImageView
+		android:layout_width="fill_parent"
+		android:layout_height="2px"
+		android:src="@drawable/item_separator" />
 
 </LinearLayout>

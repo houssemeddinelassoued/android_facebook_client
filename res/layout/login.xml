@@ -3,14 +3,17 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:background="@drawable/background_gradient" >
+	android:background="@color/bg_white" >
 
 	<TextView
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_centerVertical="true"
 		android:gravity="center"
+		android:background="@color/bg_light_blue"
+		android:text="@string/login_main_text"
 		android:textSize="@dimen/font_size_large"
-		android:text="@string/login_main_text" />
+		android:textColor="@color/text_gray" />
 	<Button
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"

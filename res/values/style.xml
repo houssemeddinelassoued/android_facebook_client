@@ -2,33 +2,18 @@
 <resources>
 
 	<!-- Font sizes used within application -->
-	<dimen name="font_size_small">10sp</dimen>
-	<dimen name="font_size_normal">16sp</dimen>
+	<dimen name="font_size_small">12sp</dimen>
+	<dimen name="font_size_normal">14sp</dimen>
 	<dimen name="font_size_large">26sp</dimen>
-
-	<!-- Background image values -->
-	<color name="bg_item_normal">#707070</color>
-	<color name="bg_item_clicked">#7070A0</color>
-	<dimen name="bg_item_corner_radius">10dp</dimen>
-
-	<!-- Friends Activity -->
-	<dimen name="friends_item_spacing">2dp</dimen>
-	<dimen name="friends_item_picture_padding">5dp</dimen>
-	<!-- NOTE: actual picture width is reduced by friends_item_picture_padding * 2 -->
-	<dimen name="friends_item_picture_width">50dp</dimen>
-	<!-- NOTE: actual picture height is reduced by friends_item_picture_padding * 2 -->
-	<dimen name="friends_item_picture_height">50dp</dimen>
-	<dimen name="friends_item_content_padding">5dp</dimen>
-	<dimen name="friends_item_content_minHeight">60dp</dimen>
-
-	<!-- Feed Activity -->
-	<dimen name="feed_item_spacing">2dp</dimen>
-	<dimen name="feed_item_from_padding">5dp</dimen>
-	<dimen name="feed_item_from_name_marginLeft">5dp</dimen>
-	<dimen name="feed_item_from_picture_width">40dp</dimen>
-	<dimen name="feed_item_from_picture_height">40dp</dimen>
-	<dimen name="feed_item_content_padding">5dp</dimen>
-	<dimen name="feed_item_content_message_marginLeft">5dp</dimen>
-	<dimen name="feed_item_content_name_marginLeft">5dp</dimen>
-
+	
+	<color name="bg_white">#FFFFFF</color>
+	<color name="bg_dark_blue">#37589B</color>
+	<color name="bg_mid_blue">#5F79B0</color>
+	<color name="bg_light_blue">#EDEFF4</color>
+	
+	<color name="text_white">#FFFFFF</color>
+	<color name="text_black">#000000</color>
+	<color name="text_blue">#37589B</color>
+	<color name="text_gray">#5A5A5A</color>
+	
 </resources>

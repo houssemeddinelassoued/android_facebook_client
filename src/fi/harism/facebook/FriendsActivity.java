@@ -92,7 +92,7 @@ public class FriendsActivity extends BaseActivity {
 
 		// Find name TextView and set its value.
 		TextView nameTextView = (TextView) friendItemView
-				.findViewById(R.id.friends_item_name);
+				.findViewById(R.id.friends_item_text_name);
 		nameTextView.setText(name);
 
 		// Find picture ImageView and set default profile picture into it.
@@ -142,7 +142,7 @@ public class FriendsActivity extends BaseActivity {
 
 		// Locate name TextView.
 		TextView nameTextView = (TextView) friendItem
-				.findViewById(R.id.friends_item_name);
+				.findViewById(R.id.friends_item_text_name);
 		// Get name from TextView.
 		String friendName = nameTextView.getText().toString();
 		// We are still not case sensitive.

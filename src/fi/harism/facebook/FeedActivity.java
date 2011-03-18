@@ -91,12 +91,10 @@ public class FeedActivity extends BaseActivity {
 		// Get message from feed item. Message is the one user can add as a
 		// description to items posted.
 		String message = feedItem.getMessage();
-		View messageView = feedItemView
-				.findViewById(R.id.feed_item_message_layout);
+		TextView messageView = (TextView) feedItemView
+				.findViewById(R.id.feed_item_message_text);
 		if (message != null) {
-			TextView messageText = (TextView) messageView
-					.findViewById(R.id.feed_item_message_text);
-			messageText.setText(message);
+			messageView.setText(message);
 		} else {
 			messageView.setVisibility(View.GONE);
 		}

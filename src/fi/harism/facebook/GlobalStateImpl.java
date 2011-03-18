@@ -22,7 +22,7 @@ public class GlobalStateImpl extends Application implements GlobalState {
 	public Bitmap getDefaultPicture() {
 		if (defaultPicture == null) {
 			defaultPicture = BitmapFactory.decodeResource(getResources(),
-					R.drawable.picture_default);
+					R.drawable.default_profile_picture);
 		}
 		return defaultPicture;
 	}

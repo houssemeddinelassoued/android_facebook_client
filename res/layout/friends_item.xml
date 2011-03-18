@@ -3,28 +3,32 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:paddingTop="@dimen/friends_item_spacing"
-	android:clickable="true" >
+	android:clickable="true"
+	android:background="@drawable/bg_item_clickable"
+	android:orientation="vertical" >
 
-	<ImageView
-		android:layout_height="@dimen/friends_item_picture_width"
-		android:layout_width="@dimen/friends_item_picture_height"
-		android:padding="@dimen/friends_item_picture_padding"
-		android:background="@drawable/bg_friend_item_picture"
-		android:duplicateParentState="true"
-		android:layout_marginRight="-1dp"
-		android:id="@+id/friends_item_picture" />
-
-	<TextView
+	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:padding="@dimen/friends_item_content_padding"
-		android:background="@drawable/bg_friend_item_content"
-		android:textSize="@dimen/font_size_normal"
-		android:duplicateParentState="true"
-		android:minHeight="@dimen/friends_item_content_minHeight"
-		android:gravity="center_vertical"
-		android:layout_marginLeft="-1dp"
-		android:id="@+id/friends_item_name" />
+		android:padding="5dp" >
+		<ImageView
+			android:layout_height="40dp"
+			android:layout_width="40dp"
+			android:id="@+id/friends_item_picture" />
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:layout_marginLeft="5dp"
+			android:textSize="@dimen/font_size_normal"
+			android:textColor="@color/text_blue"
+			android:textStyle="bold"
+			android:id="@+id/friends_item_text_name" />		
+	</LinearLayout>
+	
+	<ImageView
+		android:layout_width="fill_parent"
+		android:layout_height="2px"
+		android:src="@drawable/item_separator" />
 
 </LinearLayout>
