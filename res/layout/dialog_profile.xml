@@ -1,12 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content">
-
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical" >
 	<TextView
-		android:id="@+id/dialog_profile_text"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
-
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:textSize="@dimen/font_size_normal"
+		android:textColor="@color/text_header"
+		android:textStyle="bold"
+		android:text="Profile"
+		android:background="@drawable/bg_header"
+		android:padding="5dp" />
+	<TableLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:padding="5dp"
+		android:background="@drawable/bg_content" >
+		<TableRow >
+			<TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_black"
+				android:textSize="@dimen/font_size_normal"
+				android:text="Id:" />
+			<TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_black"
+				android:textStyle="bold"
+				android:textSize="@dimen/font_size_normal"
+				android:id="@+id/dialog_profile_id_text" />
+		</TableRow>
+		<TableRow >
+			<TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_black"
+				android:textSize="@dimen/font_size_normal"
+				android:text="Name:" />
+			<TextView
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_black"
+				android:textStyle="bold"
+				android:textSize="@dimen/font_size_normal"
+				android:id="@+id/dialog_profile_name_text" />
+		</TableRow>
+	</TableLayout>
 </LinearLayout>

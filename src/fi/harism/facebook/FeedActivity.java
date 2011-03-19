@@ -13,6 +13,7 @@ import fi.harism.facebook.dao.DAONewsFeedItem;
 import fi.harism.facebook.dao.DAONewsFeedList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
+import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
@@ -332,10 +333,23 @@ public class FeedActivity extends BaseActivity {
 
 		@Override
 		public boolean onClick(FacebookURLSpan span) {
-			if (span.getURL().startsWith(PROTOCOL_SHOW_PROFILE)) {
-				activity.showAlertDialog(span.getURL());
+			String url = span.getURL();
+			if (url.startsWith(PROTOCOL_SHOW_PROFILE)) {
+				showProgressDialog();
+				String userId = url.substring(PROTOCOL_SHOW_PROFILE.length());
+				requestController.getProfile(activity, userId, new DAOObserver<DAOProfile>() {
+					@Override
+					public void onComplete(DAOProfile response) {
+						hideProgressDialog();
+						new ProfileDialog(activity, response).show();
+					}
+					@Override
+					public void onError(Exception error) {
+						hideProgressDialog();
+					}
+				});
 				return true;
-			} else if (span.getURL().startsWith(PROTOCOL_SHOW_COMMENTS)) {
+			} else if (url.startsWith(PROTOCOL_SHOW_COMMENTS)) {
 				activity.showAlertDialog(span.getURL());
 				return true;
 			}
