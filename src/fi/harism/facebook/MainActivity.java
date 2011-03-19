@@ -113,13 +113,24 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-		// Add onClick listener to "Feed" button.
-		Button feedButton = (Button) findViewById(R.id.main_button_feed);
-		feedButton.setOnClickListener(new View.OnClickListener() {
+		// Add onClick listener to "News Feed" button.
+		Button newsFeedButton = (Button) findViewById(R.id.main_button_news_feed);
+		newsFeedButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
-				Intent i = createIntent(FeedActivity.class);
+				Intent i = createIntent(NewsFeedActivity.class);
+				startActivity(i);
+			}
+		});
+		
+		// Add onClick listener to "Wall" button.
+		Button wallButton = (Button) findViewById(R.id.main_button_wall);
+		wallButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// On click trigger feed activity.
+				Intent i = createIntent(ProfileFeedActivity.class);
 				startActivity(i);
 			}
 		});

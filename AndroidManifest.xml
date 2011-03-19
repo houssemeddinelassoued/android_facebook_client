@@ -15,8 +15,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="FriendsActivity"></activity>
-        <activity android:name="FeedActivity"></activity>
+        <activity android:name="FriendsActivity" />
+        <activity android:name="NewsFeedActivity" />
+        <activity android:name="ProfileFeedActivity" />
     </application>
     
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>

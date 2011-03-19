@@ -17,16 +17,22 @@ import fi.harism.facebook.request.RequestQueue;
  * 
  * @author harism
  */
-public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
+public class DAOFeedList implements Iterable<DAOFeedItem> {
 
 	// RequestQueue instance.
 	private RequestQueue requestQueue = null;
 	// FacebookClient instance.
 	private FacebookClient facebookClient = null;
 	// List of News Feed items.
-	private Vector<DAONewsFeedItem> feedItemList = null;
+	private Vector<DAOFeedItem> feedItemList = null;
 	// Boolean for checking if news feed list is loaded already.
 	private boolean feedItemListLoaded = false;
+	// Feed path.
+	private String feedPath = null;
+	// Path for News Feed.
+	public static final String NEWS_FEED = "/me/home";
+	// Path for Wall.
+	public static final String PROFILE_FEED = "/me/feed";
 
 	/**
 	 * Constructor for News Feed list.
@@ -36,11 +42,12 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 	 * @param facebookClient
 	 *            FacebookClient instance.
 	 */
-	public DAONewsFeedList(RequestQueue requestQueue,
-			FacebookClient facebookClient) {
+	public DAOFeedList(RequestQueue requestQueue,
+			FacebookClient facebookClient, String feedPath) {
 		this.requestQueue = requestQueue;
 		this.facebookClient = facebookClient;
-		feedItemList = new Vector<DAONewsFeedItem>();
+		this.feedPath = feedPath;
+		feedItemList = new Vector<DAOFeedItem>();
 	}
 
 	/**
@@ -50,7 +57,7 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 	 *            Index of DAONewsFeedItem.
 	 * @return DAONewsFeedItem at given index.
 	 */
-	public DAONewsFeedItem at(int index) {
+	public DAOFeedItem at(int index) {
 		return feedItemList.elementAt(index);
 	}
 
@@ -64,9 +71,9 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 	 *            Observer for this request.
 	 */
 	public void getInstance(Activity activity,
-			final DAOObserver<DAONewsFeedList> observer) {
+			final DAOObserver<DAOFeedList> observer) {
 		// We need "this" pointer later on.
-		final DAONewsFeedList self = this;
+		final DAOFeedList self = this;
 		if (feedItemListLoaded) {
 			// Call observer on UI thread.
 			activity.runOnUiThread(new Runnable() {
@@ -81,14 +88,14 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 			b.putString(
 					"fields",
 					"id,type,from,message,picture,link,name,caption,description,created_time,comments");
-			FacebookRequest r = new FacebookRequest(activity, "me/home", b,
+			FacebookRequest r = new FacebookRequest(activity, feedPath, b,
 					facebookClient, new FacebookRequest.Observer() {
 						@Override
 						public void onComplete(FacebookRequest facebookRequest) {
 							try {
 								JSONArray feedItems = facebookRequest
 										.getResponse().getJSONArray("data");
-								feedItemList = new Vector<DAONewsFeedItem>();
+								feedItemList = new Vector<DAOFeedItem>();
 								for (int i = 0; i < feedItems.length(); ++i) {
 									JSONObject item = feedItems
 											.getJSONObject(i);
@@ -118,7 +125,7 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 										commentCount = commentsObject
 												.getInt("count");
 									}
-									feedItemList.add(new DAONewsFeedItem(id,
+									feedItemList.add(new DAOFeedItem(id,
 											type, fromId, fromName, message,
 											picture, link, name, caption,
 											description, createdTime,
@@ -141,9 +148,9 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 	}
 
 	@Override
-	public Iterator<DAONewsFeedItem> iterator() {
+	public Iterator<DAOFeedItem> iterator() {
 		// Return Iterator for a copy of News Feed list instead.
-		Vector<DAONewsFeedItem> copy = new Vector<DAONewsFeedItem>(feedItemList);
+		Vector<DAOFeedItem> copy = new Vector<DAOFeedItem>(feedItemList);
 		return copy.iterator();
 	}
 

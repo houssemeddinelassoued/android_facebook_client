@@ -57,8 +57,13 @@
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"
-				android:id="@+id/main_button_feed"
-				android:text="@string/main_button_feed_text" />
+				android:id="@+id/main_button_news_feed"
+				android:text="@string/main_button_news_feed_text" />
+			<Button
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:id="@+id/main_button_wall"
+				android:text="@string/main_button_wall_text" />
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"

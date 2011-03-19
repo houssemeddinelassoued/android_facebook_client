@@ -5,7 +5,8 @@
 	<string name="app_name">Facebook Client</string>
 
 	<!-- Feed Activity -->
-	<string name="feed_title_text">News Feed</string>
+	<string name="feed_news_text">News Feed</string>
+	<string name="feed_profile_text">Wall</string>
 
 	<!-- Friends Activity -->
 	<string name="friends_search_text">Search</string>
@@ -17,7 +18,8 @@
 	<!-- Main Activity -->
 	<string name="main_name_text">Name</string>
 	<string name="main_status_text">Status</string>
-	<string name="main_button_feed_text">Feed</string>
+	<string name="main_button_news_feed_text">News Feed</string>
+	<string name="main_button_wall_text">Wall</string>
 	<string name="main_button_friends_text">Friends</string>
 	<string name="main_button_profile_text">Profile</string>
 	<string name="main_button_logout_text">Logout</string>

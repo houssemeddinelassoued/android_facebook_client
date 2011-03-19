@@ -13,8 +13,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAOComment;
-import fi.harism.facebook.dao.DAONewsFeedItem;
-import fi.harism.facebook.dao.DAONewsFeedList;
+import fi.harism.facebook.dao.DAOFeedItem;
+import fi.harism.facebook.dao.DAOFeedList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.dialog.CommentsDialog;
@@ -29,7 +29,7 @@ import fi.harism.facebook.util.StringUtils;
  * 
  * @author harism
  */
-public class FeedActivity extends BaseActivity {
+public abstract class FeedActivity extends BaseActivity {
 
 	// RequestController instance.
 	private RequestController requestController = null;
@@ -46,10 +46,19 @@ public class FeedActivity extends BaseActivity {
 	// Static protocol name for showing comments.
 	private static final String PROTOCOL_SHOW_COMMENTS = "showcomments://";
 
+	/**
+	 * Implementation of this method should trigger DAOFeedItem loading using
+	 * given observer.
+	 * 
+	 * @param observer
+	 *            Observer for DAO operation.
+	 */
+	public abstract void getFeed(DAOObserver<DAOFeedList> observer);
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.feed);
 
 		// Create default picture from resources.
@@ -61,7 +70,7 @@ public class FeedActivity extends BaseActivity {
 		spanClickObserver = new SpanClickObserver(this);
 
 		showProgressDialog();
-		requestController.getNewsFeed(this, new DAONewsFeedListObserver(this));
+		getFeed(new DAOFeedListObserver(this));
 	}
 
 	@Override
@@ -88,7 +97,7 @@ public class FeedActivity extends BaseActivity {
 	 * @param feedItemObject
 	 *            Feed item JSONObject to be added.
 	 */
-	private View createFeedItem(DAONewsFeedItem feedItem) {
+	private View createFeedItem(DAOFeedItem feedItem) {
 		String itemId = feedItem.getId();
 
 		// Create default Feed Item view.
@@ -168,9 +177,11 @@ public class FeedActivity extends BaseActivity {
 		details += "Comments(" + feedItem.getCommentCount() + ")";
 		int commentsSpanEnd = details.length();
 		SpannableString detailsString = new SpannableString(details);
-		FacebookURLSpan commentsSpan = new FacebookURLSpan(PROTOCOL_SHOW_COMMENTS + itemId);
+		FacebookURLSpan commentsSpan = new FacebookURLSpan(
+				PROTOCOL_SHOW_COMMENTS + itemId);
 		commentsSpan.setObserver(spanClickObserver);
-		detailsString.setSpan(commentsSpan, commentsSpanStart, commentsSpanEnd, 0);		
+		detailsString.setSpan(commentsSpan, commentsSpanStart, commentsSpanEnd,
+				0);
 		detailsView.setText(detailsString);
 		detailsView.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -187,24 +198,24 @@ public class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class DAONewsFeedListObserver implements
-			DAOObserver<DAONewsFeedList> {
+	private final class DAOFeedListObserver implements
+			DAOObserver<DAOFeedList> {
 
 		private Activity activity = null;
 
-		public DAONewsFeedListObserver(Activity activity) {
+		public DAOFeedListObserver(Activity activity) {
 			this.activity = activity;
 		}
 
 		@Override
-		public void onComplete(DAONewsFeedList newsFeedList) {
+		public void onComplete(DAOFeedList newsFeedList) {
 			// First hide progress dialog.
 			hideProgressDialog();
 
 			// Add feed item to viewable list of items.
 			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 
-			for (DAONewsFeedItem item : newsFeedList) {
+			for (DAOFeedItem item : newsFeedList) {
 				View view = createFeedItem(item);
 				itemList.addView(view);
 
@@ -343,32 +354,36 @@ public class FeedActivity extends BaseActivity {
 			if (url.startsWith(PROTOCOL_SHOW_PROFILE)) {
 				showProgressDialog();
 				String userId = url.substring(PROTOCOL_SHOW_PROFILE.length());
-				requestController.getProfile(activity, userId, new DAOObserver<DAOProfile>() {
-					@Override
-					public void onComplete(DAOProfile response) {
-						hideProgressDialog();
-						new ProfileDialog(activity, response).show();
-					}
-					@Override
-					public void onError(Exception error) {
-						hideProgressDialog();
-					}
-				});
+				requestController.getProfile(activity, userId,
+						new DAOObserver<DAOProfile>() {
+							@Override
+							public void onComplete(DAOProfile response) {
+								hideProgressDialog();
+								new ProfileDialog(activity, response).show();
+							}
+
+							@Override
+							public void onError(Exception error) {
+								hideProgressDialog();
+							}
+						});
 				return true;
 			} else if (url.startsWith(PROTOCOL_SHOW_COMMENTS)) {
 				showProgressDialog();
 				String postId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
-				requestController.getComments(activity, postId, new DAOObserver<Vector<DAOComment>>() {
-					@Override
-					public void onComplete(Vector<DAOComment> comments) {
-						hideProgressDialog();
-						new CommentsDialog(activity, comments).show();
-					}
-					@Override
-					public void onError(Exception error) {
-						hideProgressDialog();
-					}
-				});
+				requestController.getComments(activity, postId,
+						new DAOObserver<Vector<DAOComment>>() {
+							@Override
+							public void onComplete(Vector<DAOComment> comments) {
+								hideProgressDialog();
+								new CommentsDialog(activity, comments).show();
+							}
+
+							@Override
+							public void onError(Exception error) {
+								hideProgressDialog();
+							}
+						});
 				return true;
 			}
 			return false;

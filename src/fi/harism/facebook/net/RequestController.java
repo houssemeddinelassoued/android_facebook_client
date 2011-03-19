@@ -9,7 +9,7 @@ import fi.harism.facebook.dao.DAOBitmap;
 import fi.harism.facebook.dao.DAOComment;
 import fi.harism.facebook.dao.DAOCommentsMap;
 import fi.harism.facebook.dao.DAOFriendList;
-import fi.harism.facebook.dao.DAONewsFeedList;
+import fi.harism.facebook.dao.DAOFeedList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.dao.DAOProfileMap;
@@ -33,7 +33,9 @@ public class RequestController {
 	// Friend list.
 	private DAOFriendList friendList = null;
 	// News Feed list.
-	private DAONewsFeedList newsFeedList = null;
+	private DAOFeedList newsFeedList = null;
+	// Profile Feed list.
+	private DAOFeedList profileFeedList = null;
 	// Latest status messages.
 	private DAOStatusMap statusMap = null;
 	// Profile map.
@@ -51,7 +53,10 @@ public class RequestController {
 		requestQueue = new RequestQueue();
 
 		friendList = new DAOFriendList(requestQueue, facebookClient);
-		newsFeedList = new DAONewsFeedList(requestQueue, facebookClient);
+		newsFeedList = new DAOFeedList(requestQueue, facebookClient,
+				DAOFeedList.NEWS_FEED);
+		profileFeedList = new DAOFeedList(requestQueue, facebookClient,
+				DAOFeedList.PROFILE_FEED);
 		statusMap = new DAOStatusMap(requestQueue, facebookClient);
 		profileMap = new DAOProfileMap(requestQueue, facebookClient);
 		bitmap = new DAOBitmap(requestQueue);
@@ -73,14 +78,18 @@ public class RequestController {
 		friendList.getInstance(activity, observer);
 	}
 
-	public void getNewsFeed(Activity activity,
-			final DAOObserver<DAONewsFeedList> observer) {
+	public void getNewsFeed(Activity activity, DAOObserver<DAOFeedList> observer) {
 		newsFeedList.getInstance(activity, observer);
 	}
 
 	public void getProfile(Activity activity, String userId,
 			DAOObserver<DAOProfile> observer) {
 		profileMap.getProfile(activity, userId, observer);
+	}
+
+	public void getProfileFeed(Activity activity,
+			DAOObserver<DAOFeedList> observer) {
+		profileFeedList.getInstance(activity, observer);
 	}
 
 	public void getStatus(Activity activity, String userId,
@@ -112,8 +121,10 @@ public class RequestController {
 					requestQueue.removeAllRequests();
 					// Initiate new DAO objects.
 					friendList = new DAOFriendList(requestQueue, facebookClient);
-					newsFeedList = new DAONewsFeedList(requestQueue,
-							facebookClient);
+					newsFeedList = new DAOFeedList(requestQueue,
+							facebookClient, DAOFeedList.NEWS_FEED);
+					profileFeedList = new DAOFeedList(requestQueue,
+							facebookClient, DAOFeedList.PROFILE_FEED);
 					statusMap = new DAOStatusMap(requestQueue, facebookClient);
 					profileMap = new DAOProfileMap(requestQueue, facebookClient);
 					bitmap = new DAOBitmap(requestQueue);

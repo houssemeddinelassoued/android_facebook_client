@@ -12,10 +12,10 @@
 		android:background="@drawable/bg_header"
 		android:shadowColor="@color/shadow_color"
 		android:shadowRadius="@integer/shadow_radius"
-		android:text="@string/feed_title_text"
 		android:textSize="@dimen/font_size_normal"
 		android:textStyle="bold"
-		android:textColor="@color/text_header" />
+		android:textColor="@color/text_header"
+		android:id="@+id/feed_title_text" />
 
 	<ScrollView
 		android:layout_width="fill_parent"
