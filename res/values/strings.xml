@@ -5,7 +5,7 @@
 	<string name="app_name">Facebook Client</string>
 
 	<!-- Feed Activity -->
-	<string name="feed_item_message_title">Says...</string>
+	<string name="feed_title_text">News Feed</string>
 
 	<!-- Friends Activity -->
 	<string name="friends_search_text">Search</string>
