@@ -3,7 +3,6 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:clickable="true"
 	android:orientation="vertical" >
 
 	<LinearLayout
@@ -20,7 +19,9 @@
 			android:layout_gravity="center_vertical"
 			android:layout_marginLeft="5dp"
 			android:textSize="@dimen/font_size_normal"
-			android:textColor="@color/text_link"
+			android:textColor="@color/text_black"
+			android:textColorLink="@color/text_link"
+			android:textColorHighlight="@color/bg_link"
 			android:textStyle="bold"
 			android:id="@+id/friends_item_text_name" />		
 	</LinearLayout>

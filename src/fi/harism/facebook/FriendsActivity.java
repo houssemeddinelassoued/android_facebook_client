@@ -15,6 +15,8 @@ import fi.harism.facebook.dao.DAOFriendList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
+import fi.harism.facebook.util.FacebookURLSpan;
+import fi.harism.facebook.util.StringUtils;
 
 /**
  * Friends list Activity. Once created it first loads "me/friends" from Facebook
@@ -33,6 +35,10 @@ public class FriendsActivity extends BaseActivity {
 	private Bitmap defaultPicture = null;
 	// Radius value for rounding profile images.
 	private static final int PICTURE_ROUND_RADIUS = 7;
+	// Span onClick observer for profile and comments protocols.
+	private SpanClickObserver spanClickObserver = null;
+	// Static protocol name for showing profile.
+	private static final String PROTOCOL_SHOW_PROFILE="showprofile://";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,7 @@ public class FriendsActivity extends BaseActivity {
 		setContentView(R.layout.friends);
 
 		requestController = getGlobalState().getRequestController();
+		spanClickObserver = new SpanClickObserver(this);
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -93,7 +100,8 @@ public class FriendsActivity extends BaseActivity {
 		// Find name TextView and set its value.
 		TextView nameTextView = (TextView) friendItemView
 				.findViewById(R.id.friends_item_text_name);
-		nameTextView.setText(name);
+		StringUtils.setTextLink(nameTextView, name, PROTOCOL_SHOW_PROFILE + userId, spanClickObserver);
+		//nameTextView.setText(name);
 
 		// Find picture ImageView and set default profile picture into it.
 		ImageView imageView = (ImageView) friendItemView
@@ -110,17 +118,6 @@ public class FriendsActivity extends BaseActivity {
 		EditText searchEditText = (EditText) findViewById(R.id.friends_edit_search);
 		String searchText = searchEditText.getText().toString();
 		toggleFriendItemVisibility(friendItemView, searchText);
-
-		// Add onClick listener.
-		friendItemView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO: Do something more creative with user id here. Also it's
-				// rather pointless to create new observer for every friend item
-				// View.
-				showAlertDialog((String) v.getTag());
-			}
-		});
 
 		return friendItemView;
 	}
@@ -262,6 +259,27 @@ public class FriendsActivity extends BaseActivity {
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
 			// We are not interested in this callback.
+		}
+	}
+	
+	/**
+	 * Click listener for our own protocols. Rest is handled by default handler.
+	 */
+	private final class SpanClickObserver implements
+			FacebookURLSpan.ClickObserver {
+		private BaseActivity activity = null;
+
+		public SpanClickObserver(BaseActivity activity) {
+			this.activity = activity;
+		}
+
+		@Override
+		public boolean onClick(FacebookURLSpan span) {
+			if (span.getURL().startsWith(PROTOCOL_SHOW_PROFILE)) {
+				activity.showAlertDialog(span.getURL());
+				return true;
+			}
+			return false;
 		}
 	}
 

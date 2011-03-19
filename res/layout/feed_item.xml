@@ -20,16 +20,20 @@
 			android:layout_marginLeft="5dp"
 			android:orientation="vertical" >
 			<TextView
-				android:layout_width="wrap_content"
+				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:textColor="@color/text_link"
+				android:textColor="@color/text_black"
+				android:textColorLink="@color/text_link"
+				android:textColorHighlight="@color/bg_link"
 				android:textStyle="bold"
 				android:textSize="@dimen/font_size_normal"
 				android:id="@+id/feed_item_from_text" />
 			<TextView
-				android:layout_width="wrap_content"
+				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				android:textColor="@color/text_black"
+				android:textColorLink="@color/text_link"
+				android:textColorHighlight="@color/bg_link"
 				android:textSize="@dimen/font_size_normal"
 				android:id="@+id/feed_item_message_text" />				
 		</LinearLayout>
@@ -67,14 +71,18 @@
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:textStyle="bold"
-						android:textColor="@color/text_link"
+						android:textColor="@color/text_black"
+						android:textColorLink="@color/text_link"
+						android:textColorHighlight="@color/bg_link"
 						android:textSize="@dimen/font_size_normal"
 						android:id="@+id/feed_item_name_text" />
 					<TextView
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:textSize="@dimen/font_size_normal"
-						android:textColor="@color/text_link"
+						android:textColor="@color/text_black"
+						android:textColorLink="@color/text_link"
+						android:textColorHighlight="@color/bg_link"
 						android:id="@+id/feed_item_caption_text" />
 				</LinearLayout>
 			</LinearLayout>
@@ -82,14 +90,18 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textColor="@color/text_gray"
+				android:textColorLink="@color/text_link"
+				android:textColorHighlight="@color/bg_link"
 				android:textSize="@dimen/font_size_normal"
 				android:id="@+id/feed_item_description_text" />
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textColor="@color/text_gray"
+				android:textColorLink="@color/text_link"
+				android:textColorHighlight="@color/bg_link"
 				android:textSize="@dimen/font_size_small"
-				android:id="@+id/feed_item_created_text" />
+				android:id="@+id/feed_item_details_text" />
 		</LinearLayout>
 	</LinearLayout>
 	

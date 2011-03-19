@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,6 +15,7 @@ import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
+import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
 
 /**
@@ -34,6 +33,13 @@ public class FeedActivity extends BaseActivity {
 	// TODO: Move this value to resources instead.
 	private static final int PICTURE_ROUND_RADIUS = 7;
 
+	// Span onClick observer for profile and comments protocols.
+	private SpanClickObserver spanClickObserver = null;
+	// Static protocol name for showing profile.
+	private static final String PROTOCOL_SHOW_PROFILE = "showprofile://";
+	// Static protocol name for showing comments.
+	private static final String PROTOCOL_SHOW_COMMENTS = "showcomments://";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,9 +51,10 @@ public class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		requestController = getGlobalState().getRequestController();
+		spanClickObserver = new SpanClickObserver(this);
 
 		showProgressDialog();
-		requestController.getNewsFeed(this, new DAONewsFeedListObserver());
+		requestController.getNewsFeed(this, new DAONewsFeedListObserver(this));
 	}
 
 	@Override
@@ -69,12 +76,12 @@ public class FeedActivity extends BaseActivity {
 	}
 
 	/**
-	 * Adds new feed item to this Activity's view.
+	 * Creates new feed item.
 	 * 
 	 * @param feedItemObject
 	 *            Feed item JSONObject to be added.
 	 */
-	private void createFeedItem(DAONewsFeedItem feedItem) {
+	private View createFeedItem(DAONewsFeedItem feedItem) {
 		String itemId = feedItem.getId();
 
 		// Create default Feed Item view.
@@ -91,7 +98,8 @@ public class FeedActivity extends BaseActivity {
 		// Set sender's name.
 		TextView fromView = (TextView) feedItemView
 				.findViewById(R.id.feed_item_from_text);
-		fromView.setText(fromName);
+		StringUtils.setTextLink(fromView, fromName, PROTOCOL_SHOW_PROFILE
+				+ fromId, spanClickObserver);
 
 		// Get message from feed item. Message is the one user can add as a
 		// description to items posted.
@@ -99,7 +107,7 @@ public class FeedActivity extends BaseActivity {
 		TextView messageView = (TextView) feedItemView
 				.findViewById(R.id.feed_item_message_text);
 		if (message != null) {
-			messageView.setText(message);
+			StringUtils.setTextLinks(messageView, message, null);
 		} else {
 			messageView.setVisibility(View.GONE);
 		}
@@ -110,16 +118,21 @@ public class FeedActivity extends BaseActivity {
 		TextView nameView = (TextView) feedItemView
 				.findViewById(R.id.feed_item_name_text);
 		if (name != null) {
-			nameView.setText(name);
+			if (feedItem.getLink() != null) {
+				StringUtils.setTextLink(nameView, name, feedItem.getLink(),
+						null);
+			} else {
+				nameView.setText(name);
+			}
 		} else {
 			nameView.setVisibility(View.GONE);
 		}
-		
+
 		String caption = feedItem.getCaption();
 		TextView captionView = (TextView) feedItemView
 				.findViewById(R.id.feed_item_caption_text);
 		if (caption != null) {
-			captionView.setText(caption);
+			StringUtils.setTextLinks(captionView, caption, null);
 		} else {
 			captionView.setVisibility(View.GONE);
 		}
@@ -130,37 +143,36 @@ public class FeedActivity extends BaseActivity {
 		TextView descriptionView = (TextView) feedItemView
 				.findViewById(R.id.feed_item_description_text);
 		if (description != null) {
-			descriptionView.setText(description);
+			StringUtils.setTextLinks(descriptionView, description, null);
 		} else {
 			descriptionView.setVisibility(View.GONE);
 		}
 
 		// Get created time from feed item.
 		String created = feedItem.getCreatedTime();
-		TextView createdView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_created_text);
+		TextView detailsView = (TextView) feedItemView
+				.findViewById(R.id.feed_item_details_text);
+		String details = "";
 		if (created != null) {
-			createdView.setText(StringUtils.convertFBTime(created));
-		} else {
-			createdView.setVisibility(View.GONE);
+			details += StringUtils.convertFBTime(created);
+			details += "  á  ";
 		}
+		int commentsSpanStart = details.length();
+		details += "Comments(" + feedItem.getCommentCount() + ")";
+		int commentsSpanEnd = details.length();
+		SpannableString detailsString = new SpannableString(details);
+		FacebookURLSpan commentsSpan = new FacebookURLSpan(PROTOCOL_SHOW_COMMENTS + itemId);
+		commentsSpan.setObserver(spanClickObserver);
+		detailsString.setSpan(commentsSpan, commentsSpanStart, commentsSpanEnd, 0);		
+		detailsView.setText(detailsString);
+		detailsView.setMovementMethod(LinkMovementMethod.getInstance());
 
 		// Set default picture as sender's picture.
 		ImageView fromPictureImage = (ImageView) feedItemView
 				.findViewById(R.id.feed_item_from_image);
 		fromPictureImage.setImageBitmap(defaultPicture);
 
-		// Add feed item to viewable list of items.
-		LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
-		itemList.addView(feedItemView);
-
-		requestController.getProfile(this, fromId, new DAOProfileObserver(this,
-				itemId));
-
-		if (feedItem.getPictureUrl() != null) {
-			requestController.getBitmap(this, feedItem.getPictureUrl(),
-					new FeedItemPictureObserver(itemId));
-		}
+		return feedItemView;
 	}
 
 	/**
@@ -171,13 +183,31 @@ public class FeedActivity extends BaseActivity {
 	private final class DAONewsFeedListObserver implements
 			DAOObserver<DAONewsFeedList> {
 
+		private Activity activity = null;
+
+		public DAONewsFeedListObserver(Activity activity) {
+			this.activity = activity;
+		}
+
 		@Override
 		public void onComplete(DAONewsFeedList newsFeedList) {
 			// First hide progress dialog.
 			hideProgressDialog();
 
+			// Add feed item to viewable list of items.
+			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
+
 			for (DAONewsFeedItem item : newsFeedList) {
-				createFeedItem(item);
+				View view = createFeedItem(item);
+				itemList.addView(view);
+
+				requestController.getProfile(activity, item.getFromId(),
+						new DAOProfileObserver(activity, item.getId()));
+
+				if (item.getPictureUrl() != null) {
+					requestController.getBitmap(activity, item.getPictureUrl(),
+							new FeedItemPictureObserver(item.getId()));
+				}
 			}
 		}
 
@@ -286,6 +316,30 @@ public class FeedActivity extends BaseActivity {
 		@Override
 		public void onError(Exception ex) {
 			// We don't care about errors.
+		}
+	}
+
+	/**
+	 * Click listener for our own protocols. Rest is handled by default handler.
+	 */
+	private final class SpanClickObserver implements
+			FacebookURLSpan.ClickObserver {
+		private BaseActivity activity = null;
+
+		public SpanClickObserver(BaseActivity activity) {
+			this.activity = activity;
+		}
+
+		@Override
+		public boolean onClick(FacebookURLSpan span) {
+			if (span.getURL().startsWith(PROTOCOL_SHOW_PROFILE)) {
+				activity.showAlertDialog(span.getURL());
+				return true;
+			} else if (span.getURL().startsWith(PROTOCOL_SHOW_COMMENTS)) {
+				activity.showAlertDialog(span.getURL());
+				return true;
+			}
+			return false;
 		}
 	}
 }

@@ -6,7 +6,7 @@
 	<dimen name="font_size_normal">14sp</dimen>
 	<dimen name="font_size_large">26sp</dimen>
 	
-	<color name="bg_link">#EDEFF4</color>
+	<color name="bg_link">#D0D0D0</color>
 	
 	<color name="text_header">#FFFFFF</color>
 	<color name="text_link">#37589B</color>
