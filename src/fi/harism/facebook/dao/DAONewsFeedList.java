@@ -79,7 +79,7 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 			// Create Facebook request.
 			Bundle b = new Bundle();
 			b.putString("fields",
-					"id,type,from,message,picture,name,description,created_time");
+					"id,type,from,message,picture,link,name,caption,description,created_time");
 			FacebookRequest r = new FacebookRequest(activity, "me/home", b,
 					facebookClient, new FacebookRequest.Observer() {
 						@Override
@@ -102,15 +102,18 @@ public class DAONewsFeedList implements Iterable<DAONewsFeedItem> {
 											null);
 									String picture = item.optString("picture",
 											null);
+									String link = item.optString("link", null);
 									String name = item.optString("name", null);
+									String caption = item.optString("caption",
+											null);
 									String description = item.optString(
 											"description", null);
 									String createdTime = item.optString(
 											"created_time", null);
 									feedItemList.add(new DAONewsFeedItem(id,
 											type, fromId, fromName, message,
-											picture, name, description,
-											createdTime));
+											picture, link, name, caption,
+											description, createdTime));
 								}
 								feedItemListLoaded = true;
 								observer.onComplete(self);

@@ -3,6 +3,10 @@ package fi.harism.facebook;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -108,6 +112,15 @@ public class FeedActivity extends BaseActivity {
 			nameView.setText(name);
 		} else {
 			nameView.setVisibility(View.GONE);
+		}
+		
+		String caption = feedItem.getCaption();
+		TextView captionView = (TextView) feedItemView
+				.findViewById(R.id.feed_item_caption_text);
+		if (caption != null) {
+			captionView.setText(caption);
+		} else {
+			captionView.setVisibility(View.GONE);
 		}
 
 		// Get description from feed item. This is longer description for

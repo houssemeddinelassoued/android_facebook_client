@@ -13,22 +13,30 @@ public class DAONewsFeedItem {
 	private String fromName;
 	private String message;
 	private String pictureUrl;
+	private String link;
 	private String name;
+	private String caption;
 	private String description;
 	private String createdTime;
 
 	public DAONewsFeedItem(String id, String type, String fromId,
-			String fromName, String message, String pictureUrl, String name,
-			String description, String createdTime) {
+			String fromName, String message, String pictureUrl, String link,
+			String name, String caption, String description, String createdTime) {
 		this.id = id;
 		this.type = type;
 		this.fromId = fromId;
 		this.fromName = fromName;
 		this.message = message;
 		this.pictureUrl = pictureUrl;
+		this.link = link;
 		this.name = name;
+		this.caption = caption;
 		this.description = description;
 		this.createdTime = createdTime;
+	}
+
+	public String getCaption() {
+		return caption;
 	}
 
 	public String getCreatedTime() {
@@ -51,6 +59,10 @@ public class DAONewsFeedItem {
 		return id;
 	}
 
+	public String getLink() {
+		return link;
+	}
+
 	public String getMessage() {
 		return message;
 	}
@@ -58,11 +70,11 @@ public class DAONewsFeedItem {
 	public String getName() {
 		return name;
 	}
-
+	
 	public String getPictureUrl() {
 		return pictureUrl;
 	}
-
+	
 	public String getType() {
 		return type;
 	}
