@@ -9,7 +9,7 @@
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:padding="5dp"
-		android:background="@color/bg_dark_blue" >		
+		android:background="@drawable/bg_header" >		
 		<ImageView
 			android:layout_height="40dp"
 			android:layout_width="40dp"
@@ -25,13 +25,13 @@
 				android:layout_height="wrap_content"
 				android:textStyle="bold"
 				android:textSize="@dimen/font_size_normal"
-				android:textColor="@color/text_white"
+				android:textColor="@color/text_header"
 				android:text="@string/main_name_text"
 				android:id="@+id/main_user_name" />
 			<TextView
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:textColor="@color/text_white"
+				android:textColor="@color/text_header"
 				android:textSize="@dimen/font_size_normal"
 				android:text="@string/main_status_text"
 				android:id="@+id/main_user_status" />
@@ -41,7 +41,7 @@
 	<ScrollView
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:background="@color/bg_white" >
+		android:background="@drawable/bg_content" >
 		<LinearLayout
 			android:orientation="vertical"
 			android:layout_width="fill_parent"

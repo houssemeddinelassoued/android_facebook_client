@@ -6,14 +6,11 @@
 	<dimen name="font_size_normal">14sp</dimen>
 	<dimen name="font_size_large">26sp</dimen>
 	
-	<color name="bg_white">#FFFFFF</color>
-	<color name="bg_dark_blue">#37589B</color>
-	<color name="bg_mid_blue">#5F79B0</color>
-	<color name="bg_light_blue">#EDEFF4</color>
+	<color name="bg_link">#EDEFF4</color>
 	
-	<color name="text_white">#FFFFFF</color>
+	<color name="text_header">#FFFFFF</color>
+	<color name="text_link">#37589B</color>
 	<color name="text_black">#000000</color>
-	<color name="text_blue">#37589B</color>
 	<color name="text_gray">#5A5A5A</color>
 	
 </resources>

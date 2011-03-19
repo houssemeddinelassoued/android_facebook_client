@@ -4,7 +4,6 @@
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:clickable="true"
-	android:background="@drawable/bg_item_clickable"
 	android:orientation="vertical" >
 
 	<LinearLayout
@@ -21,7 +20,7 @@
 			android:layout_gravity="center_vertical"
 			android:layout_marginLeft="5dp"
 			android:textSize="@dimen/font_size_normal"
-			android:textColor="@color/text_blue"
+			android:textColor="@color/text_link"
 			android:textStyle="bold"
 			android:id="@+id/friends_item_text_name" />		
 	</LinearLayout>

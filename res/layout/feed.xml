@@ -9,16 +9,16 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:padding="5dp"
-		android:background="@color/bg_dark_blue"
+		android:background="@drawable/bg_header"
 		android:text="@string/feed_title_text"
 		android:textSize="@dimen/font_size_normal"
 		android:textStyle="bold"
-		android:textColor="@color/text_white" />
+		android:textColor="@color/text_header" />
 
 	<ScrollView
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:background="@color/bg_white" >
+		android:background="@drawable/bg_content" >
 		<LinearLayout
 			android:id="@+id/feed_list"
 			android:layout_width="fill_parent"
