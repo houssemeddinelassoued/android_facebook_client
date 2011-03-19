@@ -1,5 +1,7 @@
 package fi.harism.facebook;
 
+import java.util.Vector;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -9,10 +11,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import fi.harism.facebook.dao.DAOComment;
 import fi.harism.facebook.dao.DAONewsFeedItem;
 import fi.harism.facebook.dao.DAONewsFeedList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
+import fi.harism.facebook.dialog.CommentsDialog;
 import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
@@ -350,7 +354,19 @@ public class FeedActivity extends BaseActivity {
 				});
 				return true;
 			} else if (url.startsWith(PROTOCOL_SHOW_COMMENTS)) {
-				activity.showAlertDialog(span.getURL());
+				showProgressDialog();
+				String postId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
+				requestController.getComments(activity, postId, new DAOObserver<Vector<DAOComment>>() {
+					@Override
+					public void onComplete(Vector<DAOComment> comments) {
+						hideProgressDialog();
+						new CommentsDialog(activity, comments).show();
+					}
+					@Override
+					public void onError(Exception error) {
+						hideProgressDialog();
+					}
+				});
 				return true;
 			}
 			return false;

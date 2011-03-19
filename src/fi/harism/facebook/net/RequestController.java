@@ -1,9 +1,13 @@
 package fi.harism.facebook.net;
 
+import java.util.Vector;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import fi.harism.facebook.dao.DAOBitmap;
+import fi.harism.facebook.dao.DAOComment;
+import fi.harism.facebook.dao.DAOCommentsMap;
 import fi.harism.facebook.dao.DAOFriendList;
 import fi.harism.facebook.dao.DAONewsFeedList;
 import fi.harism.facebook.dao.DAOObserver;
@@ -36,6 +40,8 @@ public class RequestController {
 	private DAOProfileMap profileMap = null;
 	// Bitmap handling.
 	private DAOBitmap bitmap = null;
+	// Comments map.
+	private DAOCommentsMap commentsMap = null;
 
 	/**
 	 * Default constructor.
@@ -49,11 +55,17 @@ public class RequestController {
 		statusMap = new DAOStatusMap(requestQueue, facebookClient);
 		profileMap = new DAOProfileMap(requestQueue, facebookClient);
 		bitmap = new DAOBitmap(requestQueue);
+		commentsMap = new DAOCommentsMap(requestQueue, facebookClient);
 	}
 
 	public void getBitmap(Activity activity, String imageUrl,
 			DAOObserver<Bitmap> observer) {
 		bitmap.getBitmap(activity, imageUrl, observer);
+	}
+
+	public void getComments(Activity activity, String postId,
+			DAOObserver<Vector<DAOComment>> observer) {
+		commentsMap.getComments(activity, postId, observer);
 	}
 
 	public void getFriendList(Activity activity,
@@ -74,6 +86,56 @@ public class RequestController {
 	public void getStatus(Activity activity, String userId,
 			DAOObserver<DAOStatus> observer) {
 		statusMap.getStatus(activity, userId, observer);
+	}
+
+	public boolean isAuthorized() {
+		return facebookClient.isAuthorized();
+	}
+
+	public void login(Activity activity, FacebookLoginObserver observer) {
+		facebookClient.authorize(activity, observer);
+	}
+
+	public void loginCallback(int requestCode, int resultCode, Intent data) {
+		facebookClient.authorizeCallback(requestCode, resultCode, data);
+	}
+
+	public void logout(final Activity activity,
+			final FacebookLogoutObserver observer) {
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					facebookClient.logout(activity);
+
+					// Remove all active requests from queue.
+					requestQueue.removeAllRequests();
+					// Initiate new DAO objects.
+					friendList = new DAOFriendList(requestQueue, facebookClient);
+					newsFeedList = new DAONewsFeedList(requestQueue,
+							facebookClient);
+					statusMap = new DAOStatusMap(requestQueue, facebookClient);
+					profileMap = new DAOProfileMap(requestQueue, facebookClient);
+					bitmap = new DAOBitmap(requestQueue);
+					commentsMap = new DAOCommentsMap(requestQueue,
+							facebookClient);
+
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							observer.onComplete();
+						}
+					});
+				} catch (final Exception ex) {
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							observer.onError(ex);
+						}
+					});
+				}
+			}
+		}.start();
 	}
 
 	/**
@@ -99,53 +161,6 @@ public class RequestController {
 	 */
 	public void setPaused(Activity activity, boolean paused) {
 		requestQueue.setPaused(activity, paused);
-	}
-	
-	public boolean isAuthorized() {
-		return facebookClient.isAuthorized();
-	}
-
-	public void login(Activity activity, FacebookLoginObserver observer) {
-		facebookClient.authorize(activity, observer);
-	}
-	
-	public void loginCallback(int requestCode, int resultCode, Intent data) {
-		facebookClient.authorizeCallback(requestCode, resultCode, data);
-	}
-
-	public void logout(final Activity activity,
-			final FacebookLogoutObserver observer) {
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					facebookClient.logout(activity);
-					
-					// Remove all active requests from queue.
-					requestQueue.removeAllRequests();
-					// Initiate new DAO objects.
-					friendList = new DAOFriendList(requestQueue, facebookClient);
-					newsFeedList = new DAONewsFeedList(requestQueue, facebookClient);
-					statusMap = new DAOStatusMap(requestQueue, facebookClient);
-					profileMap = new DAOProfileMap(requestQueue, facebookClient);
-					bitmap = new DAOBitmap(requestQueue);
-					
-					activity.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							observer.onComplete();
-						}
-					});
-				} catch (final Exception ex) {
-					activity.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							observer.onError(ex);
-						}
-					});
-				}
-			}
-		}.start();
 	}
 
 }
