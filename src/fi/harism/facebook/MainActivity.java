@@ -1,13 +1,12 @@
 package fi.harism.facebook;
 
-import java.util.HashMap;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,7 +28,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class MainActivity extends BaseActivity {
 
 	// Profile picture corner rounding radius.
-	private static final int PICTURE_ROUND_RADIUS = 7;
+	private static final int PICTURE_ROUND_RADIUS = 0;
 	// Global instance of RequestController.
 	private RequestController requestController = null;
 
@@ -42,6 +41,7 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		requestController = getGlobalState().getRequestController();
 		

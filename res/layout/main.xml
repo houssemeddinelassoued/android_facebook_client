@@ -11,8 +11,11 @@
 		android:padding="5dp"
 		android:background="@drawable/bg_header" >		
 		<ImageView
-			android:layout_height="40dp"
-			android:layout_width="40dp"
+			android:layout_height="42dp"
+			android:layout_width="42dp"
+			android:padding="1dp"
+			android:layout_gravity="center_vertical"
+			android:background="#80000000"
 			android:id="@+id/main_user_image" />
 		<LinearLayout
 			android:layout_height="wrap_content"
@@ -23,6 +26,8 @@
 			<TextView
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
+				android:shadowColor="@color/shadow_color"
+				android:shadowRadius="@integer/shadow_radius"
 				android:textStyle="bold"
 				android:textSize="@dimen/font_size_normal"
 				android:textColor="@color/text_header"
@@ -31,6 +36,8 @@
 			<TextView
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
+				android:shadowColor="@color/shadow_color"
+				android:shadowRadius="@integer/shadow_radius"
 				android:textColor="@color/text_header"
 				android:textSize="@dimen/font_size_normal"
 				android:text="@string/main_status_text"

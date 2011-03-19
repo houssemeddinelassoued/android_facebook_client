@@ -47,7 +47,7 @@
 		<ImageView
 			android:layout_height="fill_parent"
 			android:layout_width="3dp"
-			android:src="#E2E2E2" />
+			android:src="#D2D2E2" />
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"

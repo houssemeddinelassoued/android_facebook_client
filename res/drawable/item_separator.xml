@@ -4,7 +4,7 @@
 	android:shape="line" >
 	
 	<stroke
-		android:color="#E2E2E2"
+		android:color="#D2D2E2"
 		android:width="1px" />
 	
 </shape>

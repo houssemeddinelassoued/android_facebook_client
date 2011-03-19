@@ -21,5 +21,13 @@
 	<string name="main_button_friends_text">Friends</string>
 	<string name="main_button_profile_text">Profile</string>
 	<string name="main_button_logout_text">Logout</string>
+	
+	<!-- Comments Dialog -->
+	<string name="comments_dialog_title">Comments</string>
+	
+	<!-- Profile Dialog -->
+	<string name="profile_dialog_title">Profile</string>
+	<string name="profile_dialog_id_text">Id:</string>
+	<string name="profile_dialog_name_text">Name:</string>
 
 </resources>

@@ -13,4 +13,7 @@
 	<color name="text_black">#000000</color>
 	<color name="text_gray">#5A5A5A</color>
 	
+	<integer name="shadow_radius">2</integer>
+	<color name="shadow_color">#000000</color>
+	
 </resources>
