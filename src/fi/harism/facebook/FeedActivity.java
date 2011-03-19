@@ -17,6 +17,7 @@ import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
+import fi.harism.facebook.util.StringUtils;
 
 /**
  * Feed Activity for showing latest News Feed events for logged in user.
@@ -135,12 +136,11 @@ public class FeedActivity extends BaseActivity {
 		}
 
 		// Get created time from feed item.
-		// TODO: Convert time to more readable format.
 		String created = feedItem.getCreatedTime();
 		TextView createdView = (TextView) feedItemView
 				.findViewById(R.id.feed_item_created_text);
 		if (created != null) {
-			createdView.setText(created);
+			createdView.setText(StringUtils.convertFBTime(created));
 		} else {
 			createdView.setVisibility(View.GONE);
 		}
