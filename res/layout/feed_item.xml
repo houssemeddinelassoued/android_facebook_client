@@ -88,7 +88,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textColor="@color/text_gray"
-				android:textSize="@dimen/font_size_normal"
+				android:textSize="@dimen/font_size_small"
 				android:id="@+id/feed_item_created_text" />
 		</LinearLayout>
 	</LinearLayout>
