@@ -28,6 +28,9 @@ public class ProfileDialog extends Dialog {
 		
 		TextView nameView = (TextView) findViewById(R.id.dialog_profile_name_text);
 		nameView.setText(profile.getName());
+		
+		TextView statusView = (TextView) findViewById(R.id.dialog_profile_status_text);
+		statusView.setText(profile.getStatus());
 	}
 
 }

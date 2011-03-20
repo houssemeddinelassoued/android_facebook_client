@@ -28,8 +28,6 @@
 	<string name="comments_dialog_title">Comments</string>
 	
 	<!-- Profile Dialog -->
-	<string name="profile_dialog_title">Profile</string>
-	<string name="profile_dialog_id_text">Id:</string>
-	<string name="profile_dialog_name_text">Name:</string>
+	<string name="dialog_profile_title">Profile</string>
 
 </resources>

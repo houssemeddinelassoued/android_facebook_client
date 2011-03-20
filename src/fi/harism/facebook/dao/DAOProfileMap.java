@@ -2,7 +2,6 @@ package fi.harism.facebook.dao;
 
 import java.util.HashMap;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -100,7 +99,7 @@ public class DAOProfileMap {
 					resp = facebookClient.request(userId + "/statuses", params);
 					status = resp.getJSONArray("data").getJSONObject(0).getString("message");
 				} catch (Exception ex) {
-					status = "Error: " + ex.getLocalizedMessage();
+					status = "Status error: " + ex.getLocalizedMessage();
 				}
 				
 				profile = new DAOProfile(userId, name, picture, status);
