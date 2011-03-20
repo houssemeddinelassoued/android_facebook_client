@@ -125,7 +125,7 @@ public class DAOFeedList implements Iterable<DAOFeedItem> {
 				Bundle params = new Bundle();
 				params.putString(
 						"fields",
-						"id,type,from,message,picture,link,name,caption,description,created_time,comments");
+						"id,type,from,message,picture,link,name,caption,description,created_time,comments,likes");
 				JSONObject resp = facebookClient.request(feedPath, params);
 
 				JSONArray feedItems = resp.getJSONArray("data");
@@ -144,11 +144,6 @@ public class DAOFeedList implements Iterable<DAOFeedItem> {
 					String caption = item.optString("caption", null);
 					String description = item.optString("description", null);
 					String createdTime = item.optString("created_time", null);
-					int commentCount = 0;
-					JSONObject commentsObject = item.optJSONObject("comments");
-					if (commentsObject != null) {
-						commentCount = commentsObject.getInt("count");
-					}
 
 					params = new Bundle();
 					params.putString("fields", "picture");
@@ -161,8 +156,7 @@ public class DAOFeedList implements Iterable<DAOFeedItem> {
 
 					feedItemList.add(new DAOFeedItem(id, type, fromId,
 							fromName, fromPicture, message, picture, link,
-							name, caption, description, createdTime,
-							commentCount));
+							name, caption, description, createdTime));
 				}
 				feedItemListLoaded = true;
 			} catch (Exception ex) {

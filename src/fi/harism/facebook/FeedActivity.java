@@ -45,6 +45,8 @@ public abstract class FeedActivity extends BaseActivity {
 	private static final String PROTOCOL_SHOW_PROFILE = "showprofile://";
 	// Static protocol name for showing comments.
 	private static final String PROTOCOL_SHOW_COMMENTS = "showcomments://";
+	// Static protocol name for showing likes.
+	private static final String PROTOCOL_SHOW_LIKES = "showlikes://";
 
 	/**
 	 * Implementation of this method should trigger DAOFeedItem loading using
@@ -174,14 +176,22 @@ public abstract class FeedActivity extends BaseActivity {
 			details += "  á  ";
 		}
 		int commentsSpanStart = details.length();
-		details += "Comments(" + feedItem.getCommentCount() + ")";
+		details += "Comments";
 		int commentsSpanEnd = details.length();
+		details += "  á  ";
+		int likesSpanStart = details.length();
+		details += "Likes";
+		int likesSpanEnd = details.length();
 		SpannableString detailsString = new SpannableString(details);
 		FacebookURLSpan commentsSpan = new FacebookURLSpan(
 				PROTOCOL_SHOW_COMMENTS + itemId);
 		commentsSpan.setObserver(spanClickObserver);
 		detailsString.setSpan(commentsSpan, commentsSpanStart, commentsSpanEnd,
 				0);
+		FacebookURLSpan likesSpan = new FacebookURLSpan(PROTOCOL_SHOW_LIKES
+				+ itemId);
+		likesSpan.setObserver(spanClickObserver);
+		detailsString.setSpan(likesSpan, likesSpanStart, likesSpanEnd, 0);
 		detailsView.setText(detailsString);
 		detailsView.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -358,6 +368,9 @@ public abstract class FeedActivity extends BaseActivity {
 								hideProgressDialog();
 							}
 						});
+				return true;
+			} else if (url.startsWith(PROTOCOL_SHOW_LIKES)) {
+				showAlertDialog(url);
 				return true;
 			}
 			return false;
