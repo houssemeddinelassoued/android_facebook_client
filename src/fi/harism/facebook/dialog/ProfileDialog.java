@@ -1,7 +1,7 @@
 package fi.harism.facebook.dialog;
 
-import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.TextView;
@@ -12,8 +12,8 @@ public class ProfileDialog extends Dialog {
 
 	private DAOProfile profile;
 
-	public ProfileDialog(Activity activity, DAOProfile profile) {
-		super(activity);
+	public ProfileDialog(Context context, DAOProfile profile) {
+		super(context);
 		this.profile = profile;
 	}
 

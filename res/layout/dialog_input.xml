@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical" >
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:shadowColor="@color/shadow_color"
+		android:shadowRadius="@integer/shadow_radius"
+		android:textSize="@dimen/font_size_normal"
+		android:textColor="@color/text_header"
+		android:textStyle="bold"
+		android:text="Enter Message"
+		android:background="@drawable/bg_header"
+		android:padding="5dp"
+		android:id="@+id/dialog_input_header"/>
+	<EditText
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="5dp"
+		android:textColor="@color/text_black"
+		android:textSize="@dimen/font_size_normal"
+		android:background="@drawable/bg_content"
+		android:id="@+id/dialog_input_edit" />
+	<Button
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="5dp"
+		android:text="Send"
+		android:shadowColor="@color/shadow_color"
+		android:shadowRadius="@integer/shadow_radius"
+		android:textColor="@color/text_header"
+		android:textSize="@dimen/font_size_normal"
+		android:textStyle="bold"		
+		android:background="@drawable/bg_footer"
+		android:id="@+id/dialog_input_send" />
+</LinearLayout>

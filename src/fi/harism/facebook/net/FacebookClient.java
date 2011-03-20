@@ -69,7 +69,7 @@ public class FacebookClient {
 		} else {
 			// List of permissions our application needs.
 			String permissions[] = { "user_status", "friends_status",
-					"read_stream" };
+					"read_stream", "publish_stream" };
 			// Call actual authorization procedure.
 			facebook.authorize(activity, permissions,
 					new Facebook.DialogListener() {

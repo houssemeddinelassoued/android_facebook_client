@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import fi.harism.facebook.dao.DAOBitmap;
 import fi.harism.facebook.dao.DAOComment;
-import fi.harism.facebook.dao.DAOCommentsMap;
+import fi.harism.facebook.dao.DAOCommentList;
 import fi.harism.facebook.dao.DAOFriendList;
 import fi.harism.facebook.dao.DAOFeedList;
 import fi.harism.facebook.dao.DAOObserver;
@@ -38,8 +38,6 @@ public class RequestController {
 	private DAOProfileMap profileMap = null;
 	// Bitmap handling.
 	private DAOBitmap bitmap = null;
-	// Comments map.
-	private DAOCommentsMap commentsMap = null;
 
 	/**
 	 * Default constructor.
@@ -55,7 +53,6 @@ public class RequestController {
 				DAOFeedList.PROFILE_FEED);
 		profileMap = new DAOProfileMap(requestQueue, facebookClient);
 		bitmap = new DAOBitmap(requestQueue);
-		commentsMap = new DAOCommentsMap(requestQueue, facebookClient);
 	}
 
 	public void getBitmap(Activity activity, String imageUrl,
@@ -63,9 +60,11 @@ public class RequestController {
 		bitmap.getBitmap(activity, imageUrl, observer);
 	}
 
-	public void getComments(Activity activity, String postId,
-			DAOObserver<Vector<DAOComment>> observer) {
-		commentsMap.getComments(activity, postId, observer);
+	public void getComments(Activity activity, String itemId,
+			DAOObserver<DAOCommentList> observer) {
+		DAOCommentList comments = new DAOCommentList(requestQueue,
+				facebookClient, activity, itemId);
+		comments.getComments(observer);
 	}
 
 	public void getFriendList(Activity activity,
@@ -117,8 +116,6 @@ public class RequestController {
 							facebookClient, DAOFeedList.PROFILE_FEED);
 					profileMap = new DAOProfileMap(requestQueue, facebookClient);
 					bitmap = new DAOBitmap(requestQueue);
-					commentsMap = new DAOCommentsMap(requestQueue,
-							facebookClient);
 
 					activity.runOnUiThread(new Runnable() {
 						@Override

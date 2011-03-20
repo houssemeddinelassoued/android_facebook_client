@@ -1,7 +1,5 @@
 package fi.harism.facebook;
 
-import java.util.Vector;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -12,7 +10,7 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAOComment;
+import fi.harism.facebook.dao.DAOCommentList;
 import fi.harism.facebook.dao.DAOFeedItem;
 import fi.harism.facebook.dao.DAOFeedList;
 import fi.harism.facebook.dao.DAOObserver;
@@ -356,9 +354,9 @@ public abstract class FeedActivity extends BaseActivity {
 				showProgressDialog();
 				String postId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
 				requestController.getComments(activity, postId,
-						new DAOObserver<Vector<DAOComment>>() {
+						new DAOObserver<DAOCommentList>() {
 							@Override
-							public void onComplete(Vector<DAOComment> comments) {
+							public void onComplete(DAOCommentList comments) {
 								hideProgressDialog();
 								new CommentsDialog(activity, comments).show();
 							}

@@ -25,7 +25,8 @@
 	<string name="main_button_logout_text">Logout</string>
 	
 	<!-- Comments Dialog -->
-	<string name="comments_dialog_title">Comments</string>
+	<string name="dialog_comments_title">Comments</string>
+	<string name="dialog_comments_post">Post Comment</string>
 	
 	<!-- Profile Dialog -->
 	<string name="dialog_profile_title">Profile</string>
