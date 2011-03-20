@@ -7,13 +7,14 @@
 	<!-- Feed Activity -->
 	<string name="feed_news_text">News Feed</string>
 	<string name="feed_profile_text">Wall</string>
+	<string name="feed_update_text">Update</string>
 
 	<!-- Friends Activity -->
 	<string name="friends_search_text">Search</string>
 
 	<!-- Login Activity -->
-	<string name="login_main_text"><b>Facebook</b>\nClient\nExample</string>
-	<string name="login_button_text">Login</string>
+	<string name="login_text"><b>Facebook</b>\nClient\nExample</string>
+	<string name="login_button">Login</string>
 
 	<!-- Main Activity -->
 	<string name="main_name_text">Name</string>
@@ -22,7 +23,7 @@
 	<string name="main_button_wall_text">Wall</string>
 	<string name="main_button_friends_text">Friends</string>
 	<string name="main_button_profile_text">Profile</string>
-	<string name="main_button_logout_text">Logout</string>
+	<string name="main_logout_text">Logout</string>
 	
 	<!-- Comments Dialog -->
 	<string name="dialog_comments_title">Comments</string>
@@ -30,5 +31,9 @@
 	
 	<!-- Profile Dialog -->
 	<string name="dialog_profile_title">Profile</string>
+	
+	<!-- Input Dialog -->
+	<string name="dialog_input_title">Enter Message</string>
+	<string name="dialog_input_send">Send</string>
 
 </resources>

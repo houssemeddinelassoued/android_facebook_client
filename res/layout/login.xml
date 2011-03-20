@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:orientation="vertical" >
+	android:layout_height="fill_parent" >
 	<TextView
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
@@ -14,28 +13,30 @@
 		android:text="@string/app_name"
 		android:shadowColor="@color/shadow_color"
 		android:shadowRadius="@integer/shadow_radius"
-		android:background="@drawable/bg_header" />
-	<RelativeLayout
+		android:background="@drawable/bg_header"
+		android:id="@+id/login_header" />
+	<TextView
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:background="@drawable/bg_content" >
-		<TextView
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_centerVertical="true"
-			android:gravity="center"
-			android:text="@string/login_main_text"
-			android:textSize="@dimen/font_size_large"
-			android:textColor="@color/text_gray" />
-		<Button
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:id="@+id/login_button"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="20dp"
-			android:layout_marginLeft="50dp"
-			android:layout_marginRight="50dp"
-			android:text="@string/login_button_text" />
-	</RelativeLayout>
-</LinearLayout>
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:padding="5dp"
+		android:gravity="center"
+		android:textColor="@color/text_header"
+		android:textSize="@dimen/font_size_normal"
+		android:textStyle="bold"
+		android:text="@string/login_button"
+		android:shadowColor="@color/shadow_color"
+		android:shadowRadius="@integer/shadow_radius"
+		android:background="@drawable/bg_footer"
+		android:id="@+id/login_footer" />
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/login_header"
+		android:layout_above="@id/login_footer"
+		android:gravity="center"
+		android:background="@drawable/bg_content"
+		android:text="@string/login_text"
+		android:textSize="@dimen/font_size_large"
+		android:textColor="@color/text_gray" />
+</RelativeLayout>

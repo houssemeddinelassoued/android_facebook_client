@@ -12,7 +12,7 @@
 		android:textSize="@dimen/font_size_normal"
 		android:textColor="@color/text_header"
 		android:textStyle="bold"
-		android:text="Enter Message"
+		android:text="@string/dialog_input_title"
 		android:background="@drawable/bg_header"
 		android:padding="5dp"
 		android:id="@+id/dialog_input_header"/>
@@ -28,7 +28,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:padding="5dp"
-		android:text="Send"
+		android:text="@string/dialog_input_send"
 		android:shadowColor="@color/shadow_color"
 		android:shadowRadius="@integer/shadow_radius"
 		android:textColor="@color/text_header"

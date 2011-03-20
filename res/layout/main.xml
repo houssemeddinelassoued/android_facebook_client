@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:orientation="vertical" >
+	android:layout_height="fill_parent" >
 
 	<LinearLayout
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:padding="5dp"
-		android:background="@drawable/bg_header" >		
+		android:background="@drawable/bg_header"
+		android:id="@+id/main_header" >
 		<ImageView
 			android:layout_height="42dp"
 			android:layout_width="42dp"
@@ -44,10 +44,25 @@
 				android:id="@+id/main_user_status" />
 		</LinearLayout>	
 	</LinearLayout>
-
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:padding="5dp"
+		android:gravity="center"
+		android:textColor="@color/text_header"
+		android:textSize="@dimen/font_size_normal"
+		android:textStyle="bold"
+		android:text="@string/main_logout_text"
+		android:shadowColor="@color/shadow_color"
+		android:shadowRadius="@integer/shadow_radius"
+		android:background="@drawable/bg_footer"
+		android:id="@+id/main_footer" />
 	<ScrollView
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/main_header"
+		android:layout_above="@id/main_footer"		
 		android:background="@drawable/bg_content" >
 		<LinearLayout
 			android:orientation="vertical"
@@ -74,12 +89,7 @@
 				android:layout_width="fill_parent"
 				android:id="@+id/main_button_profile"
 				android:text="@string/main_button_profile_text" />
-			<Button
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:id="@+id/main_button_logout"
-				android:text="@string/main_button_logout_text" />
 		</LinearLayout>
 	</ScrollView>
 
-</LinearLayout>
+</RelativeLayout>

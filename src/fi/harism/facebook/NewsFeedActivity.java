@@ -10,7 +10,7 @@ public class NewsFeedActivity extends FeedActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		TextView tv = (TextView) findViewById(R.id.feed_title_text);
+		TextView tv = (TextView) findViewById(R.id.feed_header);
 		tv.setText(R.string.feed_news_text);
 	}
 	
