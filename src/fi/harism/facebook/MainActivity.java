@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
-import fi.harism.facebook.dao.DAOStatus;
 import fi.harism.facebook.dialog.ProfileDialog;
 import fi.harism.facebook.net.FacebookLoginObserver;
 import fi.harism.facebook.net.FacebookLogoutObserver;
@@ -169,7 +168,6 @@ public class MainActivity extends BaseActivity {
 
 		// Start loading user information asynchronously.
 		requestController.getProfile(this, "me", new DAOProfileObserver(this));
-		requestController.getStatus(this, "me", new DAOStatusObserver());
 	}
 
 	/**
@@ -203,27 +201,14 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onComplete(DAOProfile profile) {
-			TextView tv = (TextView) findViewById(R.id.main_user_name);
-			tv.setText(profile.getName());
+			TextView nameView = (TextView) findViewById(R.id.main_user_name);
+			nameView.setText(profile.getName());
+			
+			TextView statusView = (TextView) findViewById(R.id.main_user_status);
+			statusView.setText(profile.getStatus());			
 
 			requestController.getBitmap(activity, profile.getPictureUrl(),
 					new BitmapObserver());
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors here.
-		}
-	}
-
-	/**
-	 * Private FacebookRequest observer for handling "me/statuses" request.
-	 */
-	private final class DAOStatusObserver implements DAOObserver<DAOStatus> {
-		@Override
-		public void onComplete(DAOStatus response) {
-			TextView tv = (TextView) findViewById(R.id.main_user_status);
-			tv.setText(response.getMessage());
 		}
 
 		@Override

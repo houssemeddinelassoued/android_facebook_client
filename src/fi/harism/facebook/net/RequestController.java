@@ -13,8 +13,6 @@ import fi.harism.facebook.dao.DAOFeedList;
 import fi.harism.facebook.dao.DAOObserver;
 import fi.harism.facebook.dao.DAOProfile;
 import fi.harism.facebook.dao.DAOProfileMap;
-import fi.harism.facebook.dao.DAOStatus;
-import fi.harism.facebook.dao.DAOStatusMap;
 import fi.harism.facebook.request.RequestQueue;
 
 /**
@@ -36,8 +34,6 @@ public class RequestController {
 	private DAOFeedList newsFeedList = null;
 	// Profile Feed list.
 	private DAOFeedList profileFeedList = null;
-	// Latest status messages.
-	private DAOStatusMap statusMap = null;
 	// Profile map.
 	private DAOProfileMap profileMap = null;
 	// Bitmap handling.
@@ -57,7 +53,6 @@ public class RequestController {
 				DAOFeedList.NEWS_FEED);
 		profileFeedList = new DAOFeedList(requestQueue, facebookClient,
 				DAOFeedList.PROFILE_FEED);
-		statusMap = new DAOStatusMap(requestQueue, facebookClient);
 		profileMap = new DAOProfileMap(requestQueue, facebookClient);
 		bitmap = new DAOBitmap(requestQueue);
 		commentsMap = new DAOCommentsMap(requestQueue, facebookClient);
@@ -92,11 +87,6 @@ public class RequestController {
 		profileFeedList.getInstance(activity, observer);
 	}
 
-	public void getStatus(Activity activity, String userId,
-			DAOObserver<DAOStatus> observer) {
-		statusMap.getStatus(activity, userId, observer);
-	}
-
 	public boolean isAuthorized() {
 		return facebookClient.isAuthorized();
 	}
@@ -125,7 +115,6 @@ public class RequestController {
 							facebookClient, DAOFeedList.NEWS_FEED);
 					profileFeedList = new DAOFeedList(requestQueue,
 							facebookClient, DAOFeedList.PROFILE_FEED);
-					statusMap = new DAOStatusMap(requestQueue, facebookClient);
 					profileMap = new DAOProfileMap(requestQueue, facebookClient);
 					bitmap = new DAOBitmap(requestQueue);
 					commentsMap = new DAOCommentsMap(requestQueue,

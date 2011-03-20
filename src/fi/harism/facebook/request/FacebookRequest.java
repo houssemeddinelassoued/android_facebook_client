@@ -62,23 +62,7 @@ public class FacebookRequest extends Request {
 	@Override
 	public void runOnThread() throws Exception {
 		try {
-			String r;
-			if (requestBundle != null) {
-				r = facebookController.request(requestPath, requestBundle);
-			} else {
-				r = facebookController.request(requestPath);
-			}
-
-			// Create JSONObject from response string.
-			response = new JSONObject(r);
-
-			// Check if response is an error JSONObject.
-			if (response.has("error")) {
-				JSONObject err = response.getJSONObject("error");
-				Exception ex = new Exception(err.getString("type") + " : "
-						+ err.getString("message"));
-				throw ex;
-			}
+			response = facebookController.request(requestPath, requestBundle);
 		} catch (Exception ex) {
 			observer.onError(ex);
 			throw ex;

@@ -2,12 +2,13 @@ package fi.harism.facebook.dao;
 
 import java.util.HashMap;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.net.FacebookClient;
-import fi.harism.facebook.request.FacebookRequest;
+import fi.harism.facebook.request.Request;
 import fi.harism.facebook.request.RequestQueue;
 
 /**
@@ -63,34 +64,58 @@ public class DAOProfileMap {
 				}
 			});
 		} else {
-			// Create Facebook request.
-			Bundle b = new Bundle();
-			b.putString(FacebookClient.TOKEN, facebookClient.getAccessToken());
-			b.putString("fields", "id,name,picture");
-			FacebookRequest r = new FacebookRequest(activity, userId, b,
-					facebookClient, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONObject resp = facebookRequest.getResponse();
-								String id = resp.getString("id");
-								String name = resp.getString("name");
-								String picture = resp.getString("picture");
-								DAOProfile r = new DAOProfile(id, name, picture);
-								profileMap.put(id, r);
-								observer.onComplete(r);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestQueue.addRequest(r);
+			ProfileRequest request = new ProfileRequest(activity, userId, observer);
+			requestQueue.addRequest(request);
 		}
+	}
+	
+	private class ProfileRequest extends Request {
+		
+		private String userId;
+		private DAOObserver<DAOProfile> observer;
+		private DAOProfile profile;
+
+		public ProfileRequest(Activity activity, String userId, DAOObserver<DAOProfile> observer) {
+			super(activity);
+			this.userId = userId;
+			this.observer = observer;
+		}
+
+		@Override
+		public void runOnThread() throws Exception {
+			try {
+				Bundle params = new Bundle();
+				params.putString(FacebookClient.TOKEN, facebookClient.getAccessToken());
+				params.putString("fields", "name,picture");
+				JSONObject resp = facebookClient.request(userId, params);
+				String name = resp.getString("name");
+				String picture = resp.getString("picture");
+				
+				params = new Bundle();
+				params.putString(FacebookClient.TOKEN, facebookClient.getAccessToken());
+				params.putString("limit", "1");
+				params.putString("fields", "message");
+				String status;
+				try {
+					resp = facebookClient.request(userId + "/statuses", params);
+					status = resp.getJSONArray("data").getJSONObject(0).getString("message");
+				} catch (Exception ex) {
+					status = "Error: " + ex.getLocalizedMessage();
+				}
+				
+				profile = new DAOProfile(userId, name, picture, status);
+				profileMap.put(userId, profile);				
+			} catch (Exception ex) {
+				observer.onError(ex);
+				throw ex;
+			}
+		}
+
+		@Override
+		public void runOnUiThread() throws Exception {
+			observer.onComplete(profile);
+		}
+		
 	}
 
 }

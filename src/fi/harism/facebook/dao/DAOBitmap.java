@@ -1,10 +1,14 @@
 package fi.harism.facebook.dao;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import fi.harism.facebook.net.DataCache;
-import fi.harism.facebook.request.ImageRequest;
+import fi.harism.facebook.request.Request;
 import fi.harism.facebook.request.RequestQueue;
 
 /**
@@ -62,25 +66,55 @@ public class DAOBitmap {
 				}
 			});
 		} else {
-			// Create new image request.
-			ImageRequest r = new ImageRequest(activity, imageUrl,
-					new ImageRequest.Observer() {
-
-						@Override
-						public void onComplete(ImageRequest imageRequest) {
-							// Store image to local cache.
-							imageCache.setData(imageUrl,
-									imageRequest.getBitmapData());
-							observer.onComplete(imageRequest.getBitmap());
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestQueue.addRequest(r);
+			BitmapRequest request = new BitmapRequest(activity, imageUrl, observer);
+			requestQueue.addRequest(request);
 		}
+	}
+
+	private class BitmapRequest extends Request {
+
+		private String url;
+		private DAOObserver<Bitmap> observer;
+		private byte[] bitmapData;
+		private Bitmap bitmap;
+
+		public BitmapRequest(Activity activity, String url, DAOObserver<Bitmap> observer) {
+			super(activity);
+			this.url = url;
+			this.observer = observer;
+		}
+
+		@Override
+		public void runOnThread() throws Exception {
+			try {
+				// Open InputStream for given url.
+				URL u = new URL(url);
+				InputStream is = u.openStream();
+				ByteArrayOutputStream imageBuffer = new ByteArrayOutputStream();
+
+				// Read actual data from InputStream.
+				int readLength;
+				byte buffer[] = new byte[1024];
+				while ((readLength = is.read(buffer)) != -1) {
+					imageBuffer.write(buffer, 0, readLength);
+				}
+
+				bitmapData = imageBuffer.toByteArray();
+				imageCache.setData(url, bitmapData);
+
+				bitmap = BitmapFactory.decodeByteArray(bitmapData, 0,
+						bitmapData.length);
+			} catch (Exception ex) {
+				observer.onError(ex);
+				throw ex;
+			}
+		}
+
+		@Override
+		public void runOnUiThread() throws Exception {
+			observer.onComplete(bitmap);
+		}
+
 	}
 
 }

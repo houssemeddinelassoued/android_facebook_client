@@ -10,11 +10,13 @@ public class DAOProfile {
 	private String id;
 	private String name;
 	private String pictureUrl;
+	private String status;
 
-	public DAOProfile(String id, String name, String pictureUrl) {
+	public DAOProfile(String id, String name, String pictureUrl, String status) {
 		this.id = id;
 		this.name = name;
 		this.pictureUrl = pictureUrl;
+		this.status = status;
 	}
 
 	public String getId() {
@@ -27,6 +29,10 @@ public class DAOProfile {
 
 	public String getPictureUrl() {
 		return pictureUrl;
+	}
+	
+	public String getStatus() {
+		return status;
 	}
 
 }

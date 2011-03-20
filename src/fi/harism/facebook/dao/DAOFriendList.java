@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.net.FacebookClient;
-import fi.harism.facebook.request.FacebookRequest;
+import fi.harism.facebook.request.Request;
 import fi.harism.facebook.request.RequestQueue;
 
 /**
@@ -79,42 +79,8 @@ public class DAOFriendList implements Iterable<DAOFriend> {
 				}
 			});
 		} else {
-			// Create friend list request.
-			Bundle b = new Bundle();
-			b.putString("fields", "id,name,picture");
-			FacebookRequest r = new FacebookRequest(activity, "me/friends", b,
-					facebookClient, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONArray friendArray = facebookRequest
-										.getResponse().getJSONArray("data");
-
-								friendList.clear();
-								for (int i = 0; i < friendArray.length(); ++i) {
-									JSONObject f = friendArray.getJSONObject(i);
-									String id = f.getString("id");
-									String name = f.getString("name");
-									String picture = f.getString("picture");
-									friendList.add(new DAOFriend(id, name,
-											picture));
-								}
-
-								sort();
-								friendListLoaded = true;
-
-								observer.onComplete(self);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestQueue.addRequest(r);
+			FriendsRequest request = new FriendsRequest(activity, this, observer);
+			requestQueue.addRequest(request);
 		}
 
 	}
@@ -149,6 +115,51 @@ public class DAOFriendList implements Iterable<DAOFriend> {
 		};
 		// Sort friends Vector.
 		Collections.sort(friendList, comparator);
+	}
+	
+	private class FriendsRequest extends Request {
+		
+		private DAOFriendList caller;
+		private DAOObserver<DAOFriendList> observer;
+
+		public FriendsRequest(Activity activity, DAOFriendList caller, DAOObserver<DAOFriendList> observer) {
+			super(activity);
+			this.caller = caller;
+			this.observer = observer;
+		}
+
+		@Override
+		public void runOnThread() throws Exception {
+			try {
+				// Create friend list request.
+				Bundle params = new Bundle();
+				params.putString("fields", "id,name,picture");
+				JSONObject resp = facebookClient.request("me/friends", params);
+				JSONArray friendArray = resp.getJSONArray("data");
+
+				friendList.clear();
+				for (int i = 0; i < friendArray.length(); ++i) {
+					JSONObject f = friendArray.getJSONObject(i);
+					String id = f.getString("id");
+					String name = f.getString("name");
+					String picture = f.getString("picture");
+					friendList.add(new DAOFriend(id, name,
+											picture));
+				}
+
+				sort();
+				friendListLoaded = true;
+
+			} catch (Exception ex) {
+				observer.onError(ex);
+				throw ex;
+			}
+		}
+
+		@Override
+		public void runOnUiThread() throws Exception {
+			observer.onComplete(caller);
+		}
 	}
 
 }

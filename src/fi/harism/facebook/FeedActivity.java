@@ -198,8 +198,7 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class DAOFeedListObserver implements
-			DAOObserver<DAOFeedList> {
+	private final class DAOFeedListObserver implements DAOObserver<DAOFeedList> {
 
 		private Activity activity = null;
 
@@ -219,12 +218,15 @@ public abstract class FeedActivity extends BaseActivity {
 				View view = createFeedItem(item);
 				itemList.addView(view);
 
-				requestController.getProfile(activity, item.getFromId(),
-						new DAOProfileObserver(activity, item.getId()));
+				if (item.getFromPictureUrl() != null) {
+					requestController.getBitmap(activity, item
+							.getFromPictureUrl(),
+							new FromPictureObserver(item.getId()));
+				}
 
 				if (item.getPictureUrl() != null) {
 					requestController.getBitmap(activity, item.getPictureUrl(),
-							new FeedItemPictureObserver(item.getId()));
+							new FeedPictureObserver(item.getId()));
 				}
 			}
 		}
@@ -240,43 +242,15 @@ public abstract class FeedActivity extends BaseActivity {
 	}
 
 	/**
-	 * Private class for handling sender's picture request.
-	 * 
-	 * @author harism
-	 */
-	private final class DAOProfileObserver implements DAOObserver<DAOProfile> {
-
-		private Activity activity = null;
-		private String itemId = null;
-
-		public DAOProfileObserver(Activity activity, String itemId) {
-			this.activity = activity;
-			this.itemId = itemId;
-		}
-
-		@Override
-		public void onComplete(DAOProfile profile) {
-			requestController.getBitmap(activity, profile.getPictureUrl(),
-					new FromPictureObserver(itemId));
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
-		}
-
-	}
-
-	/**
 	 * Private class for handling feed item picture requests.
 	 * 
 	 * @author harism
 	 */
-	private final class FeedItemPictureObserver implements DAOObserver<Bitmap> {
+	private final class FeedPictureObserver implements DAOObserver<Bitmap> {
 
 		private String itemId = null;
 
-		public FeedItemPictureObserver(String itemId) {
+		public FeedPictureObserver(String itemId) {
 			this.itemId = itemId;
 		}
 

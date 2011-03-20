@@ -11,6 +11,7 @@ public class DAOFeedItem {
 	private String type;
 	private String fromId;
 	private String fromName;
+	private String fromPictureUrl;
 	private String message;
 	private String pictureUrl;
 	private String link;
@@ -21,12 +22,13 @@ public class DAOFeedItem {
 	private int commentCount;
 
 	public DAOFeedItem(String id, String type, String fromId,
-			String fromName, String message, String pictureUrl, String link,
+			String fromName, String fromPictureUrl, String message, String pictureUrl, String link,
 			String name, String caption, String description, String createdTime, int commentCount) {
 		this.id = id;
 		this.type = type;
 		this.fromId = fromId;
 		this.fromName = fromName;
+		this.fromPictureUrl = fromPictureUrl;
 		this.message = message;
 		this.pictureUrl = pictureUrl;
 		this.link = link;
@@ -59,6 +61,10 @@ public class DAOFeedItem {
 
 	public String getFromName() {
 		return fromName;
+	}
+	
+	public String getFromPictureUrl() {
+		return fromPictureUrl;
 	}
 
 	public String getId() {

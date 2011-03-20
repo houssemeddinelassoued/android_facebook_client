@@ -1,5 +1,7 @@
 package fi.harism.facebook.net;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -59,7 +61,8 @@ public class FacebookClient {
 	 * @param observer
 	 *            Observer for this request.
 	 */
-	public void authorize(Activity activity, final FacebookLoginObserver observer) {
+	public void authorize(Activity activity,
+			final FacebookLoginObserver observer) {
 		// Check if we have authorized Facebook instance already.
 		if (facebookAuthorized) {
 			observer.onComplete();
@@ -101,7 +104,8 @@ public class FacebookClient {
 	/**
 	 * Sets this FacebookClient to logged out state.
 	 * 
-	 * @param context Should be same context used for authorization.
+	 * @param context
+	 *            Should be same context used for authorization.
 	 * @throws Exception
 	 */
 	public void logout(Context context) throws Exception {
@@ -114,28 +118,61 @@ public class FacebookClient {
 	/**
 	 * Synchronous Facebook Graph API call.
 	 * 
-	 * @param path
+	 * @param graphPath
 	 *            Facebook Graph API path.
-	 * @return JSON string presentation for response.
+	 * @return JSON object for response.
 	 * @throws Exception
 	 */
-	public String request(String path) throws Exception {
-		return facebook.request(path);
+	public JSONObject request(String graphPath) throws Exception {
+		return request(graphPath, null);
 	}
 
 	/**
 	 * Synchronous Facebook Graph API call.
 	 * 
-	 * @param path
+	 * @param graphPath
 	 *            Facebook Graph API path.
 	 * @param requestParameters
 	 *            Additional request parameters.
-	 * @return JSON string presentation for response.
+	 * @return JSON object for response.
 	 * @throws Exception
 	 */
-	public String request(String path, Bundle requestParameters)
+	public JSONObject request(String graphPath, Bundle requestParameters)
 			throws Exception {
-		return facebook.request(path, requestParameters);
+		return request(graphPath, requestParameters, "GET");
+	}
+
+	/**
+	 * Synchronous Facebook Graph API call.
+	 * 
+	 * @param graphPath
+	 *            Facebook Graph API path.
+	 * @param requestParameters
+	 *            Additional request parameters.
+	 * @param method
+	 *            HTTP method e.g. "GET", "POST".
+	 * @return JSON Object for response.
+	 * @throws Exception
+	 */
+	public JSONObject request(String graphPath, Bundle requestParameters,
+			String method) throws Exception {
+		try {
+			String response = facebook.request(graphPath, requestParameters,
+					method);
+			// Create JSONObject from response string.
+			JSONObject responseObject = new JSONObject(response);
+
+			// Check if response is an error JSONObject.
+			if (responseObject.has("error")) {
+				JSONObject err = responseObject.getJSONObject("error");
+				Exception ex = new Exception(err.getString("type") + " : "
+						+ err.getString("message"));
+				throw ex;
+			}
+			return responseObject;
+		} catch (Exception ex) {
+			throw ex;
+		}
 	}
 
 }

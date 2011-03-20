@@ -9,11 +9,11 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.net.FacebookClient;
-import fi.harism.facebook.request.FacebookRequest;
+import fi.harism.facebook.request.Request;
 import fi.harism.facebook.request.RequestQueue;
 
 /**
- * Class for retrieving News Feed list and storing it into memory.
+ * Class for retrieving Feed list and storing it into memory.
  * 
  * @author harism
  */
@@ -83,67 +83,9 @@ public class DAOFeedList implements Iterable<DAOFeedItem> {
 				}
 			});
 		} else {
-			// Create Facebook request.
-			Bundle b = new Bundle();
-			b.putString(
-					"fields",
-					"id,type,from,message,picture,link,name,caption,description,created_time,comments");
-			FacebookRequest r = new FacebookRequest(activity, feedPath, b,
-					facebookClient, new FacebookRequest.Observer() {
-						@Override
-						public void onComplete(FacebookRequest facebookRequest) {
-							try {
-								JSONArray feedItems = facebookRequest
-										.getResponse().getJSONArray("data");
-								feedItemList = new Vector<DAOFeedItem>();
-								for (int i = 0; i < feedItems.length(); ++i) {
-									JSONObject item = feedItems
-											.getJSONObject(i);
-									String id = item.getString("id");
-									String type = item.getString("type");
-									String fromId = item.getJSONObject("from")
-											.getString("id");
-									String fromName = item
-											.getJSONObject("from").getString(
-													"name");
-									String message = item.optString("message",
-											null);
-									String picture = item.optString("picture",
-											null);
-									String link = item.optString("link", null);
-									String name = item.optString("name", null);
-									String caption = item.optString("caption",
-											null);
-									String description = item.optString(
-											"description", null);
-									String createdTime = item.optString(
-											"created_time", null);
-									int commentCount = 0;
-									JSONObject commentsObject = item
-											.optJSONObject("comments");
-									if (commentsObject != null) {
-										commentCount = commentsObject
-												.getInt("count");
-									}
-									feedItemList.add(new DAOFeedItem(id,
-											type, fromId, fromName, message,
-											picture, link, name, caption,
-											description, createdTime,
-											commentCount));
-								}
-								feedItemListLoaded = true;
-								observer.onComplete(self);
-							} catch (Exception ex) {
-								observer.onError(ex);
-							}
-						}
-
-						@Override
-						public void onError(Exception ex) {
-							observer.onError(ex);
-						}
-					});
-			requestQueue.addRequest(r);
+			FeedRequest request = new FeedRequest(activity, feedPath, this,
+					observer);
+			requestQueue.addRequest(request);
 		}
 	}
 
@@ -161,6 +103,79 @@ public class DAOFeedList implements Iterable<DAOFeedItem> {
 	 */
 	public int size() {
 		return feedItemList.size();
+	}
+
+	private class FeedRequest extends Request {
+
+		private String feedPath;
+		private DAOFeedList caller;
+		private DAOObserver<DAOFeedList> observer;
+
+		public FeedRequest(Activity activity, String feedPath,
+				DAOFeedList caller, DAOObserver<DAOFeedList> observer) {
+			super(activity);
+			this.feedPath = feedPath;
+			this.caller = caller;
+			this.observer = observer;
+		}
+
+		@Override
+		public void runOnThread() throws Exception {
+			try {
+				Bundle params = new Bundle();
+				params.putString(
+						"fields",
+						"id,type,from,message,picture,link,name,caption,description,created_time,comments");
+				JSONObject resp = facebookClient.request(feedPath, params);
+
+				JSONArray feedItems = resp.getJSONArray("data");
+				feedItemList = new Vector<DAOFeedItem>();
+				for (int i = 0; i < feedItems.length(); ++i) {
+					JSONObject item = feedItems.getJSONObject(i);
+					String id = item.getString("id");
+					String type = item.getString("type");
+					String fromId = item.getJSONObject("from").getString("id");
+					String fromName = item.getJSONObject("from").getString(
+							"name");
+					String message = item.optString("message", null);
+					String picture = item.optString("picture", null);
+					String link = item.optString("link", null);
+					String name = item.optString("name", null);
+					String caption = item.optString("caption", null);
+					String description = item.optString("description", null);
+					String createdTime = item.optString("created_time", null);
+					int commentCount = 0;
+					JSONObject commentsObject = item.optJSONObject("comments");
+					if (commentsObject != null) {
+						commentCount = commentsObject.getInt("count");
+					}
+
+					params = new Bundle();
+					params.putString("fields", "picture");
+					String fromPicture = null;
+					try {
+						resp = facebookClient.request(fromId, params);
+						fromPicture = resp.getString("picture");
+					} catch (Exception ex) {
+					}
+
+					feedItemList.add(new DAOFeedItem(id, type, fromId,
+							fromName, fromPicture, message, picture, link,
+							name, caption, description, createdTime,
+							commentCount));
+				}
+				feedItemListLoaded = true;
+			} catch (Exception ex) {
+				observer.onError(ex);
+				throw ex;
+			}
+		}
+
+		@Override
+		public void runOnUiThread() throws Exception {
+			observer.onComplete(caller);
+		}
+
 	}
 
 }
