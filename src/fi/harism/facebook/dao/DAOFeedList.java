@@ -145,14 +145,18 @@ public class DAOFeedList implements Iterable<DAOFeedItem> {
 					String description = item.optString("description", null);
 					String createdTime = item.optString("created_time", null);
 
-					params = new Bundle();
-					params.putString("fields", "picture");
-					String fromPicture = null;
-					try {
-						resp = facebookClient.request(fromId, params);
-						fromPicture = resp.getString("picture");
-					} catch (Exception ex) {
-					}
+					// TODO: Figure out what to do with profile pictures.
+					// This is somewhat fast even though it uses http redirect.
+					String fromPicture = "http://graph.facebook.com/" + fromId + "/picture";
+					// Getting direct profile picture url from Graph API is much slower.
+					// params = new Bundle();
+					// params.putString("fields", "picture");
+					// String fromPicture = null;
+					// try {
+					//	resp = facebookClient.request(fromId, params);
+					//	fromPicture = resp.getString("picture");
+					// } catch (Exception ex) {
+					// }
 
 					feedItemList.add(new DAOFeedItem(id, type, fromId,
 							fromName, fromPicture, message, picture, link,

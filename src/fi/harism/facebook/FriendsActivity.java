@@ -41,12 +41,12 @@ public class FriendsActivity extends BaseActivity {
 	// Span onClick observer for profile and comments protocols.
 	private SpanClickObserver spanClickObserver = null;
 	// Static protocol name for showing profile.
-	private static final String PROTOCOL_SHOW_PROFILE="showprofile://";
+	private static final String PROTOCOL_SHOW_PROFILE = "showprofile://";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.friends);
 
 		requestController = getGlobalState().getRequestController();
@@ -104,8 +104,9 @@ public class FriendsActivity extends BaseActivity {
 		// Find name TextView and set its value.
 		TextView nameTextView = (TextView) friendItemView
 				.findViewById(R.id.friends_item_text_name);
-		StringUtils.setTextLink(nameTextView, name, PROTOCOL_SHOW_PROFILE + userId, spanClickObserver);
-		//nameTextView.setText(name);
+		StringUtils.setTextLink(nameTextView, name, PROTOCOL_SHOW_PROFILE
+				+ userId, spanClickObserver);
+		// nameTextView.setText(name);
 
 		// Find picture ImageView and set default profile picture into it.
 		ImageView imageView = (ImageView) friendItemView
@@ -181,7 +182,7 @@ public class FriendsActivity extends BaseActivity {
 			for (DAOFriend friend : friendList) {
 				String userId = friend.getId();
 				String name = friend.getName();
-				String pictureUrl = friend.getPictureUrl();
+				String pictureUrl = friend.getPicture();
 
 				// Create default friend item view.
 				View friendItemView = createFriendItem(userId, name);
@@ -265,7 +266,7 @@ public class FriendsActivity extends BaseActivity {
 			// We are not interested in this callback.
 		}
 	}
-	
+
 	/**
 	 * Click listener for our own protocols. Rest is handled by default handler.
 	 */
@@ -283,17 +284,19 @@ public class FriendsActivity extends BaseActivity {
 			if (url.startsWith(PROTOCOL_SHOW_PROFILE)) {
 				showProgressDialog();
 				String userId = url.substring(PROTOCOL_SHOW_PROFILE.length());
-				requestController.getProfile(activity, userId, new DAOObserver<DAOProfile>() {
-					@Override
-					public void onComplete(DAOProfile response) {
-						hideProgressDialog();
-						new ProfileDialog(activity, response).show();
-					}
-					@Override
-					public void onError(Exception error) {
-						hideProgressDialog();
-					}
-				});
+				requestController.getProfile(activity, userId,
+						new DAOObserver<DAOProfile>() {
+							@Override
+							public void onComplete(DAOProfile response) {
+								hideProgressDialog();
+								new ProfileDialog(activity, response).show();
+							}
+
+							@Override
+							public void onError(Exception error) {
+								hideProgressDialog();
+							}
+						});
 				return true;
 			}
 			return false;

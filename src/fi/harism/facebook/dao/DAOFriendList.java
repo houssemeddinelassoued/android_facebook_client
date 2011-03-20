@@ -143,8 +143,7 @@ public class DAOFriendList implements Iterable<DAOFriend> {
 					String id = f.getString("id");
 					String name = f.getString("name");
 					String picture = f.getString("picture");
-					friendList.add(new DAOFriend(id, name,
-											picture));
+					friendList.add(new DAOFriend(id, name, picture));
 				}
 
 				sort();

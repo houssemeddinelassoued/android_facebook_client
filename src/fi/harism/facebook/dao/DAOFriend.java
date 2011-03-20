@@ -8,12 +8,12 @@ package fi.harism.facebook.dao;
 public class DAOFriend {
 	private String id;
 	private String name;
-	private String pictureUrl;
+	private String picture;
 
-	public DAOFriend(String id, String name, String pictureUrl) {
+	public DAOFriend(String id, String name, String picture) {
 		this.id = id;
 		this.name = name;
-		this.pictureUrl = pictureUrl;
+		this.picture = picture;
 	}
 
 	public String getId() {
@@ -23,9 +23,9 @@ public class DAOFriend {
 	public String getName() {
 		return name;
 	}
-
-	public String getPictureUrl() {
-		return pictureUrl;
+	
+	public String getPicture() {
+		return picture;
 	}
 
 }
