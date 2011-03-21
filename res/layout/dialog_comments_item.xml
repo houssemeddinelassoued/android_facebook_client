@@ -5,23 +5,19 @@
 	android:layout_height="wrap_content"
 	android:orientation="vertical" >
 	<TextView
+		style="@style/contentTextBold"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:textSize="@dimen/font_size_normal"
-		android:textColor="@color/text_link"
-		android:textStyle="bold"
 		android:id="@+id/dialog_comments_item_from_text" />
 	<TextView
+		style="@style/contentText"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:textSize="@dimen/font_size_normal"
-		android:textColor="@color/text_black"
 		android:id="@+id/dialog_comments_item_message_text" />
 	<TextView
+		style="@style/contentTextSmall"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:textSize="@dimen/font_size_small"
-		android:textColor="@color/text_gray"
 		android:id="@+id/dialog_comments_item_created_text" />
 	<ImageView
 		android:layout_width="fill_parent"

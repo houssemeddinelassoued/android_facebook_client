@@ -5,42 +5,29 @@
 	android:layout_height="fill_parent"
 	android:orientation="vertical" >
 	<TextView
+		style="@style/headerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:shadowColor="@color/shadow_color"
-		android:shadowRadius="@integer/shadow_radius"
-		android:textSize="@dimen/font_size_normal"
-		android:textColor="@color/text_header"
-		android:textStyle="bold"
-		android:text="@string/dialog_profile_title"
-		android:background="@drawable/bg_header"
-		android:padding="5dp" />
+		android:text="@string/dialog_profile_title" />
 	<LinearLayout
+		style="@style/contentContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:padding="5dp"
-		android:orientation="vertical"
-		android:background="@drawable/bg_content" >
+		android:orientation="vertical" >
 		<TextView
+			style="@style/contentTextBold"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:textColor="@color/text_link"
-			android:textStyle="bold"
-			android:textSize="@dimen/font_size_normal"
 			android:id="@+id/dialog_profile_id_text" />
 		<TextView
+			style="@style/contentTextBold"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:textColor="@color/text_link"
-			android:textStyle="bold"
-			android:textSize="@dimen/font_size_normal"
 			android:id="@+id/dialog_profile_name_text" />
 		<TextView
+			style="@style/contentText"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:singleLine="false"
-			android:textColor="@color/text_black"
-			android:textSize="@dimen/font_size_normal"
 			android:id="@+id/dialog_profile_status_text" />
 	</LinearLayout>
 </LinearLayout>

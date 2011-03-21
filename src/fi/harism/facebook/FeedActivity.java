@@ -69,8 +69,8 @@ public abstract class FeedActivity extends BaseActivity {
 		requestController = getGlobalState().getRequestController();
 		spanClickObserver = new SpanClickObserver(this);
 
-		View footer = findViewById(R.id.feed_footer);
-		footer.setOnClickListener(new View.OnClickListener() {
+		View updateButton = findViewById(R.id.feed_button_update);
+		updateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub

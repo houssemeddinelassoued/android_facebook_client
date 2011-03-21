@@ -5,11 +5,10 @@
 	android:layout_height="fill_parent" >
 
 	<LinearLayout
+		style="@style/headerContainer"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:padding="5dp"
-		android:background="@drawable/bg_header"
-		android:id="@+id/main_header" >
+		android:id="@+id/header" >
 		<ImageView
 			android:layout_height="42dp"
 			android:layout_width="42dp"
@@ -24,51 +23,44 @@
 			android:layout_gravity="center_vertical"
 			android:orientation="vertical" >
 			<TextView
+				style="@style/headerText"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:shadowColor="@color/shadow_color"
-				android:shadowRadius="@integer/shadow_radius"
-				android:textStyle="bold"
-				android:textSize="@dimen/font_size_normal"
-				android:textColor="@color/text_header"
 				android:text="@string/main_name_text"
 				android:id="@+id/main_user_name" />
 			<TextView
+				style="@style/headerText"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:shadowColor="@color/shadow_color"
-				android:shadowRadius="@integer/shadow_radius"
-				android:textColor="@color/text_header"
-				android:textSize="@dimen/font_size_normal"
+				android:textStyle="normal"
 				android:text="@string/main_status_text"
 				android:id="@+id/main_user_status" />
-		</LinearLayout>	
+		</LinearLayout>
 	</LinearLayout>
-	<TextView
+	<LinearLayout
+		style="@style/footerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
-		android:padding="5dp"
 		android:gravity="center"
-		android:textColor="@color/text_header"
-		android:textSize="@dimen/font_size_normal"
-		android:textStyle="bold"
-		android:text="@string/main_logout_text"
-		android:shadowColor="@color/shadow_color"
-		android:shadowRadius="@integer/shadow_radius"
-		android:background="@drawable/bg_footer"
-		android:id="@+id/main_footer" />
+		android:id="@+id/footer" >
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/main_logout_text"
+			android:id="@+id/main_button_logout" />
+	</LinearLayout>
 	<ScrollView
+		style="@style/contentContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/main_header"
-		android:layout_above="@id/main_footer"		
-		android:background="@drawable/bg_content" >
+		android:layout_below="@id/header"
+		android:layout_above="@id/footer" >
 		<LinearLayout
 			android:orientation="vertical"
 			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:padding="10px" >
+			android:layout_height="wrap_content" >
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"

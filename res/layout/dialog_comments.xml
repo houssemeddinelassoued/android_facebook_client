@@ -4,37 +4,38 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent" >
 	<TextView
+		style="@style/headerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:shadowColor="@color/shadow_color"
-		android:shadowRadius="@integer/shadow_radius"
-		android:textSize="@dimen/font_size_normal"
-		android:textColor="@color/text_header"
-		android:textStyle="bold"
 		android:text="@string/dialog_comments_title"
-		android:background="@drawable/bg_header"
-		android:padding="5dp"
-		android:id="@+id/dialog_comments_header"/>
-	<TextView
+		android:id="@+id/header"/>
+	<RelativeLayout
+		style="@style/footerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
-		android:padding="5dp"
-		android:gravity="center"
-		android:shadowColor="@color/shadow_color"
-		android:shadowRadius="@integer/shadow_radius"
-		android:text="@string/dialog_comments_post"
-		android:textColor="@color/text_header"
-		android:textSize="@dimen/font_size_normal"
-		android:textStyle="bold"
-		android:background="@drawable/bg_footer"
-		android:id="@+id/dialog_comments_footer" />
+		android:id="@+id/footer" >
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_marginLeft="5dp"
+			android:text="@string/dialog_comments_send"
+			android:id="@+id/dialog_comments_button_send" />
+		<EditText
+			style="@style/editText"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/dialog_comments_button_send"
+			android:id="@+id/dialog_comments_edit" />
+	</RelativeLayout>
 	<ScrollView
+		style="@style/contentContainer"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:layout_below="@id/dialog_comments_header"
-		android:layout_above="@id/dialog_comments_footer"
-		android:background="@drawable/bg_content" >
+		android:layout_below="@id/header"
+		android:layout_above="@id/footer" >
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
@@ -43,3 +44,4 @@
 			android:id="@+id/dialog_comments_item_list" />
 	</ScrollView>
 </RelativeLayout>
+

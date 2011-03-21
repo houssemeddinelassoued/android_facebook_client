@@ -4,36 +4,30 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent" >
 	<TextView
+		style="@style/headerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:padding="5dp"
-		android:background="@drawable/bg_header"
-		android:shadowColor="@color/shadow_color"
-		android:shadowRadius="@integer/shadow_radius"
-		android:textSize="@dimen/font_size_normal"
-		android:textStyle="bold"
-		android:textColor="@color/text_header"
-		android:id="@+id/feed_header" />
-	<TextView
+		android:id="@+id/header" />
+	<LinearLayout
+		style="@style/footerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
-		android:padding="5dp"
 		android:gravity="center"
-		android:textColor="@color/text_header"
-		android:textSize="@dimen/font_size_normal"
-		android:textStyle="bold"
-		android:text="@string/feed_update_text"
-		android:shadowColor="@color/shadow_color"
-		android:shadowRadius="@integer/shadow_radius"
-		android:background="@drawable/bg_footer"
-		android:id="@+id/feed_footer" />
+		android:id="@+id/footer" >
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/feed_update_text"
+			android:id="@+id/feed_button_update" />
+	</LinearLayout>
 	<ScrollView
+		style="@style/contentContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/feed_header"
-		android:layout_above="@id/feed_footer"		
-		android:background="@drawable/bg_content" >
+		android:layout_below="@id/header"
+		android:layout_above="@id/footer" >
 		<LinearLayout
 			android:id="@+id/feed_list"
 			android:layout_width="fill_parent"

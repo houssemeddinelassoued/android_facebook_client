@@ -81,8 +81,8 @@ public class MainActivity extends BaseActivity {
 
 		final Activity self = this;
 		// Add onClickListener to 'login' button.
-		View v = findViewById(R.id.login_footer);
-		v.setOnClickListener(new View.OnClickListener() {
+		View loginButton = findViewById(R.id.login_button_login);
+		loginButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				LoginObserver loginObserver = new LoginObserver();
@@ -157,8 +157,8 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Add onClick listener to "Logout" button.
-		View footer = findViewById(R.id.main_footer);
-		footer.setOnClickListener(new View.OnClickListener() {
+		View logoutButton = findViewById(R.id.main_button_logout);
+		logoutButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				LogoutObserver observer = new LogoutObserver();

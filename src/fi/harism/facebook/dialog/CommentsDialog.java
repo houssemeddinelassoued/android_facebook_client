@@ -12,6 +12,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,12 +31,11 @@ public class CommentsDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.dialog_comments);
 		
-		View footer = findViewById(R.id.dialog_comments_footer);
-		footer.setOnClickListener(new View.OnClickListener() {
+		View sendButton = findViewById(R.id.dialog_comments_button_send);
+		sendButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				InputDialog dlg = new InputDialog(getContext(), new InputDialogObserver());
-				dlg.show();
+				sendComment();
 			}
 		});
 		
@@ -61,13 +61,18 @@ public class CommentsDialog extends Dialog {
 		}
 	}
 	
-	private void postComment(String message) {
-		ProgressDialog progressDialog = new ProgressDialog(getContext());
-		progressDialog.setMessage("Sending..");
-		progressDialog.setCancelable(false);
-		progressDialog.show();
-		comments.postComment(new DAOCommentListObserver(progressDialog), message);
-	}	
+	private void sendComment() {
+		EditText editText = (EditText) findViewById(R.id.dialog_comments_edit);
+		String message = editText.getText().toString().trim();
+		editText.setText("");
+		if (message.length() != 0) {
+			ProgressDialog progressDialog = new ProgressDialog(getContext());
+			progressDialog.setMessage("Sending..");
+			progressDialog.setCancelable(false);
+			progressDialog.show();
+			comments.postComment(new DAOCommentListObserver(progressDialog), message);
+		}
+	}
 	
 	private class DAOCommentListObserver implements DAOObserver<DAOCommentList> {
 		private ProgressDialog progressDialog;
@@ -84,14 +89,5 @@ public class CommentsDialog extends Dialog {
 			progressDialog.dismiss();
 		}
 	}
-	
-	private class InputDialogObserver implements InputDialog.InputObserver {
-		@Override
-		public void onComplete(String text) {
-			if (text.trim().length() > 0) {
-				postComment(text);
-			}
-		}
-	}
-	
+		
 }

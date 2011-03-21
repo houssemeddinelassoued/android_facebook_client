@@ -27,13 +27,9 @@
 	
 	<!-- Comments Dialog -->
 	<string name="dialog_comments_title">Comments</string>
-	<string name="dialog_comments_post">Post Comment</string>
+	<string name="dialog_comments_send">Send</string>
 	
 	<!-- Profile Dialog -->
 	<string name="dialog_profile_title">Profile</string>
 	
-	<!-- Input Dialog -->
-	<string name="dialog_input_title">Enter Message</string>
-	<string name="dialog_input_send">Send</string>
-
 </resources>

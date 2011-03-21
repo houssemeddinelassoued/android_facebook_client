@@ -10,7 +10,7 @@ public class ProfileFeedActivity extends FeedActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		TextView tv = (TextView) findViewById(R.id.feed_header);
+		TextView tv = (TextView) findViewById(R.id.header);
 		tv.setText(R.string.feed_profile_text);
 	}
 	
