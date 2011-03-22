@@ -23,6 +23,5 @@ Fetching sources is maybe easiest done using EGit Eclipse plugin but feel free t
 ToDo
 ====
 
-1. Re-implement image and other network loading.
-  - One "static" application wide controller.
-  - Containers for Facebook results and data.
+1. Ponder over DAO implementation - and fix/improve it eventually.
+2. Start testing chat functionality.
