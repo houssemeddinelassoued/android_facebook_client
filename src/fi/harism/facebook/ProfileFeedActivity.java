@@ -1,7 +1,6 @@
 package fi.harism.facebook;
 
-import fi.harism.facebook.dao.DAOFeedList;
-import fi.harism.facebook.dao.DAOObserver;
+import fi.harism.facebook.dao.FBFeedList;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -15,8 +14,8 @@ public class ProfileFeedActivity extends FeedActivity {
 	}
 	
 	@Override
-	public void getFeed(DAOObserver<DAOFeedList> observer) {
-		getGlobalState().getRequestController().getProfileFeed(this, observer);
+	public FBFeedList getFeedList() {
+		return getGlobalState().getFBFactory().getProfileFeed();
 	}	
 	
 }

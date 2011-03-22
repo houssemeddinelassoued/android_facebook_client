@@ -10,13 +10,10 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAOObserver;
-import fi.harism.facebook.dao.DAOProfile;
-import fi.harism.facebook.dialog.ProfileDialog;
-import fi.harism.facebook.net.FacebookLoginObserver;
-import fi.harism.facebook.net.FacebookLogoutObserver;
-import fi.harism.facebook.net.RequestController;
-import fi.harism.facebook.util.BitmapUtils;
+import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBMe;
+import fi.harism.facebook.dao.FBObserver;
+import fi.harism.facebook.net.FBClient;
 
 /**
  * Main Activity of this application. Once Activity is launched it starts to
@@ -25,27 +22,26 @@ import fi.harism.facebook.util.BitmapUtils;
  * @author harism
  */
 public class MainActivity extends BaseActivity {
-
-	// Profile picture corner rounding radius.
-	private static final int PICTURE_ROUND_RADIUS = 0;
-	// Global instance of RequestController.
-	private RequestController requestController = null;
+	
+	private FBMe fbMe;
+	private FBBitmap fbBitmap;
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		requestController.loginCallback(requestCode, resultCode, data);
+		getGlobalState().getFBClient().authorizeCallback(requestCode, resultCode, data);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        
+        fbMe = getGlobalState().getFBFactory().getMe();
+        fbBitmap = getGlobalState().getFBFactory().getBitmap();
 
-		requestController = getGlobalState().getRequestController();
-		
 		// It's possible our application hasn't been killed.
-		if (requestController.isAuthorized()) {
+		if (getGlobalState().getFBClient().isAuthorized()) {
 			showMainView();
 		} else {
 			showLoginView();
@@ -60,20 +56,22 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		requestController.removeRequests(this);
-		requestController = null;
+		fbMe.cancel();
+		fbBitmap.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		requestController.setPaused(this, true);
+		fbMe.setPaused(true);
+		fbBitmap.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		requestController.setPaused(this, false);
+		fbMe.setPaused(false);
+		fbBitmap.setPaused(false);
 	}
 	
 	public final void showLoginView() {
@@ -86,7 +84,7 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				LoginObserver loginObserver = new LoginObserver();
-				requestController.login(self, loginObserver);
+				getGlobalState().getFBClient().authorize(self, loginObserver);
 			}
 		});
 	}
@@ -98,7 +96,6 @@ public class MainActivity extends BaseActivity {
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
 		Bitmap picture = getGlobalState().getDefaultPicture();
-		picture = BitmapUtils.roundBitmap(picture, PICTURE_ROUND_RADIUS);
 		pictureView.setImageBitmap(picture);
 
 		// Add onClick listener to "Friends" button.
@@ -139,20 +136,7 @@ public class MainActivity extends BaseActivity {
 		profileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showProgressDialog();
-				requestController.getProfile(self, "me",
-						new DAOObserver<DAOProfile>() {
-							@Override
-							public void onComplete(DAOProfile response) {
-								hideProgressDialog();
-								new ProfileDialog(self, response).show();
-							}
-
-							@Override
-							public void onError(Exception error) {
-								hideProgressDialog();
-							}
-						});
+				showAlertDialog("Implement me..");
 			}
 		});
 
@@ -162,23 +146,22 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				LogoutObserver observer = new LogoutObserver();
-				requestController.logout(self, observer);
+				getGlobalState().getFBClient().logout(self, observer);
 			}
 		});
 
 		// Start loading user information asynchronously.
-		requestController.getProfile(this, "me", new DAOProfileObserver(this));
+		fbMe.load(this, new FBMeObserver(this));
 	}
 
 	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class BitmapObserver implements DAOObserver<Bitmap> {
+	private final class BitmapObserver implements FBObserver<Bitmap> {
 		@Override
 		public void onComplete(Bitmap bitmap) {
 			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-			iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
-					PICTURE_ROUND_RADIUS));
+			iv.setImageBitmap(bitmap);
 		}
 
 		@Override
@@ -191,23 +174,23 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
-	private final class DAOProfileObserver implements DAOObserver<DAOProfile> {
+	private final class FBMeObserver implements FBObserver<FBMe> {
 
 		private Activity activity = null;
 
-		public DAOProfileObserver(Activity activity) {
+		public FBMeObserver(Activity activity) {
 			this.activity = activity;
 		}
 
 		@Override
-		public void onComplete(DAOProfile profile) {
+		public void onComplete(FBMe me) {
 			TextView nameView = (TextView) findViewById(R.id.main_user_name);
-			nameView.setText(profile.getName());
+			nameView.setText(me.getName());
 			
 			TextView statusView = (TextView) findViewById(R.id.main_user_status);
-			statusView.setText(profile.getStatus());			
+			statusView.setText(me.getStatus());			
 
-			requestController.getBitmap(activity, profile.getPictureUrl(),
+			fbBitmap.load(me.getPictureUrl(), activity,
 					new BitmapObserver());
 		}
 
@@ -220,7 +203,7 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * LoginObserver observer for Facebook authentication procedure.
 	 */
-	private final class LoginObserver implements FacebookLoginObserver {
+	private final class LoginObserver implements FBClient.LoginObserver {
 		@Override
 		public void onCancel() {
 			// We are not interested in doing anything if user cancels Facebook
@@ -244,11 +227,12 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * LogoutObserver for handling asynchronous logout procedure.
 	 */
-	private final class LogoutObserver implements FacebookLogoutObserver {
+	private final class LogoutObserver implements FBClient.LogoutObserver {
 		@Override
 		public void onComplete() {
 			// First hide progress dialog.
 			hideProgressDialog();
+			getGlobalState().getFBFactory().reset();
 			// Switch to login view.
 			showLoginView();
 		}

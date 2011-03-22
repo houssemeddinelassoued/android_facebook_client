@@ -3,7 +3,9 @@ package fi.harism.facebook;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import fi.harism.facebook.net.RequestController;
+import fi.harism.facebook.dao.FBFactory;
+import fi.harism.facebook.net.FBClient;
+import fi.harism.facebook.request.RequestQueue;
 
 /**
  * GlobalStateImpl class extends Application and is used as base class for our
@@ -13,8 +15,10 @@ import fi.harism.facebook.net.RequestController;
  */
 public class GlobalStateImpl extends Application implements GlobalState {
 
-	// Instance of RequestController.
-	private RequestController requestController = null;
+	// FBClient instance.
+	private FBClient fbClient = null;
+	// FBFactory instance;
+	private FBFactory fbFactory = null;
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 
@@ -28,11 +32,19 @@ public class GlobalStateImpl extends Application implements GlobalState {
 	}
 
 	@Override
-	public RequestController getRequestController() {
-		if (requestController == null) {
-			requestController = new RequestController();
+	public FBClient getFBClient() {
+		if (fbClient == null) {
+			fbClient= new FBClient();
 		}
-		return requestController;
+		return fbClient;
+	}
+	
+	@Override
+	public FBFactory getFBFactory() {
+		if (fbFactory == null) {
+			fbFactory= new FBFactory(new RequestQueue(), getFBClient());
+		}
+		return fbFactory;
 	}
 
 }

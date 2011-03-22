@@ -1,13 +1,13 @@
 package fi.harism.facebook.dao;
 
 /**
- * Generic implementation for all DAO request observers.
+ * Generic implementation for all Facebook API request observers.
  * 
  * @author harism
  * @param <T>
  *            Class this generic presents.
  */
-public interface DAOObserver<T> {
+public interface FBObserver<T> {
 
 	/**
 	 * Called once request is complete. This method is always called from UI

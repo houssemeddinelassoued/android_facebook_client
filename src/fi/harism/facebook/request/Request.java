@@ -18,6 +18,7 @@ public abstract class Request implements Runnable {
 	private boolean executionStopped = false;
 	// Activity we execute runOnUiThread on.
 	private Activity activity = null;
+	private Object key = null;
 	// Priority for this Request.
 	private int priority = PRIORITY_NORMAL;
 
@@ -27,8 +28,9 @@ public abstract class Request implements Runnable {
 	 * @param activity
 	 *            Activity we run runOnUiThread on.
 	 */
-	public Request(Activity activity) {
+	public Request(Activity activity, Object key) {
 		this.activity = activity;
+		this.key = key;
 	}
 
 	/**
@@ -67,8 +69,8 @@ public abstract class Request implements Runnable {
 		}
 	}
 
-	public final Activity getActivity() {
-		return activity;
+	public final Object getKey() {
+		return key;
 	}
 
 	/**

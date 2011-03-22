@@ -1,12 +1,12 @@
 package fi.harism.facebook.dao;
 
-public class DAOComment {
+public class FBComment {
 	
 	private String fromName;
 	private String message;
 	private String createdTime;
 	
-	public DAOComment(String fromName, String message, String createdTime) {
+	public FBComment(String fromName, String message, String createdTime) {
 		this.fromName = fromName;
 		this.message = message;
 		this.createdTime = createdTime;

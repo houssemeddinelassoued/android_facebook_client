@@ -1,7 +1,8 @@
 package fi.harism.facebook;
 
 import android.graphics.Bitmap;
-import fi.harism.facebook.net.RequestController;
+import fi.harism.facebook.dao.FBFactory;
+import fi.harism.facebook.net.FBClient;
 
 /**
  * GlobalState interface.
@@ -19,11 +20,19 @@ public interface GlobalState {
 	public Bitmap getDefaultPicture();
 
 	/**
-	 * Returns application wide instance of RequestController. Creates one once
-	 * this method is called for the first time.
+	 * Returns application wide instance of FBClient. Creates one once this
+	 * method is called for the first time.
 	 * 
-	 * @return RequestController instance.
+	 * @return FBClient instance.
 	 */
-	public RequestController getRequestController();
+	public FBClient getFBClient();
+
+	/**
+	 * Returns application wide instance of FBFactory. Creates one once this
+	 * method is called for the first time.
+	 * 
+	 * @return FBFactory instance.
+	 */
+	public FBFactory getFBFactory();
 
 }

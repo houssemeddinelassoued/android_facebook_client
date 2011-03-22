@@ -5,12 +5,12 @@ package fi.harism.facebook.dao;
  * 
  * @author harism
  */
-public class DAOFriend {
+public class FBFriend {
 	private String id;
 	private String name;
 	private String picture;
 
-	public DAOFriend(String id, String name, String picture) {
+	public FBFriend(String id, String name, String picture) {
 		this.id = id;
 		this.name = name;
 		this.picture = picture;

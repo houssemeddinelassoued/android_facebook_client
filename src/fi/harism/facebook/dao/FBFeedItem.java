@@ -5,7 +5,7 @@ package fi.harism.facebook.dao;
  * 
  * @author harism
  */
-public class DAOFeedItem {
+public class FBFeedItem {
 
 	private String id;
 	private String type;
@@ -20,7 +20,7 @@ public class DAOFeedItem {
 	private String description;
 	private String createdTime;
 
-	public DAOFeedItem(String id, String type, String fromId, String fromName,
+	public FBFeedItem(String id, String type, String fromId, String fromName,
 			String fromPictureUrl, String message, String pictureUrl,
 			String link, String name, String caption, String description,
 			String createdTime) {

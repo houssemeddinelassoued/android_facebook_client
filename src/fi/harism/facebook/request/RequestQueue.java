@@ -13,7 +13,7 @@ import android.app.Activity;
  */
 public final class RequestQueue {
 
-	private ArrayList<Activity> pausedList = null;
+	private ArrayList<Object> pausedList = null;
 	// List of requests.
 	private ArrayList<Request> requestList = null;
 	// Currently processed request.
@@ -28,7 +28,7 @@ public final class RequestQueue {
 	 *            Activity this controller is created for.
 	 */
 	public RequestQueue() {
-		pausedList = new ArrayList<Activity>();
+		pausedList = new ArrayList<Object>();
 		requestList = new ArrayList<Request>();
 		workerThread = new WorkerThread();
 		workerThread.start();
@@ -90,11 +90,11 @@ public final class RequestQueue {
 		}
 	}
 
-	public final void removeRequests(Activity activity) {
+	public final void removeRequests(Object key) {
 		synchronized (requestList) {
 			for (int i = 0; i < requestList.size();) {
 				Request r = requestList.get(i);
-				if (r.getActivity() == activity) {
+				if (r.getKey() == key) {
 					requestList.remove(i);
 				} else {
 					++i;
@@ -102,22 +102,22 @@ public final class RequestQueue {
 			}
 			// If there is a current Request, stop its execution at once.
 			if (currentRequest != null
-					&& currentRequest.getActivity() == activity) {
+					&& currentRequest.getKey() == key) {
 				currentRequest.stop();
 				currentRequest = null;
 			}
-			pausedList.remove(activity);
+			pausedList.remove(key);
 			requestList.notify();
 		}
 	}
 
-	public final void setPaused(Activity activity, boolean paused) {
+	public final void setPaused(Object key, boolean paused) {
 		if (paused == true) {
-			if (!pausedList.contains(activity)) {
-				pausedList.add(activity);
+			if (!pausedList.contains(key)) {
+				pausedList.add(key);
 			}
 		} else {
-			pausedList.remove(activity);
+			pausedList.remove(key);
 		}
 		synchronized (requestList) {
 			requestList.notify();
@@ -161,7 +161,7 @@ public final class RequestQueue {
 					if (keepRunning) {
 						for (int i = 0; i < requestList.size(); ++i) {
 							Request r = requestList.get(i);
-							if (!pausedList.contains(r.getActivity())) {
+							if (!pausedList.contains(r.getKey())) {
 								currentRequest = requestList.remove(i);
 								break;
 							}

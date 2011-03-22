@@ -11,12 +11,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAOFriend;
-import fi.harism.facebook.dao.DAOFriendList;
-import fi.harism.facebook.dao.DAOObserver;
-import fi.harism.facebook.dao.DAOProfile;
-import fi.harism.facebook.dialog.ProfileDialog;
-import fi.harism.facebook.net.RequestController;
+import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBFriend;
+import fi.harism.facebook.dao.FBFriendList;
+import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
@@ -32,8 +30,9 @@ import fi.harism.facebook.util.StringUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	// RequestController instance.
-	private RequestController requestController = null;
+	private FBBitmap fbBitmap;
+	private FBFriendList fbFriendList;
+
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 	// Radius value for rounding profile images.
@@ -49,8 +48,9 @@ public class FriendsActivity extends BaseActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.friends);
 
-		requestController = getGlobalState().getRequestController();
 		spanClickObserver = new SpanClickObserver(this);
+		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+		fbFriendList = getGlobalState().getFBFactory().getFriendList();
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -65,25 +65,28 @@ public class FriendsActivity extends BaseActivity {
 		// Show progress dialog.
 		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		requestController.getFriendList(this, new DAOFriendListObserver(this));
+		fbFriendList.load(this, new FBFriendListObserver(this));
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		requestController.removeRequests(this);
+		fbFriendList.cancel();
+		fbBitmap.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		requestController.setPaused(this, true);
+		fbFriendList.setPaused(true);
+		fbBitmap.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		requestController.setPaused(this, false);
+		fbFriendList.setPaused(false);
+		fbBitmap.setPaused(false);
 	}
 
 	/**
@@ -162,24 +165,24 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling "me/friends" request.
 	 */
-	private final class DAOFriendListObserver implements
-			DAOObserver<DAOFriendList> {
+	private final class FBFriendListObserver implements
+			FBObserver<FBFriendList> {
 
 		private Activity activity = null;
 
-		public DAOFriendListObserver(Activity activity) {
+		public FBFriendListObserver(Activity activity) {
 			this.activity = activity;
 		}
 
 		@Override
-		public void onComplete(DAOFriendList friendList) {
+		public void onComplete(FBFriendList friendList) {
 			// First hide progress dialog.
 			hideProgressDialog();
 
 			// LinearLayout which is inside ScrollView.
 			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 
-			for (DAOFriend friend : friendList) {
+			for (FBFriend friend : friendList) {
 				String userId = friend.getId();
 				String name = friend.getName();
 				String pictureUrl = friend.getPicture();
@@ -189,8 +192,7 @@ public class FriendsActivity extends BaseActivity {
 				// Add friend item view to scrollable list.
 				scrollView.addView(friendItemView);
 
-				requestController.getBitmap(activity, pictureUrl,
-						new PictureObserver(userId));
+				fbBitmap.load(pictureUrl, activity, new PictureObserver(userId));
 			}
 		}
 
@@ -204,7 +206,7 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Observer for handling profile picture loading.
 	 */
-	private final class PictureObserver implements DAOObserver<Bitmap> {
+	private final class PictureObserver implements FBObserver<Bitmap> {
 
 		private String userId;
 
@@ -282,21 +284,7 @@ public class FriendsActivity extends BaseActivity {
 		public boolean onClick(FacebookURLSpan span) {
 			String url = span.getURL();
 			if (url.startsWith(PROTOCOL_SHOW_PROFILE)) {
-				showProgressDialog();
-				String userId = url.substring(PROTOCOL_SHOW_PROFILE.length());
-				requestController.getProfile(activity, userId,
-						new DAOObserver<DAOProfile>() {
-							@Override
-							public void onComplete(DAOProfile response) {
-								hideProgressDialog();
-								new ProfileDialog(activity, response).show();
-							}
-
-							@Override
-							public void onError(Exception error) {
-								hideProgressDialog();
-							}
-						});
+				showAlertDialog(url);
 				return true;
 			}
 			return false;

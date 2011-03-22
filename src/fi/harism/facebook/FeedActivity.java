@@ -10,14 +10,12 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import fi.harism.facebook.dao.DAOCommentList;
-import fi.harism.facebook.dao.DAOFeedItem;
-import fi.harism.facebook.dao.DAOFeedList;
-import fi.harism.facebook.dao.DAOObserver;
-import fi.harism.facebook.dao.DAOProfile;
+import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBCommentList;
+import fi.harism.facebook.dao.FBFeedItem;
+import fi.harism.facebook.dao.FBFeedList;
+import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dialog.CommentsDialog;
-import fi.harism.facebook.dialog.ProfileDialog;
-import fi.harism.facebook.net.RequestController;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
@@ -29,8 +27,9 @@ import fi.harism.facebook.util.StringUtils;
  */
 public abstract class FeedActivity extends BaseActivity {
 
-	// RequestController instance.
-	private RequestController requestController = null;
+	private FBBitmap fbBitmap;
+	private FBFeedList fbFeedList;
+
 	// Default picture used as sender's profile picture.
 	private Bitmap defaultPicture = null;
 	// Rounding radius for user picture.
@@ -46,14 +45,7 @@ public abstract class FeedActivity extends BaseActivity {
 	// Static protocol name for showing likes.
 	private static final String PROTOCOL_SHOW_LIKES = "showlikes://";
 
-	/**
-	 * Implementation of this method should trigger DAOFeedItem loading using
-	 * given observer.
-	 * 
-	 * @param observer
-	 *            Observer for DAO operation.
-	 */
-	public abstract void getFeed(DAOObserver<DAOFeedList> observer);
+	public abstract FBFeedList getFeedList();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,8 +58,9 @@ public abstract class FeedActivity extends BaseActivity {
 		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
 				PICTURE_ROUND_RADIUS);
 
-		requestController = getGlobalState().getRequestController();
 		spanClickObserver = new SpanClickObserver(this);
+		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+		fbFeedList = getFeedList();
 
 		View updateButton = findViewById(R.id.feed_button_update);
 		updateButton.setOnClickListener(new View.OnClickListener() {
@@ -79,25 +72,28 @@ public abstract class FeedActivity extends BaseActivity {
 		});
 
 		showProgressDialog();
-		getFeed(new DAOFeedListObserver(this));
+		fbFeedList.load(this, new FBFeedListObserver(this));
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		requestController.removeRequests(this);
+		fbFeedList.cancel();
+		fbBitmap.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		requestController.setPaused(this, true);
+		fbFeedList.setPaused(true);
+		fbBitmap.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		requestController.setPaused(this, false);
+		fbFeedList.setPaused(false);
+		fbBitmap.setPaused(false);
 	}
 
 	/**
@@ -106,7 +102,7 @@ public abstract class FeedActivity extends BaseActivity {
 	 * @param feedItemObject
 	 *            Feed item JSONObject to be added.
 	 */
-	private View createFeedItem(DAOFeedItem feedItem) {
+	private View createFeedItem(FBFeedItem feedItem) {
 		String itemId = feedItem.getId();
 
 		// Create default Feed Item view.
@@ -210,39 +206,33 @@ public abstract class FeedActivity extends BaseActivity {
 		return feedItemView;
 	}
 
-	/**
-	 * Private class for handling "me/home" Facebook request.
-	 * 
-	 * @author harism
-	 */
-	private final class DAOFeedListObserver implements DAOObserver<DAOFeedList> {
+	private final class FBFeedListObserver implements FBObserver<FBFeedList> {
 
 		private Activity activity = null;
 
-		public DAOFeedListObserver(Activity activity) {
+		public FBFeedListObserver(Activity activity) {
 			this.activity = activity;
 		}
 
 		@Override
-		public void onComplete(DAOFeedList newsFeedList) {
+		public void onComplete(FBFeedList newsFeedList) {
 			// First hide progress dialog.
 			hideProgressDialog();
 
 			// Add feed item to viewable list of items.
 			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 
-			for (DAOFeedItem item : newsFeedList) {
+			for (FBFeedItem item : newsFeedList) {
 				View view = createFeedItem(item);
 				itemList.addView(view);
 
 				if (item.getFromPictureUrl() != null) {
-					requestController.getBitmap(activity, item
-							.getFromPictureUrl(),
+					fbBitmap.load(item.getFromPictureUrl(), activity,
 							new FromPictureObserver(item.getId()));
 				}
 
 				if (item.getPictureUrl() != null) {
-					requestController.getBitmap(activity, item.getPictureUrl(),
+					fbBitmap.load(item.getPictureUrl(), activity,
 							new FeedPictureObserver(item.getId()));
 				}
 			}
@@ -263,7 +253,7 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FeedPictureObserver implements DAOObserver<Bitmap> {
+	private final class FeedPictureObserver implements FBObserver<Bitmap> {
 
 		private String itemId = null;
 
@@ -298,7 +288,7 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements DAOObserver<Bitmap> {
+	private final class FromPictureObserver implements FBObserver<Bitmap> {
 
 		private String itemId = null;
 
@@ -343,38 +333,25 @@ public abstract class FeedActivity extends BaseActivity {
 		public boolean onClick(FacebookURLSpan span) {
 			String url = span.getURL();
 			if (url.startsWith(PROTOCOL_SHOW_PROFILE)) {
-				showProgressDialog();
-				String userId = url.substring(PROTOCOL_SHOW_PROFILE.length());
-				requestController.getProfile(activity, userId,
-						new DAOObserver<DAOProfile>() {
-							@Override
-							public void onComplete(DAOProfile response) {
-								hideProgressDialog();
-								new ProfileDialog(activity, response).show();
-							}
-
-							@Override
-							public void onError(Exception error) {
-								hideProgressDialog();
-							}
-						});
+				showAlertDialog(url);
 				return true;
 			} else if (url.startsWith(PROTOCOL_SHOW_COMMENTS)) {
 				showProgressDialog();
-				String postId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
-				requestController.getComments(activity, postId,
-						new DAOObserver<DAOCommentList>() {
-							@Override
-							public void onComplete(DAOCommentList comments) {
-								hideProgressDialog();
-								new CommentsDialog(activity, comments).show();
-							}
+				String itemId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
+				FBCommentList commentList = getGlobalState().getFBFactory()
+						.getCommentList(itemId);
+				commentList.load(activity, new FBObserver<FBCommentList>() {
+					@Override
+					public void onComplete(FBCommentList comments) {
+						hideProgressDialog();
+						new CommentsDialog(activity, comments).show();
+					}
 
-							@Override
-							public void onError(Exception error) {
-								hideProgressDialog();
-							}
-						});
+					@Override
+					public void onError(Exception error) {
+						hideProgressDialog();
+					}
+				});
 				return true;
 			} else if (url.startsWith(PROTOCOL_SHOW_LIKES)) {
 				showAlertDialog(url);
