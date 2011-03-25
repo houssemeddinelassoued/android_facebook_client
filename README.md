@@ -31,8 +31,8 @@ ToDo
 Chat
 ----
 
-* On chat activity press connect to start login procedure.
-2. Once connection is established list of users/friends should be updated.
-3. Clicking on user opens a separate chat/conversation view.
-4. For testing purposes there is connect, disconnect and show log buttons visible at all times.
-5. This is more of a proof of concept than proper implementation at the moment.
+* On chat activity press connect button to start login procedure.
+* Once connection is established list of users/friends should be updated.
+* Clicking on user opens a separate chat/conversation view.
+* For testing purposes there is connect, disconnect and show log buttons visible at all times.
+* This is more of a proof of concept than proper implementation at the moment.
