@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" >
+	<TextView
+		style="@style/headerContainer"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/chat_title"
+		android:id="@+id/header" />
+	<LinearLayout
+		style="@style/footerContainer"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:gravity="center"
+		android:id="@+id/footer" >
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/chat_button_connect"
+			android:id="@+id/chat_button_connect" />
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/chat_button_disconnect"
+			android:id="@+id/chat_button_disconnect" />
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/chat_button_showlog"
+			android:id="@+id/chat_button_showlog" />
+	</LinearLayout>
+	<ScrollView
+		style="@style/contentContainer"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/header"
+		android:layout_above="@id/footer" >
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:id="@+id/chat_user_list" />
+	</ScrollView>
+</RelativeLayout>
+

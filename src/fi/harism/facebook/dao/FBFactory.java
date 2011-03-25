@@ -39,4 +39,8 @@ public class FBFactory {
 		return new FBFriendList(fbStorage);
 	}
 	
+	public FBChat getChat(FBChat.Observer observer) {
+		return new FBChat(fbStorage, observer);
+	}
+	
 }

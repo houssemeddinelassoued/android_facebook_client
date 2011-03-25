@@ -18,6 +18,8 @@
         <activity android:name="FriendsActivity" />
         <activity android:name="NewsFeedActivity" />
         <activity android:name="ProfileFeedActivity" />
+        <activity android:name="ChatActivity" />
+        <activity android:name="ChatSessionActivity" />
     </application>
     
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>

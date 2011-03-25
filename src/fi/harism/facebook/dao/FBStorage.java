@@ -1,6 +1,9 @@
 package fi.harism.facebook.dao;
 
+import java.util.HashMap;
 import java.util.Vector;
+
+import fi.harism.facebook.chat.ChatHandler;
 import fi.harism.facebook.net.FBClient;
 import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.util.DataCache;
@@ -21,6 +24,10 @@ public class FBStorage {
 	
 	public DataCache imageCache;
 	
+	public ChatHandler chatHandler;
+	public FBSession fbSession;
+	public HashMap<String, FBChatUser> chatUserMap;
+	
 	public FBStorage(RequestQueue requestQueue, FBClient fbClient) {
 		this.requestQueue = requestQueue;
 		this.fbClient = fbClient;
@@ -30,6 +37,10 @@ public class FBStorage {
 		friendList = new Vector<FBFriend>();
 		newsFeedList = new Vector<FBFeedItem>();
 		profileFeedList = new Vector<FBFeedItem>();
+		
+		chatHandler = new ChatHandler();
+		fbSession = new FBSession(this);
+		chatUserMap = new HashMap<String, FBChatUser>();
 	}
 	
 	public void reset() {
@@ -42,6 +53,10 @@ public class FBStorage {
 		profileFeedList.removeAllElements();
 		
 		requestQueue.removeAllRequests();
+		
+		chatHandler.disconnect();
+		fbSession = new FBSession(this);
+		chatUserMap.clear();
 	}
 
 }

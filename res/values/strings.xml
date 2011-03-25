@@ -23,7 +23,17 @@
 	<string name="main_button_wall_text">Wall</string>
 	<string name="main_button_friends_text">Friends</string>
 	<string name="main_button_profile_text">Profile</string>
+	<string name="main_button_chat_text">Chat</string>
 	<string name="main_logout_text">Logout</string>
+	
+	<!--  Chat Activity -->
+	<string name="chat_title">Chat</string>
+	<string name="chat_button_connect">Connect</string>
+	<string name="chat_button_disconnect">Disconnect</string>
+	<string name="chat_button_showlog">Show Log</string>
+	
+	<!--  Chat Session Activity -->
+	<string name="chat_session_button_send">Send</string>
 	
 	<!-- Comments Dialog -->
 	<string name="dialog_comments_title">Comments</string>

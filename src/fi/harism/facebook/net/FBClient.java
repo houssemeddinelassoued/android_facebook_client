@@ -48,8 +48,13 @@ public class FBClient {
 			observer.onComplete();
 		} else {
 			// List of permissions our application needs.
-			String permissions[] = { "user_status", "friends_status",
-					"read_stream", "publish_stream" };
+			String permissions[] = {
+					// For reading streams and posting comments.
+					"read_stream", "publish_stream",
+					// Not much in use at the moment.
+					"user_status", "friends_status",
+					// Needed to login to chat.facebook.com.
+					"xmpp_login" };
 			// Call actual authorization procedure.
 			facebook.authorize(activity, permissions,
 					new Facebook.DialogListener() {
@@ -65,17 +70,15 @@ public class FBClient {
 						}
 
 						@Override
-						public void onError(DialogError e) {
-							Exception ex = new Exception(e
-									.getLocalizedMessage());
-							observer.onError(ex);
+						public void onError(DialogError ex) {
+							observer.onError(new Exception(ex
+									.getLocalizedMessage()));
 						}
 
 						@Override
-						public void onFacebookError(FacebookError e) {
-							Exception ex = new Exception(e
-									.getLocalizedMessage());
-							observer.onError(ex);
+						public void onFacebookError(FacebookError ex) {
+							observer.onError(new Exception(ex
+									.getLocalizedMessage()));
 						}
 					});
 		}
@@ -132,6 +135,18 @@ public class FBClient {
 				}
 			}
 		}.start();
+	}
+
+	/**
+	 * Old/deprecated Facebook REST request call. This is used only for
+	 * creating/requesting secret session key needed for chat authorization.
+	 * 
+	 * @param parameters
+	 *            Request parameters.
+	 * @return Response String.
+	 */
+	public String request(Bundle parameters) throws Exception {
+		return facebook.request(parameters);
 	}
 
 	/**

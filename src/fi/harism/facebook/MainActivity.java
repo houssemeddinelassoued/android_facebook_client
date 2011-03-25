@@ -139,6 +139,17 @@ public class MainActivity extends BaseActivity {
 				showAlertDialog("Implement me..");
 			}
 		});
+		
+		// Add onClick listener to "Chat" button.
+		Button chatButton = (Button) findViewById(R.id.main_button_chat);
+		chatButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// On click trigger feed activity.
+				Intent i = createIntent(ChatActivity.class);
+				startActivity(i);
+			}
+		});
 
 		// Add onClick listener to "Logout" button.
 		View logoutButton = findViewById(R.id.main_button_logout);
