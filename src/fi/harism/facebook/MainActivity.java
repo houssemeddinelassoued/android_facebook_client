@@ -172,20 +172,26 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class BitmapObserver implements FBObserver<FBBitmap> {
+	private final class BitmapObserver implements FBObserver<FBBitmap>,
+			Runnable {
+
+		private FBBitmap bitmap;
+
 		@Override
 		public void onComplete(final FBBitmap bitmap) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-					iv.setImageBitmap(bitmap.getBitmap());
-				}
-			});
+			this.bitmap = bitmap;
+			runOnUiThread(this);
 		}
 
 		@Override
 		public void onError(Exception ex) {
 			// We don't care about errors here.
+		}
+
+		@Override
+		public void run() {
+			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
+			iv.setImageBitmap(bitmap.getBitmap());
 		}
 
 	}
@@ -193,26 +199,30 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
-	private final class FBMeObserver implements FBObserver<FBUser> {
+	private final class FBMeObserver implements FBObserver<FBUser>, Runnable {
+
+		private FBUser me;
 
 		@Override
 		public void onComplete(final FBUser me) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					TextView nameView = (TextView) findViewById(R.id.main_user_name);
-					nameView.setText(me.getName());
-
-					TextView statusView = (TextView) findViewById(R.id.main_user_status);
-					statusView.setText(me.getStatus());
-
-					fbBitmapCache.load(me.getPicture(), null, new BitmapObserver());
-				}
-			});
+			this.me = me;
+			runOnUiThread(this);
 		}
 
 		@Override
 		public void onError(Exception ex) {
 			// We don't care about errors here.
+		}
+
+		@Override
+		public void run() {
+			TextView nameView = (TextView) findViewById(R.id.main_user_name);
+			nameView.setText(me.getName());
+
+			TextView statusView = (TextView) findViewById(R.id.main_user_status);
+			statusView.setText(me.getStatus());
+
+			fbBitmapCache.load(me.getPicture(), null, new BitmapObserver());
 		}
 	}
 
