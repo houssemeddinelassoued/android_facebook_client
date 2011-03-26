@@ -1,9 +1,7 @@
 package fi.harism.facebook;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Looper;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
@@ -208,34 +206,15 @@ public abstract class FeedActivity extends BaseActivity {
 		return feedItemView;
 	}
 
-	private final class FBFeedListObserver implements FBObserver<FBFeedList> {
+	private final class FBFeedListObserver implements FBObserver<FBFeedList>,
+			Runnable {
+
+		private FBFeedList feedList;
 
 		@Override
-		public void onComplete(final FBFeedList newsFeedList) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					// First hide progress dialog.
-					hideProgressDialog();
-
-					// Add feed item to viewable list of items.
-					LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
-
-					for (FBFeedItem item : newsFeedList) {
-						View view = createFeedItem(item);
-						itemList.addView(view);
-
-						if (item.getFromPictureUrl() != null) {
-							fbBitmapCache.load(item.getFromPictureUrl(),
-									item.getId(), new FromPictureObserver());
-						}
-
-						if (item.getPictureUrl() != null) {
-							fbBitmapCache.load(item.getPictureUrl(),
-									item.getId(), new FeedPictureObserver());
-						}
-					}
-				}
-			});
+		public void onComplete(final FBFeedList feedList) {
+			this.feedList = feedList;
+			runOnUiThread(this);
 		}
 
 		@Override
@@ -246,6 +225,30 @@ public abstract class FeedActivity extends BaseActivity {
 			showAlertDialog(ex.getLocalizedMessage());
 		}
 
+		@Override
+		public void run() {
+			// First hide progress dialog.
+			hideProgressDialog();
+
+			// Add feed item to viewable list of items.
+			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
+
+			for (FBFeedItem item : feedList) {
+				View view = createFeedItem(item);
+				itemList.addView(view);
+
+				if (item.getFromPictureUrl() != null) {
+					fbBitmapCache.load(item.getFromPictureUrl(), item.getId(),
+							new FromPictureObserver());
+				}
+
+				if (item.getPictureUrl() != null) {
+					fbBitmapCache.load(item.getPictureUrl(), item.getId(),
+							new FeedPictureObserver());
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -253,31 +256,36 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FeedPictureObserver implements FBObserver<FBBitmap> {
+	private final class FeedPictureObserver implements FBObserver<FBBitmap>,
+			Runnable {
+
+		private FBBitmap bitmap;
 
 		@Override
 		public void onComplete(final FBBitmap bitmap) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					// Get feed item list view.
-					View itemList = findViewById(R.id.feed_list);
-					// Find feed item using itemId.
-					View itemView = itemList.findViewWithTag(bitmap.getId());
-					// This shouldn't happen but just in case.
-					if (itemView != null) {
-						// Set image to feed item.
-						ImageView iv = (ImageView) itemView
-								.findViewById(R.id.feed_item_picture_image);
-						iv.setImageBitmap(bitmap.getBitmap());
-						iv.setVisibility(View.VISIBLE);
-					}
-				}
-			});
+			this.bitmap = bitmap;
+			runOnUiThread(this);
 		}
 
 		@Override
 		public void onError(Exception ex) {
 			// We don't care about errors.
+		}
+
+		@Override
+		public void run() {
+			// Get feed item list view.
+			View itemList = findViewById(R.id.feed_list);
+			// Find feed item using itemId.
+			View itemView = itemList.findViewWithTag(bitmap.getId());
+			// This shouldn't happen but just in case.
+			if (itemView != null) {
+				// Set image to feed item.
+				ImageView iv = (ImageView) itemView
+						.findViewById(R.id.feed_item_picture_image);
+				iv.setImageBitmap(bitmap.getBitmap());
+				iv.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 
@@ -286,37 +294,36 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements FBObserver<FBBitmap> {
+	private final class FromPictureObserver implements FBObserver<FBBitmap>,
+			Runnable {
+
+		private FBBitmap bitmap;
 
 		@Override
 		public void onComplete(final FBBitmap bitmap) {
-
-			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-				int i = 0;
-				++i;
-			}
-
-			runOnUiThread(new Runnable() {
-				public void run() {
-					// Get feed item list view.
-					View itemList = findViewById(R.id.feed_list);
-					// Find our item view using itemId.
-					View itemView = itemList.findViewWithTag(bitmap.getId());
-					// This shouldn't happen but just in case.
-					if (itemView != null) {
-						// Set image to feed item view.
-						ImageView iv = (ImageView) itemView
-								.findViewById(R.id.feed_item_from_image);
-						iv.setImageBitmap(BitmapUtils.roundBitmap(
-								bitmap.getBitmap(), PICTURE_ROUND_RADIUS));
-					}
-				}
-			});
+			this.bitmap = bitmap;
+			runOnUiThread(this);
 		}
 
 		@Override
 		public void onError(Exception ex) {
 			// We don't care about errors.
+		}
+
+		@Override
+		public void run() {
+			// Get feed item list view.
+			View itemList = findViewById(R.id.feed_list);
+			// Find our item view using itemId.
+			View itemView = itemList.findViewWithTag(bitmap.getId());
+			// This shouldn't happen but just in case.
+			if (itemView != null) {
+				// Set image to feed item view.
+				ImageView iv = (ImageView) itemView
+						.findViewById(R.id.feed_item_from_image);
+				iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap.getBitmap(),
+						PICTURE_ROUND_RADIUS));
+			}
 		}
 	}
 
