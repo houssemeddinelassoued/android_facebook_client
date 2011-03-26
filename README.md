@@ -23,10 +23,8 @@ Fetching sources is maybe easiest done using EGit Eclipse plugin but feel free t
 
 ToDo
 ====
-1. Ponder over DAO implementation - and fix/improve it eventually.
-It really needs some face lifting.
-2. Start testing chat functionality.
-Partially done. There is some chat functionality added now.
+1. Ponder over DAO implementation - and fix/improve it eventually.<br>- It really needs some face lifting.
+2. Start testing chat functionality.<br>- Partially done. There is some chat functionality added now.
 
 Chat
 ====
