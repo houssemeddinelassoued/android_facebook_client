@@ -9,13 +9,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import fi.harism.facebook.dao.FBChat;
-import fi.harism.facebook.dao.FBChatUser;
+import fi.harism.facebook.dao.FBUser;
 
 public class ChatSessionActivity extends BaseActivity implements
 		FBChat.Observer {
 
 	private FBChat fbChat;
-	private FBChatUser fbChatUser;
+	private FBUser fbUser;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,7 +54,7 @@ public class ChatSessionActivity extends BaseActivity implements
 				Editable editable = edit.getText();
 				String message = editable.toString().trim();
 				if (message.length() > 0) {
-					fbChat.sendMessage(fbChatUser, message);
+					fbChat.sendMessage(fbUser, message);
 					addText("Me:\n" + message + "\n\n");
 					editable.clear();
 				}
@@ -62,12 +62,9 @@ public class ChatSessionActivity extends BaseActivity implements
 		});
 
 		fbChat = getGlobalState().getFBFactory().getChat(this);
-
-		String withId = getIntent().getStringExtra("with");
-		addText("Chatting with\nid=" + withId + "\n");
-
-		fbChatUser = fbChat.getUser(withId);
-		addText("name=" + fbChatUser.getName() + "\n\n");
+		fbUser = (FBUser) getIntent().getSerializableExtra("fi.harism.facebook.ChatSessionActivity");
+		addText("Chatting with\nid=" + fbUser.getId() + "\n");
+		addText("name=" + fbUser.getName() + "\n\n");
 	}
 
 	@Override
@@ -110,7 +107,7 @@ public class ChatSessionActivity extends BaseActivity implements
 	}
 
 	@Override
-	public void onPresenceChanged(final FBChatUser user) {
+	public void onPresenceChanged(final FBUser user) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				handlePresenceChange(user);
@@ -119,8 +116,8 @@ public class ChatSessionActivity extends BaseActivity implements
 	}
 
 	@Override
-	public void onMessage(final FBChatUser user, final String message) {
-		if (user.getId().equals(fbChatUser.getId())) {
+	public void onMessage(final FBUser user, final String message) {
+		if (user.getId().equals(fbUser.getId())) {
 			runOnUiThread(new Runnable() {
 				public void run() {
 					addText(user.getName() + ":\n" + message + "\n\n");
@@ -129,16 +126,16 @@ public class ChatSessionActivity extends BaseActivity implements
 		}
 	}
 
-	private void handlePresenceChange(FBChatUser user) {
-		if (user.getId().equals(fbChatUser.getId())) {
+	private void handlePresenceChange(FBUser user) {
+		if (user.getId().equals(fbUser.getId())) {
 			switch (user.getPresence()) {
-			case FBChatUser.PRESENCE_AWAY:
+			case AWAY:
 				addText(user.getName() + " is away.\n\n");
 				break;
-			case FBChatUser.PRESENCE_CHAT:
+			case CHAT:
 				addText(user.getName() + " is online.\n\n");
 				break;
-			case FBChatUser.PRESENCE_GONE:
+			case GONE:
 				addText(user.getName() + " went offline.\n\n");
 				break;
 			}

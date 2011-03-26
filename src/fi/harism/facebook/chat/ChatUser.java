@@ -2,14 +2,12 @@ package fi.harism.facebook.chat;
 
 public class ChatUser {
 	
-	public static final int PRESENCE_CHAT = 1;
-	public static final int PRESENCE_AWAY = 2;
-	public static final int PRESENCE_GONE = 3;
-	
 	private String jid;
-	private int presence;
 	
-	public ChatUser(String jid, int presence) {
+	public enum Presence { CHAT, AWAY, GONE };
+	private Presence presence;
+	
+	public ChatUser(String jid, Presence presence) {
 		this.jid = jid;
 		this.presence = presence;
 	}
@@ -18,7 +16,7 @@ public class ChatUser {
 		return jid;
 	}
 	
-	public int getPresence() {
+	public Presence getPresence() {
 		return presence;
 	}
 	

@@ -27,10 +27,6 @@ public class FBFactory {
 		return new FBFeedList(fbStorage, FBFeedList.PROFILE_FEED, fbStorage.profileFeedList);
 	}
 	
-	public FBMe getMe() {
-		return new FBMe(fbStorage);
-	}
-	
 	public FBBitmap getBitmap() {
 		return new FBBitmap(fbStorage);
 	}
@@ -41,6 +37,10 @@ public class FBFactory {
 	
 	public FBChat getChat(FBChat.Observer observer) {
 		return new FBChat(fbStorage, observer);
+	}
+	
+	public FBUserMap getUserMap() {
+		return new FBUserMap(fbStorage);
 	}
 	
 }

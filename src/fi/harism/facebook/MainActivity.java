@@ -11,8 +11,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBMe;
 import fi.harism.facebook.dao.FBObserver;
+import fi.harism.facebook.dao.FBUser;
+import fi.harism.facebook.dao.FBUserMap;
 import fi.harism.facebook.net.FBClient;
 
 /**
@@ -23,7 +24,7 @@ import fi.harism.facebook.net.FBClient;
  */
 public class MainActivity extends BaseActivity {
 	
-	private FBMe fbMe;
+	private FBUserMap fbUserMap;
 	private FBBitmap fbBitmap;
 
 	@Override
@@ -35,10 +36,10 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         
-        fbMe = getGlobalState().getFBFactory().getMe();
-        fbBitmap = getGlobalState().getFBFactory().getBitmap();
+		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+		fbUserMap = getGlobalState().getFBFactory().getUserMap();
 
 		// It's possible our application hasn't been killed.
 		if (getGlobalState().getFBClient().isAuthorized()) {
@@ -56,21 +57,21 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		fbMe.cancel();
+		fbUserMap.cancel();
 		fbBitmap.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		fbMe.setPaused(true);
+		fbUserMap.pause();
 		fbBitmap.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		fbMe.setPaused(false);
+		fbUserMap.resume();
 		fbBitmap.setPaused(false);
 	}
 	
@@ -92,7 +93,7 @@ public class MainActivity extends BaseActivity {
 	public final void showMainView() {
 		setContentView(R.layout.main);
 		final Activity self = this;
-
+		
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
 		Bitmap picture = getGlobalState().getDefaultPicture();
@@ -162,7 +163,8 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Start loading user information asynchronously.
-		fbMe.load(this, new FBMeObserver(this));
+		//fbMe.load(this, new FBMeObserver(this));
+		fbUserMap.getUser("me", this, new FBMeObserver(this));
 	}
 
 	/**
@@ -185,7 +187,7 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Private FacebookRequest observer for handling "me" request.
 	 */
-	private final class FBMeObserver implements FBObserver<FBMe> {
+	private final class FBMeObserver implements FBObserver<FBUser> {
 
 		private Activity activity = null;
 
@@ -194,14 +196,14 @@ public class MainActivity extends BaseActivity {
 		}
 
 		@Override
-		public void onComplete(FBMe me) {
+		public void onComplete(FBUser me) {
 			TextView nameView = (TextView) findViewById(R.id.main_user_name);
 			nameView.setText(me.getName());
 			
 			TextView statusView = (TextView) findViewById(R.id.main_user_status);
 			statusView.setText(me.getStatus());			
 
-			fbBitmap.load(me.getPictureUrl(), activity,
+			fbBitmap.load(me.getPicture(), activity,
 					new BitmapObserver());
 		}
 

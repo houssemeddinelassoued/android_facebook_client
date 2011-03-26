@@ -2,8 +2,6 @@ package fi.harism.facebook.dao;
 
 import java.util.Vector;
 
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.chat.ChatHandler;
@@ -15,14 +13,16 @@ public class FBChat {
 	private FBStorage fbStorage;
 	private FBChatObserver chatObserver;
 	private Observer observer;
+	private FBUserMap fbUserMap;
 
 	public FBChat(FBStorage fbStorage, Observer observer) {
 		this.fbStorage = fbStorage;
 		this.observer = observer;
 		chatObserver = new FBChatObserver();
 		fbStorage.chatHandler.addObserver(chatObserver);
+		fbUserMap = new FBUserMap(fbStorage);
 	}
-	
+
 	public void onDestroy() {
 		fbStorage.chatHandler.removeObserver(chatObserver);
 	}
@@ -32,54 +32,34 @@ public class FBChat {
 	}
 
 	public void connect(Activity activity) {
-		fbStorage.fbSession.load(activity, new FBSessionObserver());
+		SessionRequest request = new SessionRequest(activity, this);
+		fbStorage.requestQueue.addRequest(request);
 	}
-	
-	public FBChatUser getUser(String userId) {
-		return fbStorage.chatUserMap.get(userId);
-	}
-	
-	public Vector<FBChatUser> getUsers() {
+
+	public Vector<FBUser> getUsers() {
 		Vector<ChatUser> users = fbStorage.chatHandler.getUsers();
-		Vector<FBChatUser> out = new Vector<FBChatUser>();
+		Vector<FBUser> out = new Vector<FBUser>();
 		for (ChatUser user : users) {
 			String jid = user.getJID();
 			String id = jid.substring(0, jid.indexOf('@'));
 			if (id.charAt(0) == '-') {
 				id = id.substring(1);
 			}
-			FBChatUser u = fbStorage.chatUserMap.get(id);
+			FBUser u = fbStorage.userMap.get(id);
 			if (u != null) {
 				out.add(u);
 			}
 		}
 		return out;
 	}
-	
-	public void sendMessage(FBChatUser to, String message) {
-		ChatUser user = fbStorage.chatHandler.getUser(to.getJID());
+
+	public void sendMessage(FBUser to, String message) {
+		ChatUser user = fbStorage.chatHandler.getUser(to.getJid());
 		if (user != null) {
 			fbStorage.chatHandler.sendMessage(user, message);
 		}
 	}
-	
-	public FBChatUser getUserInfo(FBChatUser user) throws Exception {
-		Bundle params = new Bundle();
-		params.putString("fields", "id, name, picture");
-		JSONObject resp = fbStorage.fbClient.request(user.getId(), params);
-		String name = resp.getString("name");
-		String picture = resp.getString("picture");
-		
-		FBChatUser u = new FBChatUser(user.getId(), user.getJID(), name, picture, user.getPresence());
-		fbStorage.chatUserMap.put(user.getId(), u);
-		return u;
-	}
-	
-	public void getUserInfo(FBChatUser user, Activity activity, FBObserver<FBChatUser> observer) {
-		FBChatUserRequest request = new FBChatUserRequest(activity, this, user, observer);
-		fbStorage.requestQueue.addRequest(request);
-	}
-	
+
 	public void disconnect() {
 		fbStorage.chatHandler.disconnect();
 	}
@@ -89,21 +69,9 @@ public class FBChat {
 
 		public void onDisconnected();
 
-		public void onPresenceChanged(FBChatUser user);
-		
-		public void onMessage(FBChatUser from, String message);
-	}
+		public void onPresenceChanged(FBUser user);
 
-	private class FBSessionObserver implements FBObserver<FBSession> {
-		@Override
-		public void onComplete(FBSession response) {
-			fbStorage.chatHandler.connect(response.getSessionKey(),
-					response.getSessionSecret());
-		}
-		@Override
-		public void onError(Exception error) {
-			observer.onDisconnected();
-		}
+		public void onMessage(FBUser from, String message);
 	}
 
 	private class FBChatObserver implements ChatHandler.Observer {
@@ -125,33 +93,36 @@ public class FBChat {
 			if (id.charAt(0) == '-') {
 				id = id.substring(1);
 			}
-			int presence;
+			FBUser.Presence presence;
 			switch (user.getPresence()) {
-			case ChatUser.PRESENCE_AWAY:
-				presence = FBChatUser.PRESENCE_AWAY;
+			case AWAY:
+				presence = FBUser.Presence.AWAY;
 				break;
-			case ChatUser.PRESENCE_CHAT:
-				presence = FBChatUser.PRESENCE_CHAT;
-				break;
-			case ChatUser.PRESENCE_GONE:
-				presence = FBChatUser.PRESENCE_GONE;
+			case CHAT:
+				presence = FBUser.Presence.CHAT;
 				break;
 			default:
-				presence = FBChatUser.PRESENCE_INVALID;
+				presence = FBUser.Presence.GONE;
 				break;
 			}
 			
-			if (fbStorage.chatUserMap.containsKey(id)) {
-				FBChatUser u = fbStorage.chatUserMap.get(id);
-				u = new FBChatUser(u, presence);
-				fbStorage.chatUserMap.put(id, u);
+			FBUser u = fbStorage.userMap.get(id);
+			if (u != null) {
+				u.setJid(jid);
+				u.setPresence(presence);
 				observer.onPresenceChanged(u);
 			} else {
-				FBChatUser u = new FBChatUser(id, jid, null, null, presence);
-				observer.onPresenceChanged(u);
+				//FBUserRequest request = new FBUserRequest()
+				try {
+					u = fbUserMap.getUser(id);
+					u.setJid(jid);
+					u.setPresence(presence);
+					observer.onPresenceChanged(u);
+				} catch (Exception ex) {
+				}
 			}
 		}
-		
+
 		@Override
 		public void onMessage(ChatUser from, String message) {
 			String jid = from.getJID();
@@ -159,39 +130,74 @@ public class FBChat {
 			if (id.charAt(0) == '-') {
 				id = id.substring(1);
 			}
-			FBChatUser user = fbStorage.chatUserMap.get(id);
+			FBUser user = fbStorage.userMap.get(id);
 			if (user != null) {
 				observer.onMessage(user, message);
 			}
 		}
 	}
-	
-	private class FBChatUserRequest extends Request {
-		
-		private FBChatUser user;
-		private FBObserver<FBChatUser> observer;
 
-		public FBChatUserRequest(Activity activity, Object key, FBChatUser user, FBObserver<FBChatUser> observer) {
+	private class FBUserRequest extends Request {
+
+		private FBUser user;
+		String id;
+		String jid;
+		FBUser.Presence presence;
+
+		public FBUserRequest(Activity activity, Object key,
+				String id, String jid, FBUser.Presence presence) {
 			super(activity, key);
-			this.user = user;
-			this.observer = observer;
+			this.id = id;
+			this.jid = jid;
+			this.presence = presence;
+		}
+
+		@Override
+		public void runOnThread() throws Exception {
+			user = fbUserMap.getUser(id);
+			user.setJid(jid);
+			user.setPresence(presence);
+		}
+
+		@Override
+		public void runOnUiThread() throws Exception {
+			observer.onPresenceChanged(user);
+		}
+	}
+
+	private class SessionRequest extends Request {
+
+		public SessionRequest(Activity activity, Object key) {
+			super(activity, key);
 		}
 
 		@Override
 		public void runOnThread() throws Exception {
 			try {
-				user = getUserInfo(user);
+				Bundle params = new Bundle();
+				params.putString("method", "auth.promoteSession");
+				String secret = fbStorage.fbClient.request(params);
+				// Access token is a string of form aaaa|bbbb|cccc
+				// where bbbb is session key.
+				String[] split = fbStorage.fbClient.getAccessToken().split(
+						"\\|");
+				if (split.length != 3) {
+					// It is possible FB changes access token eventually.
+					throw new Exception("Malformed access token.");
+				}
+				String sessionKey = split[1];
+				String sessionSecret = secret.replace("\"", "");
+
+				fbStorage.chatHandler.connect(sessionKey, sessionSecret);
 			} catch (Exception ex) {
-				observer.onError(ex);
-				throw ex;
+				observer.onDisconnected();
 			}
 		}
 
 		@Override
 		public void runOnUiThread() throws Exception {
-			observer.onComplete(user);
 		}
-		
+
 	}
 
 }

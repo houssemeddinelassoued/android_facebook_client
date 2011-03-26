@@ -73,16 +73,16 @@ public class ChatHandler implements ChatObserver {
 
 	@Override
 	public void onChatPresenceChanged(String jid, String presence) {
-		int p = ChatUser.PRESENCE_AWAY;
+		ChatUser.Presence p = ChatUser.Presence.AWAY;
 		if (presence.equals("chat")) {
-			p = ChatUser.PRESENCE_CHAT;
+			p = ChatUser.Presence.CHAT;
 		} else if (presence.equals("gone")) {
-			p = ChatUser.PRESENCE_GONE;
+			p = ChatUser.Presence.GONE;
 		}
 		
 		ChatUser user = new ChatUser(jid, p);
 		
-		if (user.getPresence() == ChatUser.PRESENCE_GONE) {
+		if (p == ChatUser.Presence.GONE) {
 			userMap.remove(jid);
 		} else {
 			userMap.put(jid, user);

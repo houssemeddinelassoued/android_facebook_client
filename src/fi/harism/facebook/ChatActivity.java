@@ -14,8 +14,8 @@ import android.widget.TextView;
 
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBChat;
-import fi.harism.facebook.dao.FBChatUser;
 import fi.harism.facebook.dao.FBObserver;
+import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.util.BitmapUtils;
 
 public class ChatActivity extends BaseActivity implements FBChat.Observer {
@@ -58,10 +58,10 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		defaultPicture = BitmapUtils.roundBitmap(bitmap, 7);
 		
 		fbChat = getGlobalState().getFBFactory().getChat(this);
-		Vector<FBChatUser> users = fbChat.getUsers();
-		for (FBChatUser user : users) {
+		Vector<FBUser> users = fbChat.getUsers();
+		for (FBUser user : users) {
 			onPresenceChanged(user);
-		}		
+		}
 	}
 	
 	@Override
@@ -97,27 +97,23 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 	}
 
 	@Override
-	public void onPresenceChanged(final FBChatUser user) {
-		if (user.getName() == null) {
-			fbChat.getUserInfo(user, this, new FBChatUserObserver());
-		} else {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					handlePresenceChange(user);
-				}
-			});
-		}
+	public void onPresenceChanged(final FBUser user) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				handlePresenceChange(user);
+			}
+		});
 	}
 	
 	@Override
-	public void onMessage(FBChatUser user, String message) {
+	public void onMessage(FBUser user, String message) {
 	}
 	
-	private void handlePresenceChange(FBChatUser user) {
+	private void handlePresenceChange(FBUser user) {
 		LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
 		View v = list.findViewWithTag(user.getId());
 		
-		if (v != null && user.getPresence() == FBChatUser.PRESENCE_GONE) {
+		if (v != null && user.getPresence() == FBUser.Presence.GONE) {
 			list.removeView(v);
 		} else if (v != null) {
 			// Update user presence somehow.
@@ -130,31 +126,22 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			image.setImageBitmap(defaultPicture);
 			
 			v.setTag(user.getId());
+			v.setTag(R.id.view_storage, user);
 			v.setOnClickListener(new View.OnClickListener() {				
 				@Override
 				public void onClick(View item) {
 					Intent i = createIntent(ChatSessionActivity.class);
-					i.putExtra("with", (String)item.getTag());
+					i.putExtra("fi.harism.facebook.ChatSessionActivity", (FBUser)item.getTag(R.id.view_storage));
 					startActivity(i);
 				}
 			});
 			
 			list.addView(v);
 			
-			if (user.getPictureUrl() != null) {
-				fbBitmap.load(user.getPictureUrl(), this, new FBBitmapObserver(user.getId()));
+			if (user.getPicture() != null) {
+				fbBitmap.load(user.getPicture(), this, new FBBitmapObserver(user.getId()));
 			}
 		}
-	}
-	
-	private class FBChatUserObserver implements FBObserver<FBChatUser> {
-		@Override
-		public void onComplete(FBChatUser response) {
-			handlePresenceChange(response);
-		}
-		@Override
-		public void onError(Exception error) {
-		}		
 	}
 	
 	private class FBBitmapObserver implements FBObserver<Bitmap> {
