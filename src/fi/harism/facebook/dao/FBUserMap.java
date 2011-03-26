@@ -3,8 +3,6 @@ package fi.harism.facebook.dao;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.app.Activity;
-
 import fi.harism.facebook.request.Request;
 
 public class FBUserMap {
@@ -54,11 +52,11 @@ public class FBUserMap {
 		}
 	}
 	
-	public void getUser(String userId, Activity activity, FBObserver<FBUser> observer) {
+	public void getUser(String userId, FBObserver<FBUser> observer) {
 		if (fbStorage.userMap.containsKey(userId)) {
 			observer.onComplete(fbStorage.userMap.get(userId));
 		} else {
-			UserRequest request = new UserRequest(activity, this, userId, observer);
+			UserRequest request = new UserRequest(this, userId, observer);
 			fbStorage.requestQueue.addRequest(request);
 		}
 	}
@@ -82,27 +80,26 @@ public class FBUserMap {
 		
 		private String userId;
 		private FBObserver<FBUser> observer;
-		FBUser fbUser;
 
-		public UserRequest(Activity activity, Object key, String userId, FBObserver<FBUser> observer) {
-			super(activity, key);
+		public UserRequest(Object key, String userId, FBObserver<FBUser> observer) {
+			super(key);
 			this.userId = userId;
 			this.observer = observer;
 		}
 
 		@Override
-		public void runOnThread() throws Exception {
+		public void run() {
 			try {
-				fbUser = getUser(userId);
+				FBUser user = getUser(userId);
+				observer.onComplete(user);
 			} catch (Exception ex) {
 				observer.onError(ex);
-				throw ex;
 			}
 		}
 
 		@Override
-		public void runOnUiThread() throws Exception {
-			observer.onComplete(fbUser);
+		public void stop() {
+			// TODO:
 		}
 		
 	}

@@ -2,8 +2,6 @@ package fi.harism.facebook.request;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
-
 /**
  * RequestController provides a queue for handling Requests. Every
  * RequestController creates one WorkerThread which is used for executing one
@@ -166,7 +164,6 @@ public final class RequestQueue {
 								break;
 							}
 						}
-						// currentRequest = requestList.remove(0);
 					}
 				}
 				// Lets check keepRunning again, and if it's set currentRequest
@@ -178,7 +175,7 @@ public final class RequestQueue {
 					// TODO: Try to figure out rationale for this requirement.
 					// It's tempting to have these two lines moved inside
 					// previous if block.
-					currentRequest.execute();
+					currentRequest.run();
 					currentRequest = null;
 				}
 			}

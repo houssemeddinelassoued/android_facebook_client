@@ -1,8 +1,10 @@
 package fi.harism.facebook;
 
-import android.app.Activity;
+import java.util.Vector;
+
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBFriend;
 import fi.harism.facebook.dao.FBFriendList;
 import fi.harism.facebook.dao.FBObserver;
@@ -30,8 +33,9 @@ import fi.harism.facebook.util.StringUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	private FBBitmap fbBitmap;
+	private FBBitmapCache fbBitmapCache;
 	private FBFriendList fbFriendList;
+	private FBBitmapObserver fbBitmapObserver;
 
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
@@ -49,8 +53,9 @@ public class FriendsActivity extends BaseActivity {
 		setContentView(R.layout.friends);
 
 		spanClickObserver = new SpanClickObserver(this);
-		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		fbFriendList = getGlobalState().getFBFactory().getFriendList();
+		fbBitmapObserver = new FBBitmapObserver();
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -65,28 +70,28 @@ public class FriendsActivity extends BaseActivity {
 		// Show progress dialog.
 		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		fbFriendList.load(this, new FBFriendListObserver(this));
+		fbFriendList.load(new FBFriendListObserver());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		fbFriendList.cancel();
-		fbBitmap.cancel();
+		fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		fbFriendList.setPaused(true);
-		fbBitmap.setPaused(true);
+		fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		fbFriendList.setPaused(false);
-		fbBitmap.setPaused(false);
+		fbBitmapCache.setPaused(false);
 	}
 
 	/**
@@ -163,19 +168,85 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 * Observer for handling "me/friends" request.
+	 * Observer for handling profile picture loading.
 	 */
-	private final class FBFriendListObserver implements
-			FBObserver<FBFriendList> {
+	private final class FBBitmapObserver implements Runnable,
+			FBObserver<FBBitmap> {
 
-		private Activity activity = null;
+		private Vector<FBBitmap> waitingList = new Vector<FBBitmap>();
 
-		public FBFriendListObserver(Activity activity) {
-			this.activity = activity;
+		@Override
+		public void onComplete(FBBitmap bitmap) {
+			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+				update(bitmap);
+			} else {
+				if (waitingList.size() == 0) {
+					waitingList.addElement(bitmap);
+					runOnUiThread(this);
+				} else {
+					waitingList.addElement(bitmap);					
+				}
+			}
 		}
 
 		@Override
-		public void onComplete(FBFriendList friendList) {
+		public void onError(Exception ex) {
+			// We don't care about errors.
+		}
+
+		@Override
+		public void run() {
+			while (waitingList.size() > 0) {
+				FBBitmap bitmap = waitingList.remove(0);
+				update(bitmap);
+			}
+		}
+
+		public void update(FBBitmap bitmap) {
+			// Search for corresponding friend item View.
+			View friendItemsView = findViewById(R.id.friends_list);
+			View friendView = friendItemsView.findViewWithTag(bitmap.getId());
+
+			// If we found one.
+			if (friendView != null) {
+				// Try to find picture ImageView.
+				ImageView imageView = (ImageView) friendView
+						.findViewById(R.id.friends_item_picture);
+				// Round its corners.
+				Bitmap rounded = BitmapUtils.roundBitmap(bitmap.getBitmap(),
+						PICTURE_ROUND_RADIUS);
+				// Update ImageView's bitmap with one received.
+				imageView.setImageBitmap(rounded);
+			}
+		}
+	}
+
+	/**
+	 * Observer for handling "me/friends" request.
+	 */
+	private final class FBFriendListObserver implements
+			FBObserver<FBFriendList>, Runnable {
+
+		private FBFriendList friendList;
+
+		@Override
+		public void onComplete(final FBFriendList friendList) {
+			this.friendList = friendList;
+			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+				run();
+			} else {
+				runOnUiThread(this);
+			}
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// On error only hide progress dialog.
+			hideProgressDialog();
+		}
+
+		@Override
+		public void run() {
 			// First hide progress dialog.
 			hideProgressDialog();
 
@@ -192,49 +263,8 @@ public class FriendsActivity extends BaseActivity {
 				// Add friend item view to scrollable list.
 				scrollView.addView(friendItemView);
 
-				fbBitmap.load(pictureUrl, activity, new PictureObserver(userId));
+				fbBitmapCache.load(pictureUrl, userId, fbBitmapObserver);
 			}
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// On error only hide progress dialog.
-			hideProgressDialog();
-		}
-	}
-
-	/**
-	 * Observer for handling profile picture loading.
-	 */
-	private final class PictureObserver implements FBObserver<Bitmap> {
-
-		private String userId;
-
-		public PictureObserver(String userId) {
-			this.userId = userId;
-		}
-
-		@Override
-		public void onComplete(Bitmap bitmap) {
-			// Search for corresponding friend item View.
-			View friendItemsView = findViewById(R.id.friends_list);
-			View friendView = friendItemsView.findViewWithTag(userId);
-
-			// If we found one.
-			if (friendView != null) {
-				// Try to find picture ImageView.
-				ImageView imageView = (ImageView) friendView
-						.findViewById(R.id.friends_item_picture);
-				// Round its corners.
-				bitmap = BitmapUtils.roundBitmap(bitmap, PICTURE_ROUND_RADIUS);
-				// Update ImageView's bitmap with one received.
-				imageView.setImageBitmap(bitmap);
-			}
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
 		}
 	}
 

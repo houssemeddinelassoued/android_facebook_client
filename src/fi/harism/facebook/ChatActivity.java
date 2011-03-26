@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBChat;
 import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
@@ -21,7 +22,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class ChatActivity extends BaseActivity implements FBChat.Observer {
 
 	private FBChat fbChat;
-	private FBBitmap fbBitmap;
+	private FBBitmapCache fbBitmapCache;
 	private Bitmap defaultPicture;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,7 +45,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 				close();
 			}
 		});
-		
+
 		Button logButton = (Button) findViewById(R.id.chat_button_showlog);
 		logButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -52,18 +53,18 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 				showAlertDialog(fbChat.getLog());
 			}
 		});
-		
-		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+
+		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		Bitmap bitmap = getGlobalState().getDefaultPicture();
 		defaultPicture = BitmapUtils.roundBitmap(bitmap, 7);
-		
+
 		fbChat = getGlobalState().getFBFactory().getChat(this);
 		Vector<FBUser> users = fbChat.getUsers();
 		for (FBUser user : users) {
 			onPresenceChanged(user);
 		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -71,7 +72,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 	}
 
 	private void connect() {
-		fbChat.connect(this);
+		fbChat.connect();
 	}
 
 	private void close() {
@@ -104,15 +105,15 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			}
 		});
 	}
-	
+
 	@Override
 	public void onMessage(FBUser user, String message) {
 	}
-	
+
 	private void handlePresenceChange(FBUser user) {
 		LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
 		View v = list.findViewWithTag(user.getId());
-		
+
 		if (v != null && user.getPresence() == FBUser.Presence.GONE) {
 			list.removeView(v);
 		} else if (v != null) {
@@ -121,51 +122,54 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			v = getLayoutInflater().inflate(R.layout.chat_user, null);
 			TextView tv = (TextView) v.findViewById(R.id.chat_user_name);
 			tv.setText(user.getName());
-			
-			ImageView image = (ImageView) v.findViewById(R.id.chat_user_picture);
+
+			ImageView image = (ImageView) v
+					.findViewById(R.id.chat_user_picture);
 			image.setImageBitmap(defaultPicture);
-			
+
 			v.setTag(user.getId());
 			v.setTag(R.id.view_storage, user);
-			v.setOnClickListener(new View.OnClickListener() {				
+			v.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View item) {
 					Intent i = createIntent(ChatSessionActivity.class);
-					i.putExtra("fi.harism.facebook.ChatSessionActivity", (FBUser)item.getTag(R.id.view_storage));
+					i.putExtra("fi.harism.facebook.ChatSessionActivity",
+							(FBUser) item.getTag(R.id.view_storage));
 					startActivity(i);
 				}
 			});
-			
+
 			list.addView(v);
-			
+
 			if (user.getPicture() != null) {
-				fbBitmap.load(user.getPicture(), this, new FBBitmapObserver(user.getId()));
+				fbBitmapCache.load(user.getPicture(), user.getId(),
+						new FBBitmapObserver());
 			}
 		}
 	}
-	
-	private class FBBitmapObserver implements FBObserver<Bitmap> {
-		
-		private String userId;
-		
-		public FBBitmapObserver(String userId) {
-			this.userId = userId;
-		}
+
+	private class FBBitmapObserver implements FBObserver<FBBitmap> {
 
 		@Override
-		public void onComplete(Bitmap response) {
-			LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
-			View v = list.findViewWithTag(userId);
-			if (v != null) {
-				ImageView image = (ImageView) v.findViewById(R.id.chat_user_picture);
-				image.setImageBitmap(BitmapUtils.roundBitmap(response, 7));
-			}
+		public void onComplete(final FBBitmap bitmap) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
+					View v = list.findViewWithTag(bitmap.getId());
+					if (v != null) {
+						ImageView image = (ImageView) v
+								.findViewById(R.id.chat_user_picture);
+						image.setImageBitmap(BitmapUtils.roundBitmap(
+								bitmap.getBitmap(), 7));
+					}
+				}
+			});
 		}
 
 		@Override
 		public void onError(Exception error) {
 		}
-		
+
 	}
 
 }

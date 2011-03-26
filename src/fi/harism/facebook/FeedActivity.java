@@ -3,6 +3,7 @@ package fi.harism.facebook;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBCommentList;
 import fi.harism.facebook.dao.FBFeedItem;
 import fi.harism.facebook.dao.FBFeedList;
@@ -27,7 +29,7 @@ import fi.harism.facebook.util.StringUtils;
  */
 public abstract class FeedActivity extends BaseActivity {
 
-	private FBBitmap fbBitmap;
+	private FBBitmapCache fbBitmapCache;
 	private FBFeedList fbFeedList;
 
 	// Default picture used as sender's profile picture.
@@ -59,7 +61,7 @@ public abstract class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		spanClickObserver = new SpanClickObserver(this);
-		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		fbFeedList = getFeedList();
 
 		View updateButton = findViewById(R.id.feed_button_update);
@@ -72,28 +74,28 @@ public abstract class FeedActivity extends BaseActivity {
 		});
 
 		showProgressDialog();
-		fbFeedList.load(this, new FBFeedListObserver(this));
+		fbFeedList.load(new FBFeedListObserver());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		fbFeedList.cancel();
-		fbBitmap.cancel();
+		fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		fbFeedList.setPaused(true);
-		fbBitmap.setPaused(true);
+		fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		fbFeedList.setPaused(false);
-		fbBitmap.setPaused(false);
+		fbBitmapCache.setPaused(false);
 	}
 
 	/**
@@ -208,34 +210,32 @@ public abstract class FeedActivity extends BaseActivity {
 
 	private final class FBFeedListObserver implements FBObserver<FBFeedList> {
 
-		private Activity activity = null;
-
-		public FBFeedListObserver(Activity activity) {
-			this.activity = activity;
-		}
-
 		@Override
-		public void onComplete(FBFeedList newsFeedList) {
-			// First hide progress dialog.
-			hideProgressDialog();
+		public void onComplete(final FBFeedList newsFeedList) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					// First hide progress dialog.
+					hideProgressDialog();
 
-			// Add feed item to viewable list of items.
-			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
+					// Add feed item to viewable list of items.
+					LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 
-			for (FBFeedItem item : newsFeedList) {
-				View view = createFeedItem(item);
-				itemList.addView(view);
+					for (FBFeedItem item : newsFeedList) {
+						View view = createFeedItem(item);
+						itemList.addView(view);
 
-				if (item.getFromPictureUrl() != null) {
-					fbBitmap.load(item.getFromPictureUrl(), activity,
-							new FromPictureObserver(item.getId()));
+						if (item.getFromPictureUrl() != null) {
+							fbBitmapCache.load(item.getFromPictureUrl(),
+									item.getId(), new FromPictureObserver());
+						}
+
+						if (item.getPictureUrl() != null) {
+							fbBitmapCache.load(item.getPictureUrl(),
+									item.getId(), new FeedPictureObserver());
+						}
+					}
 				}
-
-				if (item.getPictureUrl() != null) {
-					fbBitmap.load(item.getPictureUrl(), activity,
-							new FeedPictureObserver(item.getId()));
-				}
-			}
+			});
 		}
 
 		@Override
@@ -253,28 +253,26 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FeedPictureObserver implements FBObserver<Bitmap> {
-
-		private String itemId = null;
-
-		public FeedPictureObserver(String itemId) {
-			this.itemId = itemId;
-		}
+	private final class FeedPictureObserver implements FBObserver<FBBitmap> {
 
 		@Override
-		public void onComplete(Bitmap bitmap) {
-			// Get feed item list view.
-			View itemList = findViewById(R.id.feed_list);
-			// Find feed item using itemId.
-			View itemView = itemList.findViewWithTag(itemId);
-			// This shouldn't happen but just in case.
-			if (itemView != null) {
-				// Set image to feed item.
-				ImageView iv = (ImageView) itemView
-						.findViewById(R.id.feed_item_picture_image);
-				iv.setImageBitmap(bitmap);
-				iv.setVisibility(View.VISIBLE);
-			}
+		public void onComplete(final FBBitmap bitmap) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					// Get feed item list view.
+					View itemList = findViewById(R.id.feed_list);
+					// Find feed item using itemId.
+					View itemView = itemList.findViewWithTag(bitmap.getId());
+					// This shouldn't happen but just in case.
+					if (itemView != null) {
+						// Set image to feed item.
+						ImageView iv = (ImageView) itemView
+								.findViewById(R.id.feed_item_picture_image);
+						iv.setImageBitmap(bitmap.getBitmap());
+						iv.setVisibility(View.VISIBLE);
+					}
+				}
+			});
 		}
 
 		@Override
@@ -288,28 +286,32 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements FBObserver<Bitmap> {
-
-		private String itemId = null;
-
-		public FromPictureObserver(String itemId) {
-			this.itemId = itemId;
-		}
+	private final class FromPictureObserver implements FBObserver<FBBitmap> {
 
 		@Override
-		public void onComplete(Bitmap bitmap) {
-			// Get feed item list view.
-			View itemList = findViewById(R.id.feed_list);
-			// Find our item view using itemId.
-			View itemView = itemList.findViewWithTag(itemId);
-			// This shouldn't happen but just in case.
-			if (itemView != null) {
-				// Set image to feed item view.
-				ImageView iv = (ImageView) itemView
-						.findViewById(R.id.feed_item_from_image);
-				iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
-						PICTURE_ROUND_RADIUS));
+		public void onComplete(final FBBitmap bitmap) {
+
+			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+				int i = 0;
+				++i;
 			}
+
+			runOnUiThread(new Runnable() {
+				public void run() {
+					// Get feed item list view.
+					View itemList = findViewById(R.id.feed_list);
+					// Find our item view using itemId.
+					View itemView = itemList.findViewWithTag(bitmap.getId());
+					// This shouldn't happen but just in case.
+					if (itemView != null) {
+						// Set image to feed item view.
+						ImageView iv = (ImageView) itemView
+								.findViewById(R.id.feed_item_from_image);
+						iv.setImageBitmap(BitmapUtils.roundBitmap(
+								bitmap.getBitmap(), PICTURE_ROUND_RADIUS));
+					}
+				}
+			});
 		}
 
 		@Override
@@ -340,7 +342,7 @@ public abstract class FeedActivity extends BaseActivity {
 				String itemId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
 				FBCommentList commentList = getGlobalState().getFBFactory()
 						.getCommentList(itemId);
-				commentList.load(activity, new FBObserver<FBCommentList>() {
+				commentList.load(new FBObserver<FBCommentList>() {
 					@Override
 					public void onComplete(FBCommentList comments) {
 						hideProgressDialog();

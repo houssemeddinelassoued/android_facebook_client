@@ -27,8 +27,8 @@ public class FBFactory {
 		return new FBFeedList(fbStorage, FBFeedList.PROFILE_FEED, fbStorage.profileFeedList);
 	}
 	
-	public FBBitmap getBitmap() {
-		return new FBBitmap(fbStorage);
+	public FBBitmapCache getBitmapCache() {
+		return new FBBitmapCache(fbStorage);
 	}
 	
 	public FBFriendList getFriendList() {

@@ -8,7 +8,6 @@ import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.request.Request;
 
@@ -20,11 +19,11 @@ public class FBFriendList implements Iterable<FBFriend> {
 	public FBFriendList(FBStorage fbStorage) {
 		this.fbStorage = fbStorage;
 	}
-	
+
 	public void setPaused(boolean paused) {
 		fbStorage.requestQueue.setPaused(this, paused);
 	}
-	
+
 	public void cancel() {
 		fbStorage.requestQueue.removeRequests(this);
 	}
@@ -32,7 +31,7 @@ public class FBFriendList implements Iterable<FBFriend> {
 	public FBFriend at(int index) {
 		return fbStorage.friendList.elementAt(index);
 	}
-	
+
 	public void load() throws Exception {
 		Bundle params = new Bundle();
 		params.putString("fields", "id,name,picture");
@@ -57,23 +56,17 @@ public class FBFriendList implements Iterable<FBFriend> {
 			}
 		};
 		Collections.sort(tempList, comparator);
-		
+
 		fbStorage.friendList.removeAllElements();
 		fbStorage.friendList.addAll(tempList);
 	}
 
-	public void load(Activity activity,
-			final FBObserver<FBFriendList> observer) {
+	public void load(FBObserver<FBFriendList> observer) {
 		final FBFriendList self = this;
 		if (fbStorage.friendList.size() > 0) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(self);
-				}
-			});
+			observer.onComplete(self);
 		} else {
-			FriendsRequest request = new FriendsRequest(activity, this, observer);
+			FriendsRequest request = new FriendsRequest(this, observer);
 			fbStorage.requestQueue.addRequest(request);
 		}
 	}
@@ -89,29 +82,30 @@ public class FBFriendList implements Iterable<FBFriend> {
 	}
 
 	private class FriendsRequest extends Request {
-		
+
 		private FBFriendList parent;
 		private FBObserver<FBFriendList> observer;
 
-		public FriendsRequest(Activity activity, FBFriendList parent, FBObserver<FBFriendList> observer) {
-			super(activity, parent);
+		public FriendsRequest(FBFriendList parent,
+				FBObserver<FBFriendList> observer) {
+			super(parent);
 			this.parent = parent;
 			this.observer = observer;
 		}
 
 		@Override
-		public void runOnThread() throws Exception {
+		public void run() {
 			try {
 				load();
+				observer.onComplete(parent);
 			} catch (Exception ex) {
 				observer.onError(ex);
-				throw ex;
 			}
 		}
 
 		@Override
-		public void runOnUiThread() throws Exception {
-			observer.onComplete(parent);
+		public void stop() {
+			// TODO:
 		}
 	}
 

@@ -6,7 +6,6 @@ import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.net.FBClient;
 import fi.harism.facebook.request.Request;
@@ -64,9 +63,8 @@ public class FBCommentList implements Iterable<FBComment> {
 		}
 	}
 
-	public void load(Activity activity,
-			FBObserver<FBCommentList> observer) {
-		CommentsRequest request = new CommentsRequest(activity, this, observer);
+	public void load(FBObserver<FBCommentList> observer) {
+		CommentsRequest request = new CommentsRequest(this, observer);
 		fbStorage.requestQueue.addRequest(request);
 	}
 
@@ -77,9 +75,8 @@ public class FBCommentList implements Iterable<FBComment> {
 		fbStorage.fbClient.request(itemId + "/comments", params, "POST");
 	}
 
-	public void postComment(String message, Activity activity,
-			FBObserver<FBCommentList> observer) {
-		CommentsRequest request = new CommentsRequest(activity, this, observer,
+	public void postComment(String message, FBObserver<FBCommentList> observer) {
+		CommentsRequest request = new CommentsRequest(this, observer,
 				message);
 		fbStorage.requestQueue.addRequest(request);
 	}
@@ -94,38 +91,38 @@ public class FBCommentList implements Iterable<FBComment> {
 		private FBObserver<FBCommentList> observer;
 		private String sendMessage;
 
-		public CommentsRequest(Activity activity, FBCommentList parent,
+		public CommentsRequest(FBCommentList parent,
 				FBObserver<FBCommentList> observer) {
-			super(activity, parent);
+			super(parent);
 			this.parent = parent;
 			this.observer = observer;
 			this.sendMessage = null;
 		}
 
-		public CommentsRequest(Activity activity, FBCommentList parent,
+		public CommentsRequest(FBCommentList parent,
 				FBObserver<FBCommentList> observer, String sendMessage) {
-			super(activity, parent);
+			super(parent);
 			this.parent = parent;
 			this.observer = observer;
 			this.sendMessage = sendMessage;
 		}
 
 		@Override
-		public void runOnThread() throws Exception {
+		public void run() {
 			try {
 				if (sendMessage != null) {
 					postComment(sendMessage);
 				}
 				load();
+				observer.onComplete(parent);
 			} catch (Exception ex) {
 				observer.onError(ex);
-				throw ex;
 			}
 		}
 
 		@Override
-		public void runOnUiThread() throws Exception {
-			observer.onComplete(parent);
+		public void stop() {
+			// TODO:
 		}
 
 	}

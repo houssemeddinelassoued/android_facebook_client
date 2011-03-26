@@ -76,8 +76,7 @@ public class CommentsDialog extends Dialog {
 			progressDialog.setMessage("Sending..");
 			progressDialog.setCancelable(false);
 			progressDialog.show();
-			comments.postComment(message, getOwnerActivity(),
-					new FBCommentListObserver(progressDialog));
+			comments.postComment(message, new FBCommentListObserver(progressDialog));
 		}
 	}
 
@@ -89,9 +88,14 @@ public class CommentsDialog extends Dialog {
 		}
 
 		@Override
-		public void onComplete(FBCommentList response) {
+		public void onComplete(final FBCommentList response) {
 			progressDialog.dismiss();
-			updateCommentList(response);
+			getOwnerActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					updateCommentList(response);
+				}
+			});
 		}
 
 		@Override

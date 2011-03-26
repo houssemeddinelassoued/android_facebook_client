@@ -2,7 +2,6 @@ package fi.harism.facebook.dao;
 
 import java.util.Vector;
 
-import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.chat.ChatHandler;
 import fi.harism.facebook.chat.ChatUser;
@@ -31,8 +30,8 @@ public class FBChat {
 		return fbStorage.chatHandler.getLog();
 	}
 
-	public void connect(Activity activity) {
-		SessionRequest request = new SessionRequest(activity, this);
+	public void connect() {
+		SessionRequest request = new SessionRequest(this);
 		fbStorage.requestQueue.addRequest(request);
 	}
 
@@ -112,14 +111,15 @@ public class FBChat {
 				u.setPresence(presence);
 				observer.onPresenceChanged(u);
 			} else {
-				//FBUserRequest request = new FBUserRequest()
-				try {
-					u = fbUserMap.getUser(id);
-					u.setJid(jid);
-					u.setPresence(presence);
-					observer.onPresenceChanged(u);
-				} catch (Exception ex) {
-				}
+				FBUserRequest request = new FBUserRequest(this, id, jid, presence);
+				fbStorage.requestQueue.addRequest(request);
+				//try {
+				//	u = fbUserMap.getUser(id);
+				//	u.setJid(jid);
+				//	u.setPresence(presence);
+				//	observer.onPresenceChanged(u);
+				//} catch (Exception ex) {
+				//}
 			}
 		}
 
@@ -144,35 +144,39 @@ public class FBChat {
 		String jid;
 		FBUser.Presence presence;
 
-		public FBUserRequest(Activity activity, Object key,
+		public FBUserRequest(Object key,
 				String id, String jid, FBUser.Presence presence) {
-			super(activity, key);
+			super(key);
 			this.id = id;
 			this.jid = jid;
 			this.presence = presence;
 		}
 
 		@Override
-		public void runOnThread() throws Exception {
-			user = fbUserMap.getUser(id);
-			user.setJid(jid);
-			user.setPresence(presence);
+		public void run() {
+			try {
+				user = fbUserMap.getUser(id);
+				user.setJid(jid);
+				user.setPresence(presence);
+				observer.onPresenceChanged(user);
+			} catch (Exception ex) {
+			}
 		}
 
 		@Override
-		public void runOnUiThread() throws Exception {
-			observer.onPresenceChanged(user);
+		public void stop() {
+			// TODO:
 		}
 	}
 
 	private class SessionRequest extends Request {
 
-		public SessionRequest(Activity activity, Object key) {
-			super(activity, key);
+		public SessionRequest(Object key) {
+			super(key);
 		}
 
 		@Override
-		public void runOnThread() throws Exception {
+		public void run() {
 			try {
 				Bundle params = new Bundle();
 				params.putString("method", "auth.promoteSession");
@@ -195,7 +199,8 @@ public class FBChat {
 		}
 
 		@Override
-		public void runOnUiThread() throws Exception {
+		public void stop() {
+			// TODO:
 		}
 
 	}

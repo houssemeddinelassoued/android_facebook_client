@@ -74,7 +74,7 @@ public class ChatSessionActivity extends BaseActivity implements
 	}
 
 	private void connect() {
-		fbChat.connect(this);
+		fbChat.connect();
 	}
 
 	private void close() {

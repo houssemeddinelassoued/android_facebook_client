@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
+import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.dao.FBUserMap;
@@ -23,22 +24,23 @@ import fi.harism.facebook.net.FBClient;
  * @author harism
  */
 public class MainActivity extends BaseActivity {
-	
+
 	private FBUserMap fbUserMap;
-	private FBBitmap fbBitmap;
+	private FBBitmapCache fbBitmapCache;
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		getGlobalState().getFBClient().authorizeCallback(requestCode, resultCode, data);
+		getGlobalState().getFBClient().authorizeCallback(requestCode,
+				resultCode, data);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-        
-		fbBitmap = getGlobalState().getFBFactory().getBitmap();
+
+		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		fbUserMap = getGlobalState().getFBFactory().getUserMap();
 
 		// It's possible our application hasn't been killed.
@@ -58,23 +60,23 @@ public class MainActivity extends BaseActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		fbUserMap.cancel();
-		fbBitmap.cancel();
+		fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		fbUserMap.pause();
-		fbBitmap.setPaused(true);
+		fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		fbUserMap.resume();
-		fbBitmap.setPaused(false);
+		fbBitmapCache.setPaused(false);
 	}
-	
+
 	public final void showLoginView() {
 		setContentView(R.layout.login);
 
@@ -93,7 +95,7 @@ public class MainActivity extends BaseActivity {
 	public final void showMainView() {
 		setContentView(R.layout.main);
 		final Activity self = this;
-		
+
 		// Set default picture as user picture.
 		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
 		Bitmap picture = getGlobalState().getDefaultPicture();
@@ -120,7 +122,7 @@ public class MainActivity extends BaseActivity {
 				startActivity(i);
 			}
 		});
-		
+
 		// Add onClick listener to "Wall" button.
 		Button wallButton = (Button) findViewById(R.id.main_button_wall);
 		wallButton.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +142,7 @@ public class MainActivity extends BaseActivity {
 				showAlertDialog("Implement me..");
 			}
 		});
-		
+
 		// Add onClick listener to "Chat" button.
 		Button chatButton = (Button) findViewById(R.id.main_button_chat);
 		chatButton.setOnClickListener(new View.OnClickListener() {
@@ -163,18 +165,22 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Start loading user information asynchronously.
-		//fbMe.load(this, new FBMeObserver(this));
-		fbUserMap.getUser("me", this, new FBMeObserver(this));
+		// fbMe.load(this, new FBMeObserver(this));
+		fbUserMap.getUser("me", new FBMeObserver());
 	}
 
 	/**
 	 * Private ImageRequest observer for handling profile picture loading.
 	 */
-	private final class BitmapObserver implements FBObserver<Bitmap> {
+	private final class BitmapObserver implements FBObserver<FBBitmap> {
 		@Override
-		public void onComplete(Bitmap bitmap) {
-			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-			iv.setImageBitmap(bitmap);
+		public void onComplete(final FBBitmap bitmap) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					ImageView iv = (ImageView) findViewById(R.id.main_user_image);
+					iv.setImageBitmap(bitmap.getBitmap());
+				}
+			});
 		}
 
 		@Override
@@ -189,22 +195,19 @@ public class MainActivity extends BaseActivity {
 	 */
 	private final class FBMeObserver implements FBObserver<FBUser> {
 
-		private Activity activity = null;
-
-		public FBMeObserver(Activity activity) {
-			this.activity = activity;
-		}
-
 		@Override
-		public void onComplete(FBUser me) {
-			TextView nameView = (TextView) findViewById(R.id.main_user_name);
-			nameView.setText(me.getName());
-			
-			TextView statusView = (TextView) findViewById(R.id.main_user_status);
-			statusView.setText(me.getStatus());			
+		public void onComplete(final FBUser me) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					TextView nameView = (TextView) findViewById(R.id.main_user_name);
+					nameView.setText(me.getName());
 
-			fbBitmap.load(me.getPicture(), activity,
-					new BitmapObserver());
+					TextView statusView = (TextView) findViewById(R.id.main_user_status);
+					statusView.setText(me.getStatus());
+
+					fbBitmapCache.load(me.getPicture(), null, new BitmapObserver());
+				}
+			});
 		}
 
 		@Override

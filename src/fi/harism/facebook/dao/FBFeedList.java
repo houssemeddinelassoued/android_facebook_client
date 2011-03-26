@@ -6,7 +6,6 @@ import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.os.Bundle;
 import fi.harism.facebook.request.Request;
 
@@ -84,18 +83,12 @@ public class FBFeedList implements Iterable<FBFeedItem> {
 		feedItemList.addAll(itemList);
 	}
 
-	public void load(Activity activity,
-			final FBObserver<FBFeedList> observer) {
+	public void load(FBObserver<FBFeedList> observer) {
 		final FBFeedList self = this;
 		if (feedItemList.size() > 0) {
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					observer.onComplete(self);
-				}
-			});
+			observer.onComplete(self);
 		} else {
-			FeedRequest request = new FeedRequest(activity, this, observer);
+			FeedRequest request = new FeedRequest(this, observer);
 			fbStorage.requestQueue.addRequest(request);
 		}
 	}
@@ -115,26 +108,26 @@ public class FBFeedList implements Iterable<FBFeedItem> {
 		private FBFeedList parent;
 		private FBObserver<FBFeedList> observer;
 
-		public FeedRequest(Activity activity, FBFeedList parent,
+		public FeedRequest(FBFeedList parent,
 				FBObserver<FBFeedList> observer) {
-			super(activity, parent);
+			super(parent);
 			this.parent = parent;
 			this.observer = observer;
 		}
 
 		@Override
-		public void runOnThread() throws Exception {
+		public void run() {
 			try {
 				load();
+				observer.onComplete(parent);
 			} catch (Exception ex) {
 				observer.onError(ex);
-				throw ex;
 			}
 		}
 
 		@Override
-		public void runOnUiThread() throws Exception {
-			observer.onComplete(parent);
+		public void stop() {
+			// TODO:
 		}
 
 	}
