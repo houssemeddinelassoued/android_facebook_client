@@ -1,5 +1,10 @@
 package fi.harism.facebook.net;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -190,23 +195,44 @@ public class FBClient {
 	 */
 	public JSONObject request(String graphPath, Bundle requestParameters,
 			String method) throws Exception {
+		String response = facebook
+				.request(graphPath, requestParameters, method);
 		try {
-			String response = facebook.request(graphPath, requestParameters,
-					method);
-			// Create JSONObject from response string.
-			JSONObject responseObject = new JSONObject(response);
-
-			// Check if response is an error JSONObject.
-			if (responseObject.has("error")) {
-				JSONObject err = responseObject.getJSONObject("error");
-				Exception ex = new Exception(err.getString("type") + " : "
-						+ err.getString("message"));
-				throw ex;
-			}
-			return responseObject;
-		} catch (Exception ex) {
-			throw ex;
+			return com.facebook.android.Util.parseJson(response);
+		} catch (com.facebook.android.FacebookError error) {
+			throw new Exception(error.getMessage());
 		}
+	}
+
+	/**
+	 * Executes a FQL query at
+	 * https://api.facebook.com/method/fql.query?access_token=TOKEN&query=QUERY
+	 * 
+	 * @param query
+	 *            FQL query string.
+	 * @return JSON presentation for response.
+	 * @throws Exception
+	 */
+	public JSONObject requestFQL(String query) throws Exception {
+
+		String token = URLEncoder.encode(facebook.getAccessToken());
+		query = URLEncoder.encode(query);
+
+		URL url = new URL(
+				"https://api.facebook.com/method/fql.query?access_token="
+						+ token + "&query=" + query);
+
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		InputStream is = connection.getInputStream();
+
+		JSONObject out = new JSONObject(FQLParser.parse(is));
+
+		JSONObject error = out.optJSONObject("error");
+		if (error != null) {
+			throw new Exception("FQL error: " + error.getString("error_msg"));
+		}
+
+		return out;
 	}
 
 	public interface LoginObserver {
