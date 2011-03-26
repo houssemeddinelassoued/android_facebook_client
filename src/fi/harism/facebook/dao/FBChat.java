@@ -1,6 +1,5 @@
 package fi.harism.facebook.dao;
 
-import java.util.HashMap;
 import java.util.Vector;
 
 import org.json.JSONObject;

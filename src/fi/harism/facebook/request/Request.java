@@ -62,7 +62,7 @@ public abstract class Request implements Runnable {
 				// should happen in run() method once UI thread handles our
 				// request.
 				synchronized (this) {
-					wait();
+					//wait();
 				}
 			} catch (Exception ex) {
 			}
