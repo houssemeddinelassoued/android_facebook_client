@@ -7,6 +7,7 @@ package fi.harism.facebook.chat;
  */
 public class ChatException extends Exception {
 
+	private static final long serialVersionUID = -1576060033936490153L;
 	private boolean reconnectingAllowed;
 
 	/**
