@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 import javax.net.SocketFactory;
@@ -34,6 +35,320 @@ import android.util.Base64;
  */
 public class ChatConnection {
 
+	private ChatObserver.Connection observer;
+
+	private ChatThread thread;
+
+	private ChatLogger logger;
+	private static final int STATE_READY = 1;
+	private static final int STATE_THREAD = 2;
+	private static final int STATE_CONNECTED = 3;
+	private static final int STATE_LOGIN = 4;
+
+	private static final int STATE_RUNNING = 5;
+	private static final String CHAT_ADDRESS = "chat.facebook.com";
+
+	private static final int CHAT_PORT = 5222;
+
+	private int currentState = STATE_READY;
+
+	private String jid = null;
+
+	/**
+	 * Default constructor.
+	 * 
+	 * @param observer
+	 *            Observer for chat connection events.
+	 * @param logger
+	 *            For debug reasons.
+	 */
+	public ChatConnection(ChatObserver.Connection observer, ChatLogger logger) {
+		this.observer = observer;
+		this.logger = logger;
+	}
+
+	/**
+	 * Starts connection procedure if there isn't open connection already.
+	 * 
+	 * @param sessionKey
+	 *            Session key for logged in user.
+	 * @param sessionSecret
+	 *            Session secret for logged in user.
+	 */
+	public final void connect(String sessionKey, String sessionSecret) {
+		switch (currentState) {
+		case STATE_READY:
+			thread = new ChatThread(sessionKey, sessionSecret);
+			thread.start();
+			logger.println("New thread created.");
+			break;
+		case STATE_THREAD:
+		case STATE_CONNECTED:
+		case STATE_LOGIN:
+			logger.println("Thread running already.");
+			break;
+		default:
+			logger.println("Thread running already.");
+			observer.onConnected();
+			break;
+		}
+	}
+
+	/**
+	 * Disconnects from chat server.
+	 */
+	public final void disconnect() {
+		switch (currentState) {
+		case STATE_RUNNING:
+			logger.println("Sending final presence.");
+			thread.write("<presence from='" + jid + "' type='unavailable'/>");
+		case STATE_LOGIN:
+		case STATE_CONNECTED:
+			logger.println("Sending end stream.");
+			thread.write("</stream:stream>");
+			break;
+		default:
+			logger.println("Not connected.");
+			observer.onDisconnected();
+		}
+	}
+
+	/**
+	 * Sends message to server.
+	 * 
+	 * @param to
+	 *            JID of receiving entity.
+	 * @param message
+	 *            Message to be sent.
+	 */
+	public final void sendMessage(String to, String message) {
+		thread.write("<message to='" + to + "' from='" + jid
+				+ "' type='chat'><body>" + message + "</body></message>");
+	}
+
+	/**
+	 * Executes authorization procedure to server.
+	 * <ol>
+	 * <li>Open a stream to server.</li>
+	 * <li>Verify "X-FACEBOOK-PLATFORM" authorization mechanism is supported.</li>
+	 * <li>If it is, try to authorize user for a few times, and return false if
+	 * it's not successful. For some reason it usually takes a few tries to
+	 * accomplish authorization.</li>
+	 * </ol>
+	 * 
+	 * http://xmpp.org/rfcs/rfc3920.html#streams<br>
+	 * http://xmpp.org/rfcs/rfc3920.html#sasl<br>
+	 * <br>
+	 * TODO: Handle stream errors more properly.<br>
+	 * TODO: Implement tls support.<br>
+	 * 
+	 * @param parser
+	 *            XmlPullParser instance.
+	 * @param reader
+	 *            Reader connected to server.
+	 * @param writer
+	 *            Writer connected to server.
+	 * @param sessionKey
+	 *            Session key for current user.
+	 * @param sessionSecret
+	 *            Secret key for current user.
+	 * @return True if login successful, false otherwise.
+	 * @throws ChatException
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws XmlPullParserException
+	 */
+	private final boolean executeAuthorization(XmlPullParser parser,
+			Reader reader, Writer writer, String sessionKey,
+			String sessionSecret) throws ChatException, IOException,
+			NoSuchAlgorithmException, XmlPullParserException {
+
+		parser.setInput(reader);
+		writer.write("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='chat.facebook.com' version='1.0'>");
+		writer.flush();
+
+		parser.nextTag();
+		parser.require(XmlPullParser.START_TAG, null, "stream:stream");
+
+		parser.nextTag();
+		parser.require(XmlPullParser.START_TAG, null, "stream:features");
+
+		boolean mechanismFound = false;
+		while (ChatUtils.find(parser, "mechanism", "stream:features", null)) {
+			String mechanism = parser.nextText();
+			if (mechanism.equals("X-FACEBOOK-PLATFORM")) {
+				mechanismFound = true;
+			}
+		}
+		parser.require(XmlPullParser.END_TAG, null, "stream:features");
+		if (!mechanismFound) {
+			throw new ChatException(
+					"X-FACEBOOK-PLATFORM mechanism not supported.", false);
+		}
+
+		for (int i = 0; i < 10; ++i) {
+			writer.write("<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='X-FACEBOOK-PLATFORM'/>");
+			writer.flush();
+
+			parser.nextTag();
+			parser.require(XmlPullParser.START_TAG, null, "challenge");
+
+			processChallenge(parser, writer, sessionKey, sessionSecret);
+
+			parser.nextTag();
+			parser.require(XmlPullParser.START_TAG, null, null);
+
+			if (parser.getName().equals("success")) {
+				logger.println("Auth successful.");
+				ChatUtils.skip(parser, XmlPullParser.END_TAG, "success", null);
+				return true;
+			}
+			if (parser.getName().equals("failure")) {
+				logger.println("Auth failed try=" + (i + 1) + ".");
+				ChatUtils.skip(parser, XmlPullParser.END_TAG, "failure", null);
+			}
+		}
+
+		writer.write("</stream:stream>");
+		writer.flush();
+		ChatUtils.skip(parser, XmlPullParser.END_TAG, "stream:stream", null);
+		return false;
+	}
+
+	/**
+	 * Sends bind request to server and retrieves JID from response.<br>
+	 * <br>
+	 * http://xmpp.org/rfcs/rfc3920.html#bind<br>
+	 * 
+	 * @param parser
+	 *            XmlPullParser instance.
+	 * @param writer
+	 *            Writer to send bind request to.
+	 * @throws ChatException
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 */
+	private final void executeBind(XmlPullParser parser, Writer writer)
+			throws ChatException, IOException, XmlPullParserException {
+		String id = "bind_" + System.currentTimeMillis();
+		writer.write("<iq type='set' id='" + id
+				+ "'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></iq>");
+		writer.flush();
+		parser.nextTag();
+		parser.require(XmlPullParser.START_TAG, null, "iq");
+		if (!ChatUtils.getValue(parser, "id").equals(id)) {
+			throw new ChatException("Unexpected <iq> id received.", true);
+		}
+		if (!ChatUtils.find(parser, "jid", "iq", null)) {
+			throw new ChatException("Bind failed.", true);
+		}
+		jid = parser.nextText();
+		ChatUtils.skip(parser, XmlPullParser.END_TAG, "iq", null);
+	}
+
+	/**
+	 * Executes main event loop. This iteration ends only on error or when end
+	 * stream is received.<br>
+	 * <br>
+	 * http://xmpp.org/rfcs/rfc3921.html#presence<br>
+	 * http://xmpp.org/rfcs/rfc3921.html#messaging<br>
+	 * 
+	 * @param parser
+	 * @param writer
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 */
+	private final void executeMainEventLoop(XmlPullParser parser, Writer writer)
+			throws IOException, XmlPullParserException {
+
+		writer.write("<presence/>");
+		writer.flush();
+
+		parser.nextTag();
+		while (parser.getEventType() != XmlPullParser.END_TAG) {
+			String name = parser.getName();
+			if (name.equals("presence")) {
+				processPresence(parser);
+			} else if (name.equals("message")) {
+				processMessage(parser);
+			}
+			ChatUtils.skip(parser, XmlPullParser.END_TAG, name, logger);
+			parser.nextTag();
+		}
+		parser.require(XmlPullParser.END_TAG, null, "stream:stream");
+	}
+
+	/**
+	 * Sends session creation request to server.<br>
+	 * <br>
+	 * http://xmpp.org/rfcs/rfc3921.html#session<br>
+	 * 
+	 * @param parser
+	 *            XmlPullParser instance.
+	 * @param writer
+	 *            Writer to send session request to.
+	 * @throws ChatException
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 */
+	private final void executeSession(XmlPullParser parser, Writer writer)
+			throws ChatException, IOException, XmlPullParserException {
+		String id = "session_" + System.currentTimeMillis();
+		writer.write("<iq to='chat.facebook.com' type='set' id='"
+				+ id
+				+ "'><session xmlns='urn:ietf:params:xml:ns:xmpp-session'/></iq>");
+		writer.flush();
+		parser.nextTag();
+		parser.require(XmlPullParser.START_TAG, null, "iq");
+		if (!ChatUtils.find(parser, "session", "iq", null)) {
+			throw new ChatException("Session creation failed.", true);
+		}
+		ChatUtils.skip(parser, XmlPullParser.END_TAG, "iq", null);
+	}
+
+	/**
+	 * Executes session creation and starts a session loop for handling incoming
+	 * events - or stream end eventually.
+	 * <ol>
+	 * <li>Open a new stream to server.</li>
+	 * <li>Verify that bind and session features are supported.</li>
+	 * <li>Execute bind to retrieve JID and session creation.</li>
+	 * </ol>
+	 * 
+	 * @param parser
+	 *            XmlPullParser
+	 * @param reader
+	 *            Reader connected to the server.
+	 * @param writer
+	 *            Writer connected to the server.
+	 * @throws ChatException
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 */
+	private final void executeSessionCreation(XmlPullParser parser,
+			Reader reader, Writer writer) throws ChatException, IOException,
+			XmlPullParserException {
+		parser.setInput(reader);
+		writer.write("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='chat.facebook.com' version='1.0'>");
+		writer.flush();
+
+		parser.nextTag();
+		parser.require(XmlPullParser.START_TAG, null, "stream:stream");
+
+		parser.nextTag();
+		parser.require(XmlPullParser.START_TAG, null, "stream:features");
+		if (!ChatUtils.find(parser, "bind", "stream:features", null)) {
+			throw new ChatException("Bind not supported.", false);
+		}
+		if (!ChatUtils.find(parser, "session", "stream:features", null)) {
+			throw new ChatException("Session not supported", false);
+		}
+		ChatUtils.skip(parser, XmlPullParser.END_TAG, "stream:features", null);
+
+		executeBind(parser, writer);
+		executeSession(parser, writer);
+	}
+
 	/**
 	 * Method for handling challenge response. Reads first content of challenge
 	 * tag and then sends response.<br>
@@ -43,10 +358,13 @@ public class ChatConnection {
 	 * @param challenge
 	 * @param sessionKey
 	 * @param sessionSecret
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws XmlPullParserException
 	 */
-	public static void processChallenge(XmlPullParser parser, Writer writer,
-			String sessionKey, String sessionSecret) throws Exception {
+	private final void processChallenge(XmlPullParser parser, Writer writer,
+			String sessionKey, String sessionSecret) throws IOException,
+			NoSuchAlgorithmException, XmlPullParserException {
 
 		parser.require(XmlPullParser.START_TAG, null, "challenge");
 		String challenge = new String(Base64.decode(parser.nextText(),
@@ -104,317 +422,6 @@ public class ChatConnection {
 		writer.flush();
 	}
 
-	private ChatObserver.Connection observer;
-
-	private ChatThread thread;
-
-	private ChatLogger logger;
-	private static final int STATE_READY = 1;
-	private static final int STATE_THREAD = 2;
-	private static final int STATE_CONNECTED = 3;
-	private static final int STATE_LOGIN = 4;
-
-	private static final int STATE_RUNNING = 5;
-	private static final String CHAT_ADDRESS = "chat.facebook.com";
-
-	private static final int CHAT_PORT = 5222;
-
-	private int currentState = STATE_READY;
-
-	private String jid = null;
-
-	/**
-	 * Default constructor.
-	 * 
-	 * @param observer
-	 *            Observer for chat connection events.
-	 * @param logger
-	 *            For debug reasons.
-	 */
-	public ChatConnection(ChatObserver.Connection observer, ChatLogger logger) {
-		this.observer = observer;
-		this.logger = logger;
-	}
-
-	/**
-	 * Starts connection procedure if there isn't open connection already.
-	 * 
-	 * @param sessionKey
-	 *            Session key for logged in user.
-	 * @param sessionSecret
-	 *            Session secret for logged in user.
-	 */
-	public void connect(String sessionKey, String sessionSecret) {
-		switch (currentState) {
-		case STATE_READY:
-			thread = new ChatThread(sessionKey, sessionSecret);
-			thread.start();
-			logger.println("New thread created.");
-			break;
-		case STATE_THREAD:
-		case STATE_CONNECTED:
-		case STATE_LOGIN:
-			logger.println("Thread running already.");
-			break;
-		default:
-			logger.println("Thread running already.");
-			observer.onConnected();
-			break;
-		}
-	}
-
-	/**
-	 * Disconnects from chat server.
-	 */
-	public void disconnect() {
-		switch (currentState) {
-		case STATE_RUNNING:
-			logger.println("Sending final presence.");
-			thread.write("<presence from='" + jid + "' type='unavailable'/>");
-		case STATE_LOGIN:
-		case STATE_CONNECTED:
-			logger.println("Sending end stream.");
-			thread.write("</stream:stream>");
-			break;
-		default:
-			logger.println("Not connected.");
-			observer.onDisconnected();
-		}
-	}
-
-	/**
-	 * Sends message to server.
-	 * 
-	 * @param to
-	 *            JID of receiving entity.
-	 * @param message
-	 *            Message to be sent.
-	 */
-	public void sendMessage(String to, String message) {
-		thread.write("<message to='" + to + "' from='" + jid
-				+ "' type='chat'><body>" + message + "</body></message>");
-	}
-
-	/**
-	 * Executes authorization procedure to server.
-	 * <ol>
-	 * <li>Open a stream to server.</li>
-	 * <li>Verify "X-FACEBOOK-PLATFORM" authorization mechanism is supported.</li>
-	 * <li>If it is, try to authorize user for a few times, and return false if
-	 * it's not successful. For some reason it usually takes a few tries to
-	 * accomplish authorization.</li>
-	 * </ol>
-	 * 
-	 * http://xmpp.org/rfcs/rfc3920.html#streams<br>
-	 * http://xmpp.org/rfcs/rfc3920.html#sasl<br>
-	 * <br>
-	 * TODO: Handle stream errors more properly.<br>
-	 * TODO: Implement tls support.<br>
-	 * 
-	 * @param parser
-	 *            XmlPullParser instance.
-	 * @param reader
-	 *            Reader connected to server.
-	 * @param writer
-	 *            Writer connected to server.
-	 * @param sessionKey
-	 *            Session key for current user.
-	 * @param sessionSecret
-	 *            Secret key for current user.
-	 * @return True if login successful, false otherwise.
-	 * @throws Exception
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 */
-	private boolean executeAuthorization(XmlPullParser parser, Reader reader,
-			Writer writer, String sessionKey, String sessionSecret)
-			throws Exception, IOException, XmlPullParserException {
-
-		parser.setInput(reader);
-		writer.write("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='chat.facebook.com' version='1.0'>");
-		writer.flush();
-
-		parser.nextTag();
-		parser.require(XmlPullParser.START_TAG, null, "stream:stream");
-
-		parser.nextTag();
-		parser.require(XmlPullParser.START_TAG, null, "stream:features");
-
-		boolean mechanismFound = false;
-		while (ChatUtils.find(parser, "mechanism", "stream:features", null)) {
-			String mechanism = parser.nextText();
-			if (mechanism.equals("X-FACEBOOK-PLATFORM")) {
-				mechanismFound = true;
-			}
-		}
-		parser.require(XmlPullParser.END_TAG, null, "stream:features");
-		if (!mechanismFound) {
-			throw new Exception("X-FACEBOOK-PLATFORM mechanism not supported.");
-		}
-
-		for (int i = 0; i < 10; ++i) {
-			writer.write("<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='X-FACEBOOK-PLATFORM'/>");
-			writer.flush();
-
-			parser.nextTag();
-			parser.require(XmlPullParser.START_TAG, null, "challenge");
-
-			processChallenge(parser, writer, sessionKey, sessionSecret);
-
-			parser.nextTag();
-			parser.require(XmlPullParser.START_TAG, null, null);
-
-			if (parser.getName().equals("success")) {
-				logger.println("Auth successful.");
-				ChatUtils.skip(parser, XmlPullParser.END_TAG, "success", null);
-				return true;
-			}
-			if (parser.getName().equals("failure")) {
-				logger.println("Auth failed try=" + (i + 1) + ".");
-				ChatUtils.skip(parser, XmlPullParser.END_TAG, "failure", null);
-			}
-		}
-
-		writer.write("</stream:stream>");
-		writer.flush();
-		ChatUtils.skip(parser, XmlPullParser.END_TAG, "stream:stream", null);
-		return false;
-	}
-
-	/**
-	 * Sends bind request to server and retrieves JID from response.<br>
-	 * <br>
-	 * http://xmpp.org/rfcs/rfc3920.html#bind<br>
-	 * 
-	 * @param parser
-	 *            XmlPullParser instance.
-	 * @param writer
-	 *            Writer to send bind request to.
-	 * @throws Exception
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 */
-	private void executeBind(XmlPullParser parser, Writer writer)
-			throws Exception, IOException, XmlPullParserException {
-		String id = "bind_" + System.currentTimeMillis();
-		writer.write("<iq type='set' id='" + id
-				+ "'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></iq>");
-		writer.flush();
-		parser.nextTag();
-		parser.require(XmlPullParser.START_TAG, null, "iq");
-		if (!ChatUtils.getValue(parser, "id").equals(id)) {
-			throw new Exception("Unexpected <iq> id received.");
-		}
-		if (!ChatUtils.find(parser, "jid", "iq", null)) {
-			throw new Exception("Bind failed.");
-		}
-		jid = parser.nextText();
-		ChatUtils.skip(parser, XmlPullParser.END_TAG, "iq", null);
-	}
-
-	/**
-	 * Executes main event loop. This iteration ends only on error or when end
-	 * stream is received.<br>
-	 * <br>
-	 * http://xmpp.org/rfcs/rfc3921.html#presence<br>
-	 * http://xmpp.org/rfcs/rfc3921.html#messaging<br>
-	 * 
-	 * @param parser
-	 * @param writer
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 */
-	private void executeMainEventLoop(XmlPullParser parser, Writer writer)
-			throws IOException, XmlPullParserException {
-
-		writer.write("<presence/>");
-		writer.flush();
-
-		parser.nextTag();
-		while (parser.getEventType() != XmlPullParser.END_TAG) {
-			String name = parser.getName();
-			if (name.equals("presence")) {
-				processPresence(parser);
-			} else if (name.equals("message")) {
-				processMessage(parser);
-			}
-			ChatUtils.skip(parser, XmlPullParser.END_TAG, name, logger);
-			parser.nextTag();
-		}
-		parser.require(XmlPullParser.END_TAG, null, "stream:stream");
-	}
-
-	/**
-	 * Sends session creation request to server.<br>
-	 * <br>
-	 * http://xmpp.org/rfcs/rfc3921.html#session<br>
-	 * 
-	 * @param parser
-	 *            XmlPullParser instance.
-	 * @param writer
-	 *            Writer to send session request to.
-	 * @throws Exception
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 */
-	private void executeSession(XmlPullParser parser, Writer writer)
-			throws Exception, IOException, XmlPullParserException {
-		String id = "session_" + System.currentTimeMillis();
-		writer.write("<iq to='chat.facebook.com' type='set' id='"
-				+ id
-				+ "'><session xmlns='urn:ietf:params:xml:ns:xmpp-session'/></iq>");
-		writer.flush();
-		parser.nextTag();
-		parser.require(XmlPullParser.START_TAG, null, "iq");
-		if (!ChatUtils.find(parser, "session", "iq", null)) {
-			throw new Exception("Session creation failed.");
-		}
-		ChatUtils.skip(parser, XmlPullParser.END_TAG, "iq", null);
-	}
-
-	/**
-	 * Executes session creation and starts a session loop for handling incoming
-	 * events - or stream end eventually.
-	 * <ol>
-	 * <li>Open a new stream to server.</li>
-	 * <li>Verify that bind and session features are supported.</li>
-	 * <li>Execute bind to retrieve JID and session creation.</li>
-	 * </ol>
-	 * 
-	 * @param parser
-	 *            XmlPullParser
-	 * @param reader
-	 *            Reader connected to the server.
-	 * @param writer
-	 *            Writer connected to the server.
-	 * @throws Exception
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 */
-	private void executeSessionCreation(XmlPullParser parser, Reader reader,
-			Writer writer) throws Exception, IOException,
-			XmlPullParserException {
-		parser.setInput(reader);
-		writer.write("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='chat.facebook.com' version='1.0'>");
-		writer.flush();
-
-		parser.nextTag();
-		parser.require(XmlPullParser.START_TAG, null, "stream:stream");
-
-		parser.nextTag();
-		parser.require(XmlPullParser.START_TAG, null, "stream:features");
-		if (!ChatUtils.find(parser, "bind", "stream:features", null)) {
-			throw new Exception("Bind not supported.");
-		}
-		if (!ChatUtils.find(parser, "session", "stream:features", null)) {
-			throw new Exception("Session not supported");
-		}
-		ChatUtils.skip(parser, XmlPullParser.END_TAG, "stream:features", null);
-
-		executeBind(parser, writer);
-		executeSession(parser, writer);
-	}
-
 	/**
 	 * Method for parsing &lt;message&gt; tag. Parser is expected to be at start
 	 * of message tag - otherwise an exception is thrown. If this condition
@@ -426,7 +433,7 @@ public class ChatConnection {
 	 * @throws IOException
 	 * @throws XmlPullParserException
 	 */
-	private void processMessage(XmlPullParser parser) throws IOException,
+	private final void processMessage(XmlPullParser parser) throws IOException,
 			XmlPullParserException {
 		parser.require(XmlPullParser.START_TAG, null, "message");
 		String from = ChatUtils.getValue(parser, "from");
@@ -451,8 +458,8 @@ public class ChatConnection {
 	 * @throws IOException
 	 * @throws XmlPullParserException
 	 */
-	private void processPresence(XmlPullParser parser) throws IOException,
-			XmlPullParserException {
+	private final void processPresence(XmlPullParser parser)
+			throws IOException, XmlPullParserException {
 		parser.require(XmlPullParser.START_TAG, null, "presence");
 		String from = ChatUtils.getValue(parser, "from");
 		String to = ChatUtils.getValue(parser, "to");
@@ -534,10 +541,10 @@ public class ChatConnection {
 					observer.onConnected();
 					executeMainEventLoop(parser, writer);
 				}
-				
+
 				currentState = STATE_READY;
 				observer.onDisconnected();
-				
+
 			} catch (Exception ex) {
 				currentState = STATE_READY;
 				logger.println(ex.toString());
@@ -545,7 +552,7 @@ public class ChatConnection {
 			} finally {
 				try {
 					socket.close();
-				} catch(Exception ex) {
+				} catch (IOException ex) {
 				}
 				logger.println("Socket disconnected.");
 			}
