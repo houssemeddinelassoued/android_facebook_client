@@ -3,4 +3,5 @@
 *.project
 bin/
 gen/
+doc/
 com_facebook_android_src/
