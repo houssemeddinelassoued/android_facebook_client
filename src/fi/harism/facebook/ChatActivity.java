@@ -93,6 +93,10 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				showAlertDialog("Disconnected.");
+				// TODO: It is possible there is presence request waiting in
+				// request queue at this point.
+				LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
+				list.removeAllViews();
 			}
 		});
 	}
