@@ -535,9 +535,11 @@ public class ChatConnection {
 					executeMainEventLoop(parser, writer);
 				}
 				
+				currentState = STATE_READY;
 				observer.onDisconnected();
 				
 			} catch (Exception ex) {
+				currentState = STATE_READY;
 				logger.println(ex.toString());
 				observer.onError(ex);
 			} finally {
@@ -545,11 +547,9 @@ public class ChatConnection {
 					socket.close();
 				} catch(Exception ex) {
 				}
-				logger.println("Disconnected.");
+				logger.println("Socket disconnected.");
 			}
-
 			logger.println("Thread end.");
-			currentState = STATE_READY;
 		}
 
 		public void write(String content) {
