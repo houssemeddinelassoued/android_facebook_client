@@ -24,14 +24,14 @@ Fetching sources is maybe easiest done using EGit Eclipse plugin but feel free t
 ToDo
 ====
 1. Ponder over DAO implementation - and fix/improve it eventually.
-  <br>- It really needs some face lifting.
+  <br>- Getting there.
 2. Start testing chat functionality.
   <br>- Partially done. There is some chat functionality added now.
 
 Chat
 ====
 * On chat activity press connect button to start login procedure.
-* Once connection is established list of users/friends should be updated.
+* Once connection is established list of users/friends online should be updated properly.
 * Clicking on user opens a separate chat/conversation view.
 * For testing purposes there is connect, disconnect and show log buttons visible at all times.
 * This is more of a proof of concept than proper implementation at the moment.
