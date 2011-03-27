@@ -1,8 +1,31 @@
 package fi.harism.facebook.chat;
 
-public interface ChatLogger {
+/**
+ * Logger class for debugging reasons.<br>
+ * <br>
+ * TODO: It might be a good idea to have different logging levels.
+ * 
+ * @author harism
+ */
+public class ChatLogger {
+
+	private StringBuilder log;
 	
-	public void print(String str);
-	public void println(String str);
+	public ChatLogger() {
+		log = new StringBuilder();
+	}
+
+	public void print(String text) {
+		log.append(text);
+	}
+
+	public void println(String text) {
+		log.append(text + "\n");
+	}
+
+	@Override
+	public String toString() {
+		return log.toString();
+	}
 
 }

@@ -3,7 +3,7 @@ package fi.harism.facebook.dao;
 import java.util.Vector;
 
 import android.os.Bundle;
-import fi.harism.facebook.chat.ChatHandler;
+import fi.harism.facebook.chat.ChatObserver;
 import fi.harism.facebook.chat.ChatUser;
 import fi.harism.facebook.request.Request;
 
@@ -73,7 +73,7 @@ public class FBChat {
 		public void onMessage(FBUser from, String message);
 	}
 
-	private class FBChatObserver implements ChatHandler.Observer {
+	private class FBChatObserver implements ChatObserver.Handler {
 
 		@Override
 		public void onConnected() {
