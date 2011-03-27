@@ -2,6 +2,7 @@ package fi.harism.facebook.chat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import javax.net.SocketFactory;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.util.Base64;
@@ -101,6 +103,7 @@ public class ChatConnection {
 		writer.write(out.toString());
 		writer.flush();
 	}
+
 	private ChatObserver.Connection observer;
 
 	private ChatThread thread;
@@ -220,10 +223,12 @@ public class ChatConnection {
 	 *            Secret key for current user.
 	 * @return True if login successful, false otherwise.
 	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	private boolean executeAuthorization(XmlPullParser parser, Reader reader,
 			Writer writer, String sessionKey, String sessionSecret)
-			throws Exception {
+			throws Exception, IOException, XmlPullParserException {
 
 		parser.setInput(reader);
 		writer.write("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='chat.facebook.com' version='1.0'>");
@@ -286,9 +291,11 @@ public class ChatConnection {
 	 * @param writer
 	 *            Writer to send bind request to.
 	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	private void executeBind(XmlPullParser parser, Writer writer)
-			throws Exception {
+			throws Exception, IOException, XmlPullParserException {
 		String id = "bind_" + System.currentTimeMillis();
 		writer.write("<iq type='set' id='" + id
 				+ "'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></iq>");
@@ -314,10 +321,11 @@ public class ChatConnection {
 	 * 
 	 * @param parser
 	 * @param writer
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	private void executeMainEventLoop(XmlPullParser parser, Writer writer)
-			throws Exception {
+			throws IOException, XmlPullParserException {
 
 		writer.write("<presence/>");
 		writer.flush();
@@ -346,9 +354,11 @@ public class ChatConnection {
 	 * @param writer
 	 *            Writer to send session request to.
 	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	private void executeSession(XmlPullParser parser, Writer writer)
-			throws Exception {
+			throws Exception, IOException, XmlPullParserException {
 		String id = "session_" + System.currentTimeMillis();
 		writer.write("<iq to='chat.facebook.com' type='set' id='"
 				+ id
@@ -378,9 +388,12 @@ public class ChatConnection {
 	 * @param writer
 	 *            Writer connected to the server.
 	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	private void executeSessionCreation(XmlPullParser parser, Reader reader,
-			Writer writer) throws Exception {
+			Writer writer) throws Exception, IOException,
+			XmlPullParserException {
 		parser.setInput(reader);
 		writer.write("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='chat.facebook.com' version='1.0'>");
 		writer.flush();
@@ -410,9 +423,11 @@ public class ChatConnection {
 	 * 
 	 * @param parser
 	 *            XmlPullParser instance.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
-	private void processMessage(XmlPullParser parser) throws Exception {
+	private void processMessage(XmlPullParser parser) throws IOException,
+			XmlPullParserException {
 		parser.require(XmlPullParser.START_TAG, null, "message");
 		String from = ChatUtils.getValue(parser, "from");
 		String to = ChatUtils.getValue(parser, "to");
@@ -433,9 +448,11 @@ public class ChatConnection {
 	 * 
 	 * @param parser
 	 *            XmlPullParser instance.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
-	private void processPresence(XmlPullParser parser) throws Exception {
+	private void processPresence(XmlPullParser parser) throws IOException,
+			XmlPullParserException {
 		parser.require(XmlPullParser.START_TAG, null, "presence");
 		String from = ChatUtils.getValue(parser, "from");
 		String to = ChatUtils.getValue(parser, "to");
@@ -517,20 +534,18 @@ public class ChatConnection {
 					observer.onConnected();
 					executeMainEventLoop(parser, writer);
 				}
-
-				socket.close();
-				logger.println("Disconnected.");
+				
 				observer.onDisconnected();
-
+				
 			} catch (Exception ex) {
-				if (socket != null) {
-					try {
-						socket.close();
-					} catch (Exception exx) {
-					}
-				}
 				logger.println(ex.toString());
 				observer.onError(ex);
+			} finally {
+				try {
+					socket.close();
+				} catch(Exception ex) {
+				}
+				logger.println("Disconnected.");
 			}
 
 			logger.println("Thread end.");

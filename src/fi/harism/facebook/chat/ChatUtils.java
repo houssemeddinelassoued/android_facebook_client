@@ -1,13 +1,8 @@
 package fi.harism.facebook.chat;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.util.HashMap;
-
+import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
-
-import android.util.Base64;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Some Facebook Chat related utility methods.
@@ -42,10 +37,12 @@ public class ChatUtils {
 	 * @param logger
 	 *            ChatLogger instance, may be null.
 	 * @return True if 'name' tag was found before 'nameEnd' tag.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	public static boolean find(XmlPullParser parser, String name,
-			String nameEnd, ChatLogger logger) throws Exception {
+			String nameEnd, ChatLogger logger) throws IOException,
+			XmlPullParserException {
 		int tag = parser.getEventType();
 		// Iterate until end condition is reached.
 		while (tag != XmlPullParser.END_TAG
@@ -54,7 +51,8 @@ public class ChatUtils {
 			log(parser, logger);
 			// Unexpected end of document.
 			if (tag == XmlPullParser.END_DOCUMENT) {
-				throw new Exception("Unexpected end of document.");
+				throw new XmlPullParserException("Unexpected end of document.",
+						parser, null);
 			}
 			// Tag we were looking for has been found.
 			if (tag == XmlPullParser.START_TAG && parser.getName().equals(name)) {
@@ -76,6 +74,7 @@ public class ChatUtils {
 	 * getValue(parser, "picture")<br>
 	 * - throws an exception.<br>
 	 * <br>
+	 * 
 	 * @see optValue(XmlPullParser, String)
 	 * 
 	 * @param parser
@@ -83,13 +82,15 @@ public class ChatUtils {
 	 * @param attribute
 	 *            Name of attribute we are looking for.
 	 * @return Value of attribute.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	public static String getValue(XmlPullParser parser, String attribute)
-			throws Exception {
+			throws IOException, XmlPullParserException {
 		String value = optValue(parser, attribute);
 		if (value == null) {
-			throw new Exception("Attribute " + attribute + " not found.");
+			throw new XmlPullParserException("Attribute " + attribute
+					+ " not found.", parser, null);
 		}
 		return value;
 	}
@@ -101,10 +102,10 @@ public class ChatUtils {
 	 *            XmlPullParser
 	 * @param logger
 	 *            Logger instance, may be null.
-	 * @throws Exception
+	 * @throws XmlPullParserException
 	 */
 	public static void log(XmlPullParser parser, ChatLogger logger)
-			throws Exception {
+			throws XmlPullParserException {
 
 		if (logger == null) {
 			return;
@@ -163,10 +164,11 @@ public class ChatUtils {
 	 * @param attribute
 	 *            Name of attribute.
 	 * @return Value of attribute or null if attribute was not found.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	public static String optValue(XmlPullParser parser, String attribute)
-			throws Exception {
+			throws IOException, XmlPullParserException {
 		parser.require(XmlPullParser.START_TAG, null, null);
 		for (int i = 0; i < parser.getAttributeCount(); ++i) {
 			if (parser.getAttributeName(i).equals(attribute)) {
@@ -191,16 +193,18 @@ public class ChatUtils {
 	 *            Name of tag.
 	 * @param logger
 	 *            Logger instance, may be null.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws XmlPullParserException
 	 */
 	public static void skip(XmlPullParser parser, int tag, String name,
-			ChatLogger logger) throws Exception {
+			ChatLogger logger) throws IOException, XmlPullParserException {
 		int t = parser.getEventType();
 		while (t != tag || !parser.getName().equals(name)) {
 			t = parser.next();
 			log(parser, logger);
 			if (t == XmlPullParser.END_DOCUMENT) {
-				throw new Exception("Unexpected end of document.");
+				throw new XmlPullParserException("Unexpected end of document.",
+						parser, null);
 			}
 		}
 		parser.require(tag, null, name);
