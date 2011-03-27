@@ -351,9 +351,13 @@ public abstract class FeedActivity extends BaseActivity {
 						.getCommentList(itemId);
 				commentList.load(new FBObserver<FBCommentList>() {
 					@Override
-					public void onComplete(FBCommentList comments) {
+					public void onComplete(final FBCommentList comments) {
 						hideProgressDialog();
-						new CommentsDialog(activity, comments).show();
+						runOnUiThread(new Runnable() {
+							public void run() {
+								new CommentsDialog(activity, comments).show();
+							}
+						});
 					}
 
 					@Override

@@ -15,9 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBBitmapCache;
-import fi.harism.facebook.dao.FBFriend;
-import fi.harism.facebook.dao.FBFriendList;
 import fi.harism.facebook.dao.FBObserver;
+import fi.harism.facebook.dao.FBUser;
+import fi.harism.facebook.dao.FBUserCache;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
@@ -34,7 +34,7 @@ import fi.harism.facebook.util.StringUtils;
 public class FriendsActivity extends BaseActivity {
 
 	private FBBitmapCache fbBitmapCache;
-	private FBFriendList fbFriendList;
+	private FBUserCache fbUserCache;
 	private FBBitmapObserver fbBitmapObserver;
 
 	// Default profile picture.
@@ -54,7 +54,7 @@ public class FriendsActivity extends BaseActivity {
 
 		spanClickObserver = new SpanClickObserver(this);
 		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
-		fbFriendList = getGlobalState().getFBFactory().getFriendList();
+		fbUserCache = getGlobalState().getFBFactory().getUserCache();
 		fbBitmapObserver = new FBBitmapObserver();
 
 		// Add text changed observer to search editor.
@@ -70,27 +70,27 @@ public class FriendsActivity extends BaseActivity {
 		// Show progress dialog.
 		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		fbFriendList.load(new FBFriendListObserver());
+		fbUserCache.getFriends(new FBFriendListObserver());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		fbFriendList.cancel();
+		fbUserCache.cancel();
 		fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		fbFriendList.setPaused(true);
+		fbUserCache.pause();
 		fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		fbFriendList.setPaused(false);
+		fbUserCache.resume();
 		fbBitmapCache.setPaused(false);
 	}
 
@@ -225,12 +225,12 @@ public class FriendsActivity extends BaseActivity {
 	 * Observer for handling "me/friends" request.
 	 */
 	private final class FBFriendListObserver implements
-			FBObserver<FBFriendList>, Runnable {
+			FBObserver<Vector<FBUser>>, Runnable {
 
-		private FBFriendList friendList;
+		private Vector<FBUser> friendList;
 
 		@Override
-		public void onComplete(final FBFriendList friendList) {
+		public void onComplete(Vector<FBUser> friendList) {
 			this.friendList = friendList;
 			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
 				run();
@@ -253,7 +253,7 @@ public class FriendsActivity extends BaseActivity {
 			// LinearLayout which is inside ScrollView.
 			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 
-			for (FBFriend friend : friendList) {
+			for (FBUser friend : friendList) {
 				String userId = friend.getId();
 				String name = friend.getName();
 				String pictureUrl = friend.getPicture();

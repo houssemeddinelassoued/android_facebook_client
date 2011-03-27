@@ -12,14 +12,14 @@ public class FBChat {
 	private FBStorage fbStorage;
 	private FBChatObserver chatObserver;
 	private Observer observer;
-	private FBUserMap fbUserMap;
+	private FBUserCache fbUserMap;
 
 	public FBChat(FBStorage fbStorage, Observer observer) {
 		this.fbStorage = fbStorage;
 		this.observer = observer;
 		chatObserver = new FBChatObserver();
 		fbStorage.chatHandler.addObserver(chatObserver);
-		fbUserMap = new FBUserMap(fbStorage);
+		fbUserMap = new FBUserCache(fbStorage);
 	}
 
 	public void onDestroy() {

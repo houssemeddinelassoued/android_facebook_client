@@ -14,7 +14,7 @@ import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
-import fi.harism.facebook.dao.FBUserMap;
+import fi.harism.facebook.dao.FBUserCache;
 import fi.harism.facebook.net.FBClient;
 
 /**
@@ -25,7 +25,7 @@ import fi.harism.facebook.net.FBClient;
  */
 public class MainActivity extends BaseActivity {
 
-	private FBUserMap fbUserMap;
+	private FBUserCache fbUserMap;
 	private FBBitmapCache fbBitmapCache;
 
 	@Override
@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
-		fbUserMap = getGlobalState().getFBFactory().getUserMap();
+		fbUserMap = getGlobalState().getFBFactory().getUserCache();
 
 		// It's possible our application hasn't been killed.
 		if (getGlobalState().getFBClient().isAuthorized()) {

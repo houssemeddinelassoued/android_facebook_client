@@ -13,7 +13,6 @@ public class FBStorage {
 	public RequestQueue requestQueue;
 	public FBClient fbClient;
 	
-	public Vector<FBFriend> friendList = null;
 	public Vector<FBFeedItem> newsFeedList = null;
 	public Vector<FBFeedItem> profileFeedList = null;
 	
@@ -22,6 +21,7 @@ public class FBStorage {
 	public ChatHandler chatHandler;
 	
 	public HashMap<String, FBUser> userMap;
+	public Vector<String> friendIdList;
 	
 	public FBStorage(RequestQueue requestQueue, FBClient fbClient) {
 		this.requestQueue = requestQueue;
@@ -29,17 +29,16 @@ public class FBStorage {
 		
 		imageCache = new DataCache(1024000);
 		
-		friendList = new Vector<FBFriend>();
 		newsFeedList = new Vector<FBFeedItem>();
 		profileFeedList = new Vector<FBFeedItem>();
 		
 		chatHandler = new ChatHandler();
 		
 		userMap = new HashMap<String, FBUser>();
+		friendIdList = new Vector<String>();
 	}
 	
 	public void reset() {
-		friendList.removeAllElements();
 		newsFeedList.removeAllElements();
 		profileFeedList.removeAllElements();
 		
@@ -48,6 +47,7 @@ public class FBStorage {
 		chatHandler.disconnect();
 		
 		userMap.clear();
+		friendIdList.removeAllElements();
 	}
 
 }

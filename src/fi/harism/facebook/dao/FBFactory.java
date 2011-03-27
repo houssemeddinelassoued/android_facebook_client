@@ -31,16 +31,12 @@ public class FBFactory {
 		return new FBBitmapCache(fbStorage);
 	}
 	
-	public FBFriendList getFriendList() {
-		return new FBFriendList(fbStorage);
-	}
-	
 	public FBChat getChat(FBChat.Observer observer) {
 		return new FBChat(fbStorage, observer);
 	}
 	
-	public FBUserMap getUserMap() {
-		return new FBUserMap(fbStorage);
+	public FBUserCache getUserCache() {
+		return new FBUserCache(fbStorage);
 	}
 	
 }
