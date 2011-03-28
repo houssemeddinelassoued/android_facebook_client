@@ -9,33 +9,48 @@
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:id="@+id/header" >
-		<ImageView
-			android:layout_height="42dp"
-			android:layout_width="42dp"
-			android:padding="1dp"
+		
+		<AbsoluteLayout
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
 			android:layout_gravity="center_vertical"
 			android:background="#80000000"
-			android:id="@+id/main_user_image" />
-		<LinearLayout
-			android:layout_height="wrap_content"
+			android:padding="1dp" >
+			<include
+				layout="@layout/view_layered_image"
+				android:layout_height="40dp"
+				android:layout_width="40dp"
+				android:id="@+id/main_user_image" />
+		</AbsoluteLayout>
+		<FrameLayout
 			android:layout_width="fill_parent"
-			android:layout_marginLeft="10dp"
-			android:layout_gravity="center_vertical"
-			android:orientation="vertical" >
+			android:layout_height="wrap_content" >
+			<LinearLayout
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:layout_marginLeft="10dp"
+				android:layout_gravity="center_vertical"
+				android:orientation="vertical" >
+				<TextView
+					style="@style/headerText"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:id="@+id/main_user_name" />
+				<TextView
+					style="@style/headerText"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:textStyle="normal"
+					android:id="@+id/main_user_status" />
+			</LinearLayout>
 			<TextView
 				style="@style/headerText"
-				android:layout_width="fill_parent"
+				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/main_name_text"
-				android:id="@+id/main_user_name" />
-			<TextView
-				style="@style/headerText"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textStyle="normal"
-				android:text="@string/main_status_text"
-				android:id="@+id/main_user_status" />
-		</LinearLayout>
+				android:layout_gravity="center"
+				android:text="@string/main_loading_text"
+				android:id="@+id/main_loading_text" />
+		</FrameLayout>
 	</LinearLayout>
 	<LinearLayout
 		style="@style/footerContainer"

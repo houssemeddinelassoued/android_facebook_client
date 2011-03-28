@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -78,7 +80,7 @@ public class MainActivity extends BaseActivity {
 	}
 
 	public final void showLoginView() {
-		setContentView(R.layout.login);
+		setContentView(R.layout.activity_login);
 
 		final Activity self = this;
 		// Add onClickListener to 'login' button.
@@ -93,13 +95,15 @@ public class MainActivity extends BaseActivity {
 	}
 
 	public final void showMainView() {
-		setContentView(R.layout.main);
+		setContentView(R.layout.activity_main);
 		final Activity self = this;
 
 		// Set default picture as user picture.
-		ImageView pictureView = (ImageView) findViewById(R.id.main_user_image);
+		View imageContainer = findViewById(R.id.main_user_image);
+		ImageView bottomImage = (ImageView) imageContainer
+				.findViewById(R.id.view_layered_image_bottom);
 		Bitmap picture = getGlobalState().getDefaultPicture();
-		pictureView.setImageBitmap(picture);
+		bottomImage.setImageBitmap(picture);
 
 		// Add onClick listener to "Friends" button.
 		Button friendsButton = (Button) findViewById(R.id.main_button_friends);
@@ -165,7 +169,6 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Start loading user information asynchronously.
-		// fbMe.load(this, new FBMeObserver(this));
 		fbUserMap.getUser("me", new FBMeObserver());
 	}
 
@@ -190,8 +193,27 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void run() {
-			ImageView iv = (ImageView) findViewById(R.id.main_user_image);
-			iv.setImageBitmap(bitmap.getBitmap());
+			View imageContainer = findViewById(R.id.main_user_image);
+			ImageView bottomImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_bottom);
+			ImageView topImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_top);
+
+			Rect r = new Rect();
+			if (imageContainer.getLocalVisibleRect(r)) {
+				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+				inAnimation.setDuration(700);
+				outAnimation.setDuration(700);
+				outAnimation.setFillAfter(true);
+
+				topImage.setAnimation(inAnimation);
+				bottomImage.startAnimation(outAnimation);
+			} else {
+				bottomImage.setAlpha(0);
+			}
+
+			topImage.setImageBitmap(bitmap.getBitmap());
 		}
 
 	}
@@ -220,7 +242,29 @@ public class MainActivity extends BaseActivity {
 			nameView.setText(me.getName());
 
 			TextView statusView = (TextView) findViewById(R.id.main_user_status);
-			statusView.setText(me.getStatus());
+			if (me.getStatus() == null || me.getStatus().length() == 0) {
+				statusView.setVisibility(View.GONE);
+			} else {
+				statusView.setText(me.getStatus());
+			}
+			
+			TextView loadingView = (TextView) findViewById(R.id.main_loading_text);
+
+			Rect r = new Rect();
+			if (nameView.getLocalVisibleRect(r)
+					&& statusView.getLocalVisibleRect(r)) {
+				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+				inAnimation.setDuration(700);
+				nameView.startAnimation(inAnimation);
+				statusView.startAnimation(inAnimation);
+				
+				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+				outAnimation.setDuration(700);
+				outAnimation.setFillAfter(true);
+				loadingView.startAnimation(outAnimation);
+			} else {
+				loadingView.setVisibility(View.GONE);
+			}
 
 			fbBitmapCache.load(me.getPicture(), null, new BitmapObserver());
 		}

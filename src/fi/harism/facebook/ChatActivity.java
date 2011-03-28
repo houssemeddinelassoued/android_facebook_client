@@ -4,9 +4,11 @@ import java.util.Vector;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,7 +30,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.chat);
+		setContentView(R.layout.activity_chat);
 
 		Button connectButton = (Button) findViewById(R.id.chat_button_connect);
 		connectButton.setOnClickListener(new View.OnClickListener() {
@@ -123,13 +125,15 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		} else if (v != null) {
 			// Update user presence somehow.
 		} else {
-			v = getLayoutInflater().inflate(R.layout.chat_user, null);
-			TextView tv = (TextView) v.findViewById(R.id.chat_user_name);
+			v = getLayoutInflater().inflate(R.layout.view_friend, null);
+			TextView tv = (TextView) v.findViewById(R.id.view_friend_name);
 			tv.setText(user.getName());
 
-			ImageView image = (ImageView) v
-					.findViewById(R.id.chat_user_picture);
-			image.setImageBitmap(defaultPicture);
+			// Search picture Container and set default profile picture into it.
+			View imageContainer = v.findViewById(R.id.view_friend_picture);
+			ImageView bottomView = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_bottom);
+			bottomView.setImageBitmap(defaultPicture);
 
 			v.setTag(user.getId());
 			v.setTag(R.id.view_storage, user);
@@ -161,9 +165,30 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 					LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
 					View v = list.findViewWithTag(bitmap.getId());
 					if (v != null) {
-						ImageView image = (ImageView) v
-								.findViewById(R.id.chat_user_picture);
-						image.setImageBitmap(BitmapUtils.roundBitmap(
+						// Search picture Container and set profile picture into
+						// it.
+						View imageContainer = v
+								.findViewById(R.id.view_friend_picture);
+						ImageView topImage = (ImageView) imageContainer
+								.findViewById(R.id.view_layered_image_top);
+						ImageView bottomImage = (ImageView) imageContainer
+								.findViewById(R.id.view_layered_image_bottom);
+						
+						Rect r = new Rect();
+						if (imageContainer.getLocalVisibleRect(r)) {
+							AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+							AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+							inAnimation.setDuration(700);
+							outAnimation.setDuration(700);
+							outAnimation.setFillAfter(true);
+							
+							topImage.setAnimation(inAnimation);
+							bottomImage.startAnimation(outAnimation);
+						} else {
+							bottomImage.setAlpha(0);
+						}						
+						
+						topImage.setImageBitmap(BitmapUtils.roundBitmap(
 								bitmap.getBitmap(), 7));
 					}
 				}

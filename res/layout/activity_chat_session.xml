@@ -7,8 +7,8 @@
 		style="@style/headerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="@string/chat_title"
-		android:id="@+id/header" />
+		android:text="@string/chat_session_title"
+		android:id="@+id/chat_session_title" />
 	<LinearLayout
 		style="@style/footerContainer"
 		android:layout_width="fill_parent"
@@ -63,7 +63,7 @@
 		style="@style/contentContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/header"
+		android:layout_below="@id/chat_session_title"
 		android:layout_above="@id/footer" >
 		<TextView
 			style="@style/contentText"

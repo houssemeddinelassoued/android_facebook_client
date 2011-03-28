@@ -9,17 +9,19 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:padding="5dp" >
-		<ImageView
-			android:layout_height="40dp"
+		
+		<include
+			layout="@layout/view_layered_image"
 			android:layout_width="40dp"
-			android:id="@+id/friends_item_picture" />
+			android:layout_height="40dp"
+			android:id="@+id/view_friend_picture" />		
 		<TextView
 			style="@style/contentTextBold"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_vertical"
 			android:layout_marginLeft="5dp"
-			android:id="@+id/friends_item_text_name" />		
+			android:id="@+id/view_friend_name" />		
 	</LinearLayout>
 	
 	<ImageView

@@ -20,7 +20,7 @@ public class ChatSessionActivity extends BaseActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.chat_session);
+		setContentView(R.layout.activity_chat_session);
 
 		Button connectButton = (Button) findViewById(R.id.chat_button_connect);
 		connectButton.setOnClickListener(new View.OnClickListener() {
@@ -65,6 +65,11 @@ public class ChatSessionActivity extends BaseActivity implements
 		fbUser = (FBUser) getIntent().getSerializableExtra("fi.harism.facebook.ChatSessionActivity");
 		addText("Chatting with\nid=" + fbUser.getId() + "\n");
 		addText("name=" + fbUser.getName() + "\n\n");
+		
+		String title = getString(R.string.chat_session_title);
+		title = String.format(title, fbUser.getName());
+		TextView tv = (TextView) findViewById(R.id.chat_session_title);
+		tv.setText(title);
 	}
 
 	@Override

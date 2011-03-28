@@ -3,12 +3,17 @@ package fi.harism.facebook;
 import java.util.Vector;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -50,7 +55,7 @@ public class FriendsActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.friends);
+		setContentView(R.layout.activity_friends);
 
 		spanClickObserver = new SpanClickObserver(this);
 		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
@@ -106,20 +111,22 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final View createFriendItem(String userId, String name) {
 		// Create new friend item View.
-		View friendItemView = getLayoutInflater().inflate(
-				R.layout.friends_item, null);
+		View friendItemView = getLayoutInflater().inflate(R.layout.view_friend,
+				null);
 
 		// Find name TextView and set its value.
 		TextView nameTextView = (TextView) friendItemView
-				.findViewById(R.id.friends_item_text_name);
+				.findViewById(R.id.view_friend_name);
 		StringUtils.setTextLink(nameTextView, name, PROTOCOL_SHOW_PROFILE
 				+ userId, spanClickObserver);
 		// nameTextView.setText(name);
 
-		// Find picture ImageView and set default profile picture into it.
-		ImageView imageView = (ImageView) friendItemView
-				.findViewById(R.id.friends_item_picture);
-		imageView.setImageBitmap(defaultPicture);
+		// Search picture Container and set default profile picture into it.
+		View imageContainer = friendItemView
+				.findViewById(R.id.view_friend_picture);
+		ImageView bottomView = (ImageView) imageContainer
+				.findViewById(R.id.view_layered_image_bottom);
+		bottomView.setImageBitmap(defaultPicture);
 
 		// Store user id as a tag to friend item View.
 		friendItemView.setTag(userId);
@@ -152,7 +159,7 @@ public class FriendsActivity extends BaseActivity {
 
 		// Locate name TextView.
 		TextView nameTextView = (TextView) friendItem
-				.findViewById(R.id.friends_item_text_name);
+				.findViewById(R.id.view_friend_name);
 		// Get name from TextView.
 		String friendName = nameTextView.getText().toString();
 		// We are still not case sensitive.
@@ -177,15 +184,11 @@ public class FriendsActivity extends BaseActivity {
 
 		@Override
 		public void onComplete(FBBitmap bitmap) {
-			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-				update(bitmap);
+			if (waitingList.size() == 0) {
+				waitingList.addElement(bitmap);
+				runOnUiThread(this);
 			} else {
-				if (waitingList.size() == 0) {
-					waitingList.addElement(bitmap);
-					runOnUiThread(this);
-				} else {
-					waitingList.addElement(bitmap);					
-				}
+				waitingList.addElement(bitmap);
 			}
 		}
 
@@ -209,14 +212,36 @@ public class FriendsActivity extends BaseActivity {
 
 			// If we found one.
 			if (friendView != null) {
-				// Try to find picture ImageView.
-				ImageView imageView = (ImageView) friendView
-						.findViewById(R.id.friends_item_picture);
-				// Round its corners.
+				// Search picture Container and layered pictures in it.
+				View imageContainer = friendView
+						.findViewById(R.id.view_friend_picture);
+				ImageView bottomImage = (ImageView) imageContainer
+						.findViewById(R.id.view_layered_image_bottom);
+				ImageView topImage = (ImageView) imageContainer
+						.findViewById(R.id.view_layered_image_top);
+
+				// If image container is visible on screen, do animation.
+				Rect visibleRect = new Rect();
+				if (imageContainer.getLocalVisibleRect(visibleRect)) {
+					// Update ImageView's bitmap with one received.
+					AnimationSet inAnimation = new AnimationSet(false);
+					inAnimation.addAnimation(new AlphaAnimation(0, 1));
+					inAnimation.addAnimation(new ScaleAnimation(2, 1, 2, 1));
+					inAnimation.setDuration(700);
+					topImage.setAnimation(inAnimation);
+
+					AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+					outAnimation.setFillAfter(true);
+					outAnimation.setDuration(700);
+					bottomImage.startAnimation(outAnimation);
+				} else {
+					bottomImage.setAlpha(0);
+				}
+				// Round image corners.
 				Bitmap rounded = BitmapUtils.roundBitmap(bitmap.getBitmap(),
 						PICTURE_ROUND_RADIUS);
-				// Update ImageView's bitmap with one received.
-				imageView.setImageBitmap(rounded);
+				topImage.setImageBitmap(rounded);
+
 			}
 		}
 	}
@@ -232,11 +257,7 @@ public class FriendsActivity extends BaseActivity {
 		@Override
 		public void onComplete(Vector<FBUser> friendList) {
 			this.friendList = friendList;
-			if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-				run();
-			} else {
-				runOnUiThread(this);
-			}
+			runOnUiThread(this);
 		}
 
 		@Override
@@ -247,9 +268,6 @@ public class FriendsActivity extends BaseActivity {
 
 		@Override
 		public void run() {
-			// First hide progress dialog.
-			hideProgressDialog();
-
 			// LinearLayout which is inside ScrollView.
 			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 
@@ -265,6 +283,8 @@ public class FriendsActivity extends BaseActivity {
 
 				fbBitmapCache.load(pictureUrl, userId, fbBitmapObserver);
 			}
+
+			hideProgressDialog();
 		}
 	}
 

@@ -1,11 +1,13 @@
 package fi.harism.facebook;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,7 +53,7 @@ public abstract class FeedActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.feed);
+		setContentView(R.layout.activity_feed);
 
 		// Create default picture from resources.
 		defaultPicture = getGlobalState().getDefaultPicture();
@@ -106,7 +108,7 @@ public abstract class FeedActivity extends BaseActivity {
 		String itemId = feedItem.getId();
 
 		// Create default Feed Item view.
-		View feedItemView = getLayoutInflater().inflate(R.layout.feed_item,
+		View feedItemView = getLayoutInflater().inflate(R.layout.view_feed_post,
 				null);
 		// We use itemId to find this Feed Item if needed.
 		feedItemView.setTag(itemId);
@@ -227,9 +229,6 @@ public abstract class FeedActivity extends BaseActivity {
 
 		@Override
 		public void run() {
-			// First hide progress dialog.
-			hideProgressDialog();
-
 			// Add feed item to viewable list of items.
 			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
 
@@ -247,6 +246,8 @@ public abstract class FeedActivity extends BaseActivity {
 							new FeedPictureObserver());
 				}
 			}
+			
+			hideProgressDialog();
 		}
 
 	}
@@ -283,6 +284,14 @@ public abstract class FeedActivity extends BaseActivity {
 				// Set image to feed item.
 				ImageView iv = (ImageView) itemView
 						.findViewById(R.id.feed_item_picture_image);
+				
+				Rect r = new Rect();
+				if (itemView.getLocalVisibleRect(r)) {
+					AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+					inAnimation.setDuration(700);
+					iv.setAnimation(inAnimation);
+				}
+				
 				iv.setImageBitmap(bitmap.getBitmap());
 				iv.setVisibility(View.VISIBLE);
 			}
