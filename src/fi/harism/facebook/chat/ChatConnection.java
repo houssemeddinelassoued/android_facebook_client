@@ -104,6 +104,7 @@ public class ChatConnection {
 			thread.write("<presence from='" + jid + "' type='unavailable'/>");
 		case STATE_LOGIN:
 		case STATE_CONNECTED:
+			// TODO: On connected state socket should be closed.
 			logger.println("Sending end stream.");
 			thread.write("</stream:stream>");
 			break;
@@ -517,6 +518,7 @@ public class ChatConnection {
 				socket = sf.createSocket(CHAT_ADDRESS, CHAT_PORT);
 
 				currentState = STATE_CONNECTED;
+				socket.setSoTimeout(10000);
 
 				BufferedInputStream is = new BufferedInputStream(
 						socket.getInputStream());
@@ -528,6 +530,8 @@ public class ChatConnection {
 
 				XmlPullParser parser = XmlPullParserFactory.newInstance()
 						.newPullParser();
+				
+				socket.setSoTimeout(0);
 
 				logger.println("Socket connected.");
 
