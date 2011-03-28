@@ -63,6 +63,7 @@ public class FBBitmapCache {
 		} else {
 			BitmapRequest request = new BitmapRequest(this, id, imageUrl,
 					observer);
+			request.setPriority(Request.PRIORITY_HIGH);
 			fbStorage.requestQueue.addRequest(request);
 		}
 	}
