@@ -5,21 +5,18 @@ import java.util.Vector;
 import android.os.Bundle;
 import fi.harism.facebook.chat.ChatObserver;
 import fi.harism.facebook.chat.ChatUser;
-import fi.harism.facebook.request.Request;
 
 public class FBChat {
 
 	private FBStorage fbStorage;
 	private FBChatObserver chatObserver;
 	private Observer observer;
-	private FBUserCache fbUserMap;
 
-	public FBChat(FBStorage fbStorage, Observer observer) {
+	public FBChat(FBStorage fbStorage,
+			Observer observer) {
 		this.fbStorage = fbStorage;
 		this.observer = observer;
 		chatObserver = new FBChatObserver();
-		fbStorage.chatHandler.addObserver(chatObserver);
-		fbUserMap = new FBUserCache(fbStorage);
 	}
 
 	public void onDestroy() {
@@ -30,9 +27,22 @@ public class FBChat {
 		return fbStorage.chatHandler.getLog();
 	}
 
-	public void connect() {
-		SessionRequest request = new SessionRequest(this);
-		fbStorage.requestQueue.addRequest(request);
+	public void connect() throws Exception{
+		Bundle params = new Bundle();
+		params.putString("method", "auth.promoteSession");
+		String secret = fbStorage.fbClient.request(params);
+		// Access token is a string of form aaaa|bbbb|cccc
+		// where bbbb is session key.
+		String[] split = fbStorage.fbClient.getAccessToken().split("\\|");
+		if (split.length != 3) {
+			// It is possible FB changes access token eventually.
+			throw new Exception("Malformed access token.");
+		}
+		String sessionKey = split[1];
+		String sessionSecret = secret.replace("\"", "");
+
+		fbStorage.chatHandler.addObserver(chatObserver);
+		fbStorage.chatHandler.connect(sessionKey, sessionSecret);
 	}
 
 	public Vector<FBUser> getUsers() {
@@ -104,23 +114,16 @@ public class FBChat {
 				presence = FBUser.Presence.GONE;
 				break;
 			}
-			
+
 			FBUser u = fbStorage.userMap.get(id);
-			if (u != null) {
-				u.setJid(jid);
-				u.setPresence(presence);
-				observer.onPresenceChanged(u);
-			} else {
-				FBUserRequest request = new FBUserRequest(this, id, jid, presence);
-				fbStorage.requestQueue.addRequest(request);
-				//try {
-				//	u = fbUserMap.getUser(id);
-				//	u.setJid(jid);
-				//	u.setPresence(presence);
-				//	observer.onPresenceChanged(u);
-				//} catch (Exception ex) {
-				//}
+			if (u == null) {
+				u = new FBUser(fbStorage.fbClient, id);
+				fbStorage.userMap.put(id, u);
 			}
+
+			u.jid = jid;
+			u.presence = presence;
+			observer.onPresenceChanged(u);
 		}
 
 		@Override
@@ -135,74 +138,6 @@ public class FBChat {
 				observer.onMessage(user, message);
 			}
 		}
-	}
-
-	private class FBUserRequest extends Request {
-
-		private FBUser user;
-		String id;
-		String jid;
-		FBUser.Presence presence;
-
-		public FBUserRequest(Object key,
-				String id, String jid, FBUser.Presence presence) {
-			super(key);
-			this.id = id;
-			this.jid = jid;
-			this.presence = presence;
-		}
-
-		@Override
-		public void run() {
-			try {
-				user = fbUserMap.getUser(id);
-				user.setJid(jid);
-				user.setPresence(presence);
-				observer.onPresenceChanged(user);
-			} catch (Exception ex) {
-			}
-		}
-
-		@Override
-		public void stop() {
-			// TODO:
-		}
-	}
-
-	private class SessionRequest extends Request {
-
-		public SessionRequest(Object key) {
-			super(key);
-		}
-
-		@Override
-		public void run() {
-			try {
-				Bundle params = new Bundle();
-				params.putString("method", "auth.promoteSession");
-				String secret = fbStorage.fbClient.request(params);
-				// Access token is a string of form aaaa|bbbb|cccc
-				// where bbbb is session key.
-				String[] split = fbStorage.fbClient.getAccessToken().split(
-						"\\|");
-				if (split.length != 3) {
-					// It is possible FB changes access token eventually.
-					throw new Exception("Malformed access token.");
-				}
-				String sessionKey = split[1];
-				String sessionSecret = secret.replace("\"", "");
-
-				fbStorage.chatHandler.connect(sessionKey, sessionSecret);
-			} catch (Exception ex) {
-				observer.onDisconnected();
-			}
-		}
-
-		@Override
-		public void stop() {
-			// TODO:
-		}
-
 	}
 
 }

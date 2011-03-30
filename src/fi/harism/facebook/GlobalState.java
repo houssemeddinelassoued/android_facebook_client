@@ -3,6 +3,7 @@ package fi.harism.facebook;
 import android.graphics.Bitmap;
 import fi.harism.facebook.dao.FBFactory;
 import fi.harism.facebook.net.FBClient;
+import fi.harism.facebook.request.RequestQueue;
 
 /**
  * GlobalState interface.
@@ -34,5 +35,13 @@ public interface GlobalState {
 	 * @return FBFactory instance.
 	 */
 	public FBFactory getFBFactory();
+
+	/**
+	 * Returns application wide instance of RequestQueue. Creates one once this
+	 * method is called for the first time.
+	 * 
+	 * @return RequestQueue instance.
+	 */
+	public RequestQueue getRequestQueue();
 
 }

@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBCommentList;
 import fi.harism.facebook.dao.FBFeedItem;
 import fi.harism.facebook.dao.FBFeedList;
@@ -29,7 +28,7 @@ import fi.harism.facebook.util.StringUtils;
  */
 public abstract class FeedActivity extends BaseActivity {
 
-	private FBBitmapCache fbBitmapCache;
+	//private FBBitmapCache fbBitmapCache;
 	private FBFeedList fbFeedList;
 
 	// Default picture used as sender's profile picture.
@@ -61,7 +60,7 @@ public abstract class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		spanClickObserver = new SpanClickObserver(this);
-		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
+		//fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		fbFeedList = getFeedList();
 
 		View updateButton = findViewById(R.id.feed_button_update);
@@ -81,21 +80,21 @@ public abstract class FeedActivity extends BaseActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		fbFeedList.cancel();
-		fbBitmapCache.cancel();
+		//fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		fbFeedList.setPaused(true);
-		fbBitmapCache.setPaused(true);
+		//fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		fbFeedList.setPaused(false);
-		fbBitmapCache.setPaused(false);
+		//fbBitmapCache.setPaused(false);
 	}
 
 	/**
@@ -237,13 +236,13 @@ public abstract class FeedActivity extends BaseActivity {
 				itemList.addView(view);
 
 				if (item.getFromPictureUrl() != null) {
-					fbBitmapCache.load(item.getFromPictureUrl(), item.getId(),
-							new FromPictureObserver());
+					//fbBitmapCache.load(item.getFromPictureUrl(), item.getId(),
+					//		new FromPictureObserver());
 				}
 
 				if (item.getPictureUrl() != null) {
-					fbBitmapCache.load(item.getPictureUrl(), item.getId(),
-							new FeedPictureObserver());
+					//fbBitmapCache.load(item.getPictureUrl(), item.getId(),
+					//		new FeedPictureObserver());
 				}
 			}
 			
@@ -278,7 +277,7 @@ public abstract class FeedActivity extends BaseActivity {
 			// Get feed item list view.
 			View itemList = findViewById(R.id.feed_list);
 			// Find feed item using itemId.
-			View itemView = itemList.findViewWithTag(bitmap.getId());
+			View itemView = null; //itemList.findViewWithTag(bitmap.getId());
 			// This shouldn't happen but just in case.
 			if (itemView != null) {
 				// Set image to feed item.
@@ -324,7 +323,7 @@ public abstract class FeedActivity extends BaseActivity {
 			// Get feed item list view.
 			View itemList = findViewById(R.id.feed_list);
 			// Find our item view using itemId.
-			View itemView = itemList.findViewWithTag(bitmap.getId());
+			View itemView = null; // itemList.findViewWithTag(bitmap.getId());
 			// This shouldn't happen but just in case.
 			if (itemView != null) {
 				// Set image to feed item view.

@@ -15,6 +15,8 @@ import fi.harism.facebook.request.RequestQueue;
  */
 public class GlobalStateImpl extends Application implements GlobalState {
 
+	// RequestQueue instance.
+	private RequestQueue requestQueue = null;
 	// FBClient instance.
 	private FBClient fbClient = null;
 	// FBFactory instance;
@@ -42,9 +44,17 @@ public class GlobalStateImpl extends Application implements GlobalState {
 	@Override
 	public FBFactory getFBFactory() {
 		if (fbFactory == null) {
-			fbFactory= new FBFactory(new RequestQueue(), getFBClient());
+			fbFactory= new FBFactory(getRequestQueue(), getFBClient());
 		}
 		return fbFactory;
+	}
+	
+	@Override
+	public RequestQueue getRequestQueue() {
+		if (requestQueue == null) {
+			requestQueue = new RequestQueue();
+		}
+		return requestQueue;
 	}
 
 }

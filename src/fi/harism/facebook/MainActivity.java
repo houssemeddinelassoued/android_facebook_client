@@ -13,11 +13,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
-import fi.harism.facebook.dao.FBUserCache;
 import fi.harism.facebook.net.FBClient;
+import fi.harism.facebook.request.Request;
 
 /**
  * Main Activity of this application. Once Activity is launched it starts to
@@ -27,8 +26,8 @@ import fi.harism.facebook.net.FBClient;
  */
 public class MainActivity extends BaseActivity {
 
-	private FBUserCache fbUserMap;
-	private FBBitmapCache fbBitmapCache;
+	private FBUser fbUserMe;
+	private FBBitmap fbBitmapMe;
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -42,8 +41,7 @@ public class MainActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
-		fbUserMap = getGlobalState().getFBFactory().getUserCache();
+		fbUserMe = getGlobalState().getFBFactory().getUser("me");
 
 		// It's possible our application hasn't been killed.
 		if (getGlobalState().getFBClient().isAuthorized()) {
@@ -61,22 +59,19 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		fbUserMap.cancel();
-		fbBitmapCache.cancel();
+		// fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		fbUserMap.pause();
-		fbBitmapCache.setPaused(true);
+		// fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		fbUserMap.resume();
-		fbBitmapCache.setPaused(false);
+		// fbBitmapCache.setPaused(false);
 	}
 
 	public final void showLoginView() {
@@ -168,106 +163,138 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-		// Start loading user information asynchronously.
-		fbUserMap.getUser("me", new FBMeObserver());
+		// Update user information asynchronously.
+		if (fbUserMe.getLevel() == FBUser.Level.FULL) {
+			updateProfileInfo();
+		} else {
+			FBUserRequest meRequest = new FBUserRequest(this);
+			getGlobalState().getRequestQueue().addRequest(meRequest);
+		}
+	}
+
+	private void updateProfileInfo() {
+		TextView nameView = (TextView) findViewById(R.id.main_user_name);
+		nameView.setText(fbUserMe.getName());
+
+		TextView statusView = (TextView) findViewById(R.id.main_user_status);
+		if (fbUserMe.getStatus() == null || fbUserMe.getStatus().length() == 0) {
+			statusView.setVisibility(View.GONE);
+		} else {
+			statusView.setText(fbUserMe.getStatus());
+		}
+
+		TextView loadingView = (TextView) findViewById(R.id.main_loading_text);
+
+		Rect r = new Rect();
+		if (nameView.getLocalVisibleRect(r)
+				&& statusView.getLocalVisibleRect(r)) {
+			AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+			inAnimation.setDuration(700);
+			nameView.startAnimation(inAnimation);
+			statusView.startAnimation(inAnimation);
+
+			AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+			outAnimation.setDuration(700);
+			outAnimation.setFillAfter(true);
+			loadingView.startAnimation(outAnimation);
+		} else {
+			loadingView.setVisibility(View.GONE);
+		}
+
+		fbBitmapMe = getGlobalState().getFBFactory().getBitmap(
+				fbUserMe.getPicture());
+		if (fbBitmapMe.getBitmap() != null) {
+			updateProfilePicture();
+		} else {
+			FBBitmapRequest request = new FBBitmapRequest(this);
+			getGlobalState().getRequestQueue().addRequest(request);
+		}
+	}
+
+	private void updateProfilePicture() {
+		View imageContainer = findViewById(R.id.main_user_image);
+		ImageView bottomImage = (ImageView) imageContainer
+				.findViewById(R.id.view_layered_image_bottom);
+		ImageView topImage = (ImageView) imageContainer
+				.findViewById(R.id.view_layered_image_top);
+
+		Rect r = new Rect();
+		if (imageContainer.getLocalVisibleRect(r)) {
+			AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+			AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+			inAnimation.setDuration(700);
+			outAnimation.setDuration(700);
+			outAnimation.setFillAfter(true);
+
+			topImage.setAnimation(inAnimation);
+			bottomImage.startAnimation(outAnimation);
+		} else {
+			bottomImage.setAlpha(0);
+		}
+
+		topImage.setImageBitmap(fbBitmapMe.getBitmap());
 	}
 
 	/**
-	 * Private ImageRequest observer for handling profile picture loading.
+	 * Class for handling profile picture request.
 	 */
-	private final class BitmapObserver implements FBObserver<FBBitmap>,
-			Runnable {
+	private final class FBBitmapRequest extends Request {
 
-		private FBBitmap bitmap;
-
-		@Override
-		public void onComplete(final FBBitmap bitmap) {
-			this.bitmap = bitmap;
-			runOnUiThread(this);
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors here.
+		public FBBitmapRequest(Object key) {
+			super(key);
 		}
 
 		@Override
 		public void run() {
-			View imageContainer = findViewById(R.id.main_user_image);
-			ImageView bottomImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_bottom);
-			ImageView topImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_top);
-
-			Rect r = new Rect();
-			if (imageContainer.getLocalVisibleRect(r)) {
-				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-				inAnimation.setDuration(700);
-				outAnimation.setDuration(700);
-				outAnimation.setFillAfter(true);
-
-				topImage.setAnimation(inAnimation);
-				bottomImage.startAnimation(outAnimation);
-			} else {
-				bottomImage.setAlpha(0);
+			try {
+				fbBitmapMe.load();
+				runOnUiThread(new UIRunnable());
+			} catch (Exception ex) {
 			}
-
-			topImage.setImageBitmap(bitmap.getBitmap());
 		}
 
+		@Override
+		public void stop() {
+		}
+
+		private class UIRunnable implements Runnable {
+			@Override
+			public void run() {
+				updateProfilePicture();
+			}
+		}
 	}
 
 	/**
-	 * Private FacebookRequest observer for handling "me" request.
+	 * Class for handling "me" request.
 	 */
-	private final class FBMeObserver implements FBObserver<FBUser>, Runnable {
+	private final class FBUserRequest extends Request {
 
-		private FBUser me;
-
-		@Override
-		public void onComplete(final FBUser me) {
-			this.me = me;
-			runOnUiThread(this);
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors here.
+		public FBUserRequest(Object key) {
+			super(key);
 		}
 
 		@Override
 		public void run() {
-			TextView nameView = (TextView) findViewById(R.id.main_user_name);
-			nameView.setText(me.getName());
-
-			TextView statusView = (TextView) findViewById(R.id.main_user_status);
-			if (me.getStatus() == null || me.getStatus().length() == 0) {
-				statusView.setVisibility(View.GONE);
-			} else {
-				statusView.setText(me.getStatus());
+			try {
+				fbUserMe.load(FBUser.Level.FULL);
+				runOnUiThread(new UIRunnable());
+			} catch (Exception ex) {
+				showAlertDialog(ex.toString());
 			}
-			
-			TextView loadingView = (TextView) findViewById(R.id.main_loading_text);
-
-			Rect r = new Rect();
-			if (nameView.getLocalVisibleRect(r)
-					&& statusView.getLocalVisibleRect(r)) {
-				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-				inAnimation.setDuration(700);
-				nameView.startAnimation(inAnimation);
-				statusView.startAnimation(inAnimation);
-				
-				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-				outAnimation.setDuration(700);
-				outAnimation.setFillAfter(true);
-				loadingView.startAnimation(outAnimation);
-			} else {
-				loadingView.setVisibility(View.GONE);
-			}
-
-			fbBitmapCache.load(me.getPicture(), null, new BitmapObserver());
 		}
+
+		@Override
+		public void stop() {
+		}
+
+		private class UIRunnable implements Runnable {
+			@Override
+			public void run() {
+				updateProfileInfo();
+			}
+		}
+
 	}
 
 	/**

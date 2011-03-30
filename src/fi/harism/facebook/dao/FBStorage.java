@@ -39,15 +39,15 @@ public class FBStorage {
 	}
 	
 	public void reset() {
-		newsFeedList.removeAllElements();
-		profileFeedList.removeAllElements();
+		newsFeedList.clear();
+		profileFeedList.clear();
 		
 		requestQueue.removeAllRequests();
 		
 		chatHandler.disconnect();
 		
 		userMap.clear();
-		friendIdList.removeAllElements();
+		friendIdList.clear();
 	}
 
 }

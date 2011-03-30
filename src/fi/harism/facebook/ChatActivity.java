@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBBitmapCache;
 import fi.harism.facebook.dao.FBChat;
 import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
@@ -24,7 +23,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class ChatActivity extends BaseActivity implements FBChat.Observer {
 
 	private FBChat fbChat;
-	private FBBitmapCache fbBitmapCache;
+	//private FBBitmapCache fbBitmapCache;
 	private Bitmap defaultPicture;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,7 +55,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			}
 		});
 
-		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
+		//fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		Bitmap bitmap = getGlobalState().getDefaultPicture();
 		defaultPicture = BitmapUtils.roundBitmap(bitmap, 7);
 
@@ -74,7 +73,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 	}
 
 	private void connect() {
-		fbChat.connect();
+		//fbChat.connect();
 	}
 
 	private void close() {
@@ -150,8 +149,8 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			list.addView(v);
 
 			if (user.getPicture() != null) {
-				fbBitmapCache.load(user.getPicture(), user.getId(),
-						new FBBitmapObserver());
+				//fbBitmapCache.load(user.getPicture(), user.getId(),
+				//		new FBBitmapObserver());
 			}
 		}
 	}
@@ -163,7 +162,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			runOnUiThread(new Runnable() {
 				public void run() {
 					LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
-					View v = list.findViewWithTag(bitmap.getId());
+					View v = null; //list.findViewWithTag(bitmap.getId());
 					if (v != null) {
 						// Search picture Container and set profile picture into
 						// it.

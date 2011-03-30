@@ -1,17 +1,13 @@
 package fi.harism.facebook;
 
-import java.util.Vector;
-
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.widget.EditText;
@@ -19,10 +15,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBBitmapCache;
-import fi.harism.facebook.dao.FBObserver;
+import fi.harism.facebook.dao.FBFriendList;
 import fi.harism.facebook.dao.FBUser;
-import fi.harism.facebook.dao.FBUserCache;
+import fi.harism.facebook.request.Request;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
@@ -38,9 +33,7 @@ import fi.harism.facebook.util.StringUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	private FBBitmapCache fbBitmapCache;
-	private FBUserCache fbUserCache;
-	private FBBitmapObserver fbBitmapObserver;
+	private FBFriendList fbFriendList;
 
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
@@ -58,9 +51,9 @@ public class FriendsActivity extends BaseActivity {
 		setContentView(R.layout.activity_friends);
 
 		spanClickObserver = new SpanClickObserver(this);
-		fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
-		fbUserCache = getGlobalState().getFBFactory().getUserCache();
-		fbBitmapObserver = new FBBitmapObserver();
+		// fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
+		fbFriendList = getGlobalState().getFBFactory().getFriendList();
+		// fbBitmapObserver = new FBBitmapObserver();
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -72,31 +65,37 @@ public class FriendsActivity extends BaseActivity {
 		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
 				PICTURE_ROUND_RADIUS);
 
-		// Show progress dialog.
-		showProgressDialog();
 		// Trigger asynchronous friend list loading.
-		fbUserCache.getFriends(new FBFriendListObserver());
+		// fbUserCache.getFriends(new FBFriendListObserver());
+		if (fbFriendList.getFriends().size() > 0) {
+			updateFriendList();
+		} else {
+			// Show progress dialog.
+			showProgressDialog();
+			FBFriendListRequest request = new FBFriendListRequest(this);
+			getGlobalState().getRequestQueue().addRequest(request);
+		}
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		fbUserCache.cancel();
-		fbBitmapCache.cancel();
+		// fbUserCache.cancel();
+		// fbBitmapCache.cancel();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		fbUserCache.pause();
-		fbBitmapCache.setPaused(true);
+		// fbUserCache.pause();
+		// fbBitmapCache.setPaused(true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		fbUserCache.resume();
-		fbBitmapCache.setPaused(false);
+		// fbUserCache.resume();
+		// fbBitmapCache.setPaused(false);
 	}
 
 	/**
@@ -175,116 +174,138 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 * Observer for handling profile picture loading.
+	 * Updates friend list to screen.
 	 */
-	private final class FBBitmapObserver implements Runnable,
-			FBObserver<FBBitmap> {
+	private final void updateFriendList() {
+		// LinearLayout which is inside ScrollView.
+		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
+		scrollView.removeAllViews();
 
-		private Vector<FBBitmap> waitingList = new Vector<FBBitmap>();
+		for (FBUser friend : fbFriendList.getFriends()) {
+			String userId = friend.getId();
+			String name = friend.getName();
+			String pictureUrl = friend.getPicture();
 
-		@Override
-		public void onComplete(FBBitmap bitmap) {
-			if (waitingList.size() == 0) {
-				waitingList.addElement(bitmap);
-				runOnUiThread(this);
+			// Create default friend item view.
+			View friendItemView = createFriendItem(userId, name);
+			// Add friend item view to scrollable list.
+			scrollView.addView(friendItemView);
+
+			FBBitmap picture = getGlobalState().getFBFactory().getBitmap(
+					pictureUrl);
+			if (picture.getBitmap() != null) {
+				updateProfilePicture(friend, picture.getBitmap());
 			} else {
-				waitingList.addElement(bitmap);
+				FBBitmapRequest request = new FBBitmapRequest(this, friend,
+						picture);
+				getGlobalState().getRequestQueue().addRequest(request);
 			}
 		}
+	}
 
-		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
+	private final void updateProfilePicture(FBUser user, Bitmap bitmap) {
+		// Search for corresponding friend item View.
+		View friendItemsView = findViewById(R.id.friends_list);
+		View friendView = friendItemsView.findViewWithTag(user.getId());
+
+		// If we found one.
+		if (friendView != null) {
+			// Search picture Container and layered pictures in it.
+			View imageContainer = friendView
+					.findViewById(R.id.view_friend_picture);
+			ImageView bottomImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_bottom);
+			ImageView topImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_top);
+
+			// If image container is visible on screen, do animation.
+			Rect visibleRect = new Rect();
+			if (imageContainer.getLocalVisibleRect(visibleRect)) {
+				// Update ImageView's bitmap with one received.
+				AnimationSet inAnimation = new AnimationSet(false);
+				inAnimation.addAnimation(new AlphaAnimation(0, 1));
+				inAnimation.addAnimation(new ScaleAnimation(2, 1, 2, 1));
+				inAnimation.setDuration(700);
+				topImage.setAnimation(inAnimation);
+
+				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+				outAnimation.setFillAfter(true);
+				outAnimation.setDuration(700);
+				bottomImage.startAnimation(outAnimation);
+			} else {
+				bottomImage.setAlpha(0);
+			}
+			// Round image corners.
+			Bitmap rounded = BitmapUtils.roundBitmap(bitmap,
+					PICTURE_ROUND_RADIUS);
+			topImage.setImageBitmap(rounded);
+		}
+	}
+
+	/**
+	 * Request for handling profile picture loading.
+	 */
+	private final class FBBitmapRequest extends Request {
+
+		private FBUser fbUser;
+		private FBBitmap fbBitmap;
+
+		public FBBitmapRequest(Object key, FBUser fbUser, FBBitmap fbBitmap) {
+			super(key);
+			this.fbUser = fbUser;
+			this.fbBitmap = fbBitmap;
 		}
 
 		@Override
 		public void run() {
-			while (waitingList.size() > 0) {
-				FBBitmap bitmap = waitingList.remove(0);
-				update(bitmap);
+			try {
+				fbBitmap.load();
+				runOnUiThread(new UIRunnable());
+			} catch (Exception ex) {
 			}
 		}
 
-		public void update(FBBitmap bitmap) {
-			// Search for corresponding friend item View.
-			View friendItemsView = findViewById(R.id.friends_list);
-			View friendView = friendItemsView.findViewWithTag(bitmap.getId());
+		@Override
+		public void stop() {
+		}
 
-			// If we found one.
-			if (friendView != null) {
-				// Search picture Container and layered pictures in it.
-				View imageContainer = friendView
-						.findViewById(R.id.view_friend_picture);
-				ImageView bottomImage = (ImageView) imageContainer
-						.findViewById(R.id.view_layered_image_bottom);
-				ImageView topImage = (ImageView) imageContainer
-						.findViewById(R.id.view_layered_image_top);
-
-				// If image container is visible on screen, do animation.
-				Rect visibleRect = new Rect();
-				if (imageContainer.getLocalVisibleRect(visibleRect)) {
-					// Update ImageView's bitmap with one received.
-					AnimationSet inAnimation = new AnimationSet(false);
-					inAnimation.addAnimation(new AlphaAnimation(0, 1));
-					inAnimation.addAnimation(new ScaleAnimation(2, 1, 2, 1));
-					inAnimation.setDuration(700);
-					topImage.setAnimation(inAnimation);
-
-					AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-					outAnimation.setFillAfter(true);
-					outAnimation.setDuration(700);
-					bottomImage.startAnimation(outAnimation);
-				} else {
-					bottomImage.setAlpha(0);
-				}
-				// Round image corners.
-				Bitmap rounded = BitmapUtils.roundBitmap(bitmap.getBitmap(),
-						PICTURE_ROUND_RADIUS);
-				topImage.setImageBitmap(rounded);
-
+		private class UIRunnable implements Runnable {
+			@Override
+			public void run() {
+				updateProfilePicture(fbUser, fbBitmap.getBitmap());
 			}
 		}
 	}
 
 	/**
-	 * Observer for handling "me/friends" request.
+	 * Request for handling "me/friends" loading.
 	 */
-	private final class FBFriendListObserver implements
-			FBObserver<Vector<FBUser>>, Runnable {
+	private final class FBFriendListRequest extends Request {
 
-		private Vector<FBUser> friendList;
-
-		@Override
-		public void onComplete(Vector<FBUser> friendList) {
-			this.friendList = friendList;
-			runOnUiThread(this);
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// On error only hide progress dialog.
-			hideProgressDialog();
+		public FBFriendListRequest(Object key) {
+			super(key);
 		}
 
 		@Override
 		public void run() {
-			// LinearLayout which is inside ScrollView.
-			LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
-
-			for (FBUser friend : friendList) {
-				String userId = friend.getId();
-				String name = friend.getName();
-				String pictureUrl = friend.getPicture();
-
-				// Create default friend item view.
-				View friendItemView = createFriendItem(userId, name);
-				// Add friend item view to scrollable list.
-				scrollView.addView(friendItemView);
-
-				fbBitmapCache.load(pictureUrl, userId, fbBitmapObserver);
+			try {
+				fbFriendList.load();
+				runOnUiThread(new UIRunnable());
+			} catch (Exception ex) {
+				showAlertDialog(ex.toString());
 			}
-
 			hideProgressDialog();
+		}
+
+		@Override
+		public void stop() {
+		}
+
+		private class UIRunnable implements Runnable {
+			@Override
+			public void run() {
+				updateFriendList();
+			}
 		}
 	}
 
