@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.net.FBClient;
 import fi.harism.facebook.request.Request;
@@ -26,9 +25,6 @@ import fi.harism.facebook.request.Request;
  */
 public class MainActivity extends BaseActivity {
 
-	private FBUser fbUserMe;
-	private FBBitmap fbBitmapMe;
-
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -40,8 +36,6 @@ public class MainActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		fbUserMe = getGlobalState().getFBFactory().getUser("me");
 
 		// It's possible our application hasn't been killed.
 		if (getGlobalState().getFBClient().isAuthorized()) {
@@ -59,19 +53,19 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		// fbBitmapCache.cancel();
+		getGlobalState().getRequestQueue().removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		// fbBitmapCache.setPaused(true);
+		getGlobalState().getRequestQueue().setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		// fbBitmapCache.setPaused(false);
+		getGlobalState().getRequestQueue().setPaused(this, false);
 	}
 
 	public final void showLoginView() {
@@ -163,16 +157,17 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-		// Update user information asynchronously.
+		// Update user information asynchronously if needed.
+		FBUser fbUserMe = getGlobalState().getFBFactory().getUser("me");
 		if (fbUserMe.getLevel() == FBUser.Level.FULL) {
-			updateProfileInfo();
+			updateProfileInfo(fbUserMe);
 		} else {
-			FBUserRequest meRequest = new FBUserRequest(this);
+			FBUserRequest meRequest = new FBUserRequest(this, fbUserMe);
 			getGlobalState().getRequestQueue().addRequest(meRequest);
 		}
 	}
 
-	private void updateProfileInfo() {
+	private void updateProfileInfo(FBUser fbUserMe) {
 		TextView nameView = (TextView) findViewById(R.id.main_user_name);
 		nameView.setText(fbUserMe.getName());
 
@@ -201,17 +196,17 @@ public class MainActivity extends BaseActivity {
 			loadingView.setVisibility(View.GONE);
 		}
 
-		fbBitmapMe = getGlobalState().getFBFactory().getBitmap(
+		FBBitmap fbBitmapMe = getGlobalState().getFBFactory().getBitmap(
 				fbUserMe.getPicture());
 		if (fbBitmapMe.getBitmap() != null) {
-			updateProfilePicture();
+			updateProfilePicture(fbBitmapMe);
 		} else {
-			FBBitmapRequest request = new FBBitmapRequest(this);
+			FBBitmapRequest request = new FBBitmapRequest(this, fbBitmapMe);
 			getGlobalState().getRequestQueue().addRequest(request);
 		}
 	}
 
-	private void updateProfilePicture() {
+	private void updateProfilePicture(FBBitmap fbBitmapMe) {
 		View imageContainer = findViewById(R.id.main_user_image);
 		ImageView bottomImage = (ImageView) imageContainer
 				.findViewById(R.id.view_layered_image_bottom);
@@ -240,14 +235,17 @@ public class MainActivity extends BaseActivity {
 	 */
 	private final class FBBitmapRequest extends Request {
 
-		public FBBitmapRequest(Object key) {
+		private FBBitmap fbBitmap;
+
+		public FBBitmapRequest(Object key, FBBitmap fbBitmap) {
 			super(key);
+			this.fbBitmap = fbBitmap;
 		}
 
 		@Override
 		public void run() {
 			try {
-				fbBitmapMe.load();
+				fbBitmap.load();
 				runOnUiThread(new UIRunnable());
 			} catch (Exception ex) {
 			}
@@ -260,7 +258,7 @@ public class MainActivity extends BaseActivity {
 		private class UIRunnable implements Runnable {
 			@Override
 			public void run() {
-				updateProfilePicture();
+				updateProfilePicture(fbBitmap);
 			}
 		}
 	}
@@ -270,14 +268,17 @@ public class MainActivity extends BaseActivity {
 	 */
 	private final class FBUserRequest extends Request {
 
-		public FBUserRequest(Object key) {
+		private FBUser fbUser;
+
+		public FBUserRequest(Object key, FBUser fbUser) {
 			super(key);
+			this.fbUser = fbUser;
 		}
 
 		@Override
 		public void run() {
 			try {
-				fbUserMe.load(FBUser.Level.FULL);
+				fbUser.load(FBUser.Level.FULL);
 				runOnUiThread(new UIRunnable());
 			} catch (Exception ex) {
 				showAlertDialog(ex.toString());
@@ -291,7 +292,7 @@ public class MainActivity extends BaseActivity {
 		private class UIRunnable implements Runnable {
 			@Override
 			public void run() {
-				updateProfileInfo();
+				updateProfileInfo(fbUser);
 			}
 		}
 

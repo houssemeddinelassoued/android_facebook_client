@@ -33,8 +33,6 @@ import fi.harism.facebook.util.StringUtils;
  */
 public class FriendsActivity extends BaseActivity {
 
-	private FBFriendList fbFriendList;
-
 	// Default profile picture.
 	private Bitmap defaultPicture = null;
 	// Radius value for rounding profile images.
@@ -51,9 +49,6 @@ public class FriendsActivity extends BaseActivity {
 		setContentView(R.layout.activity_friends);
 
 		spanClickObserver = new SpanClickObserver(this);
-		// fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
-		fbFriendList = getGlobalState().getFBFactory().getFriendList();
-		// fbBitmapObserver = new FBBitmapObserver();
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -65,14 +60,16 @@ public class FriendsActivity extends BaseActivity {
 		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
 				PICTURE_ROUND_RADIUS);
 
-		// Trigger asynchronous friend list loading.
-		// fbUserCache.getFriends(new FBFriendListObserver());
+		// Trigger asynchronous friend list loading if needed.
+		FBFriendList fbFriendList = getGlobalState().getFBFactory()
+				.getFriendList();
 		if (fbFriendList.getFriends().size() > 0) {
-			updateFriendList();
+			updateFriendList(fbFriendList);
 		} else {
 			// Show progress dialog.
 			showProgressDialog();
-			FBFriendListRequest request = new FBFriendListRequest(this);
+			FBFriendListRequest request = new FBFriendListRequest(this,
+					fbFriendList);
 			getGlobalState().getRequestQueue().addRequest(request);
 		}
 	}
@@ -80,22 +77,19 @@ public class FriendsActivity extends BaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		// fbUserCache.cancel();
-		// fbBitmapCache.cancel();
+		getGlobalState().getRequestQueue().removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		// fbUserCache.pause();
-		// fbBitmapCache.setPaused(true);
+		getGlobalState().getRequestQueue().setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		// fbUserCache.resume();
-		// fbBitmapCache.setPaused(false);
+		getGlobalState().getRequestQueue().setPaused(this, false);
 	}
 
 	/**
@@ -176,7 +170,7 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Updates friend list to screen.
 	 */
-	private final void updateFriendList() {
+	private final void updateFriendList(FBFriendList fbFriendList) {
 		// LinearLayout which is inside ScrollView.
 		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
 		scrollView.removeAllViews();
@@ -282,8 +276,11 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final class FBFriendListRequest extends Request {
 
-		public FBFriendListRequest(Object key) {
+		private FBFriendList fbFriendList;
+
+		public FBFriendListRequest(Object key, FBFriendList fbFriendList) {
 			super(key);
+			this.fbFriendList = fbFriendList;
 		}
 
 		@Override
@@ -304,7 +301,7 @@ public class FriendsActivity extends BaseActivity {
 		private class UIRunnable implements Runnable {
 			@Override
 			public void run() {
-				updateFriendList();
+				updateFriendList(fbFriendList);
 			}
 		}
 	}
