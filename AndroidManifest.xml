@@ -8,13 +8,14 @@
     <application android:icon="@drawable/application_icon"
                  android:label="@string/app_name"
                  android:name="GlobalStateImpl" >
-        <activity android:name="MainActivity"
+        <activity android:name="LoginActivity"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="MainActivity" />
         <activity android:name="FriendsActivity" />
         <activity android:name="NewsFeedActivity" />
         <activity android:name="ProfileFeedActivity" />

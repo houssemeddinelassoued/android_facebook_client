@@ -26,64 +26,10 @@ import fi.harism.facebook.request.Request;
 public class MainActivity extends BaseActivity {
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		getGlobalState().getFBClient().authorizeCallback(requestCode,
-				resultCode, data);
-	}
-
-	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-		// It's possible our application hasn't been killed.
-		if (getGlobalState().getFBClient().isAuthorized()) {
-			showMainView();
-		} else {
-			showLoginView();
-		}
-	}
-
-	@Override
-	public final Dialog onCreateDialog(int id) {
-		return onCreateDialog(id, null);
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		getGlobalState().getRequestQueue().removeRequests(this);
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-		getGlobalState().getRequestQueue().setPaused(this, true);
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		getGlobalState().getRequestQueue().setPaused(this, false);
-	}
-
-	public final void showLoginView() {
-		setContentView(R.layout.activity_login);
-
-		final Activity self = this;
-		// Add onClickListener to 'login' button.
-		View loginButton = findViewById(R.id.login_button_login);
-		loginButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				LoginObserver loginObserver = new LoginObserver();
-				getGlobalState().getFBClient().authorize(self, loginObserver);
-			}
-		});
-	}
-
-	public final void showMainView() {
 		setContentView(R.layout.activity_main);
 		final Activity self = this;
 
@@ -165,6 +111,29 @@ public class MainActivity extends BaseActivity {
 			FBUserRequest meRequest = new FBUserRequest(this, fbUserMe);
 			getGlobalState().getRequestQueue().addRequest(meRequest);
 		}
+	}
+
+	@Override
+	public final Dialog onCreateDialog(int id) {
+		return onCreateDialog(id, null);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		getGlobalState().getRequestQueue().removeRequests(this);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		getGlobalState().getRequestQueue().setPaused(this, true);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		getGlobalState().getRequestQueue().setPaused(this, false);
 	}
 
 	private void updateProfileInfo(FBUser fbUserMe) {
@@ -299,30 +268,6 @@ public class MainActivity extends BaseActivity {
 	}
 
 	/**
-	 * LoginObserver observer for Facebook authentication procedure.
-	 */
-	private final class LoginObserver implements FBClient.LoginObserver {
-		@Override
-		public void onCancel() {
-			// We are not interested in doing anything if user cancels Facebook
-			// authorization dialog. Let them click 'login' again or close the
-			// application.
-		}
-
-		@Override
-		public void onComplete() {
-			// On successful login switch to main view.
-			showMainView();
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// If there was an error during authorization show an alert to user.
-			showAlertDialog(ex.getLocalizedMessage());
-		}
-	}
-
-	/**
 	 * LogoutObserver for handling asynchronous logout procedure.
 	 */
 	private final class LogoutObserver implements FBClient.LogoutObserver {
@@ -332,7 +277,9 @@ public class MainActivity extends BaseActivity {
 			hideProgressDialog();
 			getGlobalState().getFBFactory().reset();
 			// Switch to login view.
-			showLoginView();
+			Intent intent = createIntent(LoginActivity.class);
+			startActivity(intent);
+			finish();
 		}
 
 		@Override
