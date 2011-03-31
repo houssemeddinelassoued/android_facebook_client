@@ -68,7 +68,7 @@ public final class RequestQueue {
 		}
 		// If there is a current Request, stop its execution at once.
 		if (currentRequest != null) {
-			currentRequest.stop();
+			currentRequest.cancel();
 			currentRequest = null;
 		}
 	}
@@ -76,18 +76,24 @@ public final class RequestQueue {
 	/**
 	 * Removes all requests from this queue.
 	 */
-	public final void removeAllRequests() {
+	public final void removeRequests() {
 		synchronized (requestList) {
 			pausedList.clear();
 			requestList.clear();
 		}
 		// If there is a current Request, stop its execution at once.
 		if (currentRequest != null) {
-			currentRequest.stop();
+			currentRequest.cancel();
 			currentRequest = null;
 		}
 	}
 
+	/**
+	 * Removes all Requests with given key from this queue. Requests are removed
+	 * quietly but if there is one being executed cancel() will be called on it.
+	 * 
+	 * @param key
+	 */
 	public final void removeRequests(Object key) {
 		synchronized (requestList) {
 			for (int i = 0; i < requestList.size();) {
@@ -99,9 +105,8 @@ public final class RequestQueue {
 				}
 			}
 			// If there is a current Request, stop its execution at once.
-			if (currentRequest != null
-					&& currentRequest.getKey() == key) {
-				currentRequest.stop();
+			if (currentRequest != null && currentRequest.getKey() == key) {
+				currentRequest.cancel();
 				currentRequest = null;
 			}
 			pausedList.remove(key);
@@ -109,6 +114,12 @@ public final class RequestQueue {
 		}
 	}
 
+	/**
+	 * Sets Requests with given key to paused state or resumes them.
+	 * 
+	 * @param key
+	 * @param paused
+	 */
 	public final void setPaused(Object key, boolean paused) {
 		if (paused == true) {
 			if (!pausedList.contains(key)) {

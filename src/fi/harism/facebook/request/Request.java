@@ -41,7 +41,11 @@ public abstract class Request implements Runnable {
 
 	@Override
 	public abstract void run();
-	public abstract void stop();
+	
+	/**
+	 * Called from RequestQueue once Request should be canceled.
+	 */
+	public abstract void cancel();
 
 	/**
 	 * Setter for Request priority value. Default priority is PRIORITY_NORMAL.
