@@ -171,7 +171,7 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Updates friend list to screen.
 	 */
-	private final void updateFriendList(FBFriendList fbFriendList) {		
+	private final void updateFriendList(FBFriendList fbFriendList) {
 		// LinearLayout which is inside ScrollView.
 		LinearLayout friendsView = (LinearLayout) findViewById(R.id.friends_list);
 		friendsView.removeAllViews();
@@ -253,11 +253,8 @@ public class FriendsActivity extends BaseActivity {
 		}
 
 		@Override
-		public void execute() {
-			try {
-				fbBitmap.load();
-			} catch (Exception ex) {
-			}
+		public void execute() throws Exception {
+			fbBitmap.load();
 		}
 
 		@Override
@@ -279,12 +276,13 @@ public class FriendsActivity extends BaseActivity {
 		}
 
 		@Override
-		public void execute() {
+		public void execute() throws Exception {
 			try {
 				fbFriendList.load();
 			} catch (Exception ex) {
 				hideProgressDialog();
 				showAlertDialog(ex.toString());
+				throw ex;
 			}
 		}
 

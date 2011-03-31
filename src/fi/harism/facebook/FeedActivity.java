@@ -1,5 +1,6 @@
 package fi.harism.facebook;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -12,24 +13,21 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
-import fi.harism.facebook.dao.FBCommentList;
-import fi.harism.facebook.dao.FBFeedItem;
-import fi.harism.facebook.dao.FBFeedList;
-import fi.harism.facebook.dao.FBObserver;
-import fi.harism.facebook.dialog.CommentsDialog;
+import fi.harism.facebook.dao.FBPost;
+import fi.harism.facebook.dao.FBFeed;
+import fi.harism.facebook.dao.FBUser;
+import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
 
 /**
- * Feed Activity for showing latest News Feed events for logged in user.
+ * Feed Activity for showing feed listings.
+ * TODO: This is a disaster.
  * 
  * @author harism
  */
-public abstract class FeedActivity extends BaseActivity {
-
-	//private FBBitmapCache fbBitmapCache;
-	private FBFeedList fbFeedList;
+public class FeedActivity extends BaseActivity {
 
 	// Default picture used as sender's profile picture.
 	private Bitmap defaultPicture = null;
@@ -46,8 +44,6 @@ public abstract class FeedActivity extends BaseActivity {
 	// Static protocol name for showing likes.
 	private static final String PROTOCOL_SHOW_LIKES = "showlikes://";
 
-	public abstract FBFeedList getFeedList();
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,57 +56,66 @@ public abstract class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		spanClickObserver = new SpanClickObserver(this);
-		//fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
-		fbFeedList = getFeedList();
+
+		TextView title = (TextView) findViewById(R.id.header);
+		title.setText(getIntent().getStringExtra(
+				"fi.harism.facebook.FeedActivity.title"));
+
+		final FBFeed fbFeed = getGlobalState().getFBFactory().getFeed(
+				getIntent().getStringExtra(
+						"fi.harism.facebook.FeedActivity.path"));
+		final Activity self = this;
 
 		View updateButton = findViewById(R.id.feed_button_update);
 		updateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				showAlertDialog("TODO: Implement me.");
+				showProgressDialog();
+				getGlobalState().getRequestQueue().removeRequests(self);
+				FBFeedRequest request = new FBFeedRequest(self, fbFeed);
+				getGlobalState().getRequestQueue().addRequest(request);
 			}
 		});
 
-		showProgressDialog();
-		fbFeedList.load(new FBFeedListObserver());
+		if (fbFeed.getPosts().size() == 0) {
+			showProgressDialog();
+			FBFeedRequest request = new FBFeedRequest(this, fbFeed);
+			getGlobalState().getRequestQueue().addRequest(request);
+		} else {
+			updateFeedView(fbFeed);
+		}
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		fbFeedList.cancel();
-		//fbBitmapCache.cancel();
+		getGlobalState().getRequestQueue().removeRequests(this);
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		fbFeedList.setPaused(true);
-		//fbBitmapCache.setPaused(true);
+		getGlobalState().getRequestQueue().setPaused(this, true);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		fbFeedList.setPaused(false);
-		//fbBitmapCache.setPaused(false);
+		getGlobalState().getRequestQueue().setPaused(this, false);
 	}
 
 	/**
-	 * Creates new feed item.
+	 * Creates new feed post.
 	 * 
-	 * @param feedItemObject
-	 *            Feed item JSONObject to be added.
+	 * @param feedItem
+	 *            Feed FBPost to be added.
 	 */
-	private View createFeedItem(FBFeedItem feedItem) {
+	private View createPostView(FBPost feedItem) {
 		String itemId = feedItem.getId();
 
 		// Create default Feed Item view.
-		View feedItemView = getLayoutInflater().inflate(R.layout.view_feed_post,
+		View feedItemView = getLayoutInflater().inflate(R.layout.view_post,
 				null);
-		// We use itemId to find this Feed Item if needed.
-		feedItemView.setTag(itemId);
 
 		// We need id of sender later on to trigger profile picture loading.
 		String fromId = feedItem.getFromId();
@@ -119,7 +124,7 @@ public abstract class FeedActivity extends BaseActivity {
 
 		// Set sender's name.
 		TextView fromView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_from_text);
+				.findViewById(R.id.view_post_from);
 		StringUtils.setTextLink(fromView, fromName, PROTOCOL_SHOW_PROFILE
 				+ fromId, spanClickObserver);
 
@@ -127,7 +132,7 @@ public abstract class FeedActivity extends BaseActivity {
 		// description to items posted.
 		String message = feedItem.getMessage();
 		TextView messageView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_message_text);
+				.findViewById(R.id.view_post_message);
 		if (message != null) {
 			StringUtils.setTextLinks(messageView, message, null);
 		} else {
@@ -138,7 +143,7 @@ public abstract class FeedActivity extends BaseActivity {
 		// for feed item.
 		String name = feedItem.getName();
 		TextView nameView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_name_text);
+				.findViewById(R.id.view_post_name);
 		if (name != null) {
 			if (feedItem.getLink() != null) {
 				StringUtils.setTextLink(nameView, name, feedItem.getLink(),
@@ -152,7 +157,7 @@ public abstract class FeedActivity extends BaseActivity {
 
 		String caption = feedItem.getCaption();
 		TextView captionView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_caption_text);
+				.findViewById(R.id.view_post_caption);
 		if (caption != null) {
 			StringUtils.setTextLinks(captionView, caption, null);
 		} else {
@@ -163,7 +168,7 @@ public abstract class FeedActivity extends BaseActivity {
 		// feed item.
 		String description = feedItem.getDescription();
 		TextView descriptionView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_description_text);
+				.findViewById(R.id.view_post_description);
 		if (description != null) {
 			StringUtils.setTextLinks(descriptionView, description, null);
 		} else {
@@ -173,18 +178,18 @@ public abstract class FeedActivity extends BaseActivity {
 		// Get created time from feed item.
 		String created = feedItem.getCreatedTime();
 		TextView detailsView = (TextView) feedItemView
-				.findViewById(R.id.feed_item_details_text);
+				.findViewById(R.id.view_post_details);
 		String details = "";
 		if (created != null) {
 			details += StringUtils.convertFBTime(created);
 			details += "  á  ";
 		}
 		int commentsSpanStart = details.length();
-		details += "Comments";
+		details += "Comments (" + feedItem.getCommentsCount() + ")";
 		int commentsSpanEnd = details.length();
 		details += "  á  ";
 		int likesSpanStart = details.length();
-		details += "Likes";
+		details += "Likes (" + feedItem.getLikesCount() + ")";
 		int likesSpanEnd = details.length();
 		SpannableString detailsString = new SpannableString(details);
 		FacebookURLSpan commentsSpan = new FacebookURLSpan(
@@ -200,101 +205,96 @@ public abstract class FeedActivity extends BaseActivity {
 		detailsView.setMovementMethod(LinkMovementMethod.getInstance());
 
 		// Set default picture as sender's picture.
-		ImageView fromPictureImage = (ImageView) feedItemView
-				.findViewById(R.id.feed_item_from_image);
-		fromPictureImage.setImageBitmap(defaultPicture);
+		View pictureContainer = feedItemView
+				.findViewById(R.id.view_post_from_picture);
+		ImageView bottomImage = (ImageView) pictureContainer
+				.findViewById(R.id.view_layered_image_bottom);
+		bottomImage.setImageBitmap(defaultPicture);
 
 		return feedItemView;
 	}
 
-	private final class FBFeedListObserver implements FBObserver<FBFeedList>,
-			Runnable {
+	private void updateFeedView(FBFeed fbFeed) {
+		LinearLayout contentView = (LinearLayout) findViewById(R.id.feed_list);
+		contentView.removeAllViews();
+		for (FBPost post : fbFeed.getPosts()) {
+			View postView = createPostView(post);
+			postView.setTag(post.getId());
 
-		private FBFeedList feedList;
-
-		@Override
-		public void onComplete(final FBFeedList feedList) {
-			this.feedList = feedList;
-			runOnUiThread(this);
-		}
-
-		@Override
-		public void onError(Exception ex) {
-			// Hide progress dialog.
-			hideProgressDialog();
-			// We don't want to see this happening but just in case.
-			showAlertDialog(ex.getLocalizedMessage());
-		}
-
-		@Override
-		public void run() {
-			// Add feed item to viewable list of items.
-			LinearLayout itemList = (LinearLayout) findViewById(R.id.feed_list);
-
-			for (FBFeedItem item : feedList) {
-				View view = createFeedItem(item);
-				itemList.addView(view);
-
-				if (item.getFromPictureUrl() != null) {
-					//fbBitmapCache.load(item.getFromPictureUrl(), item.getId(),
-					//		new FromPictureObserver());
-				}
-
-				if (item.getPictureUrl() != null) {
-					//fbBitmapCache.load(item.getPictureUrl(), item.getId(),
-					//		new FeedPictureObserver());
+			if (post.getPicture() != null) {
+				ImageView imageView = (ImageView) postView
+						.findViewById(R.id.view_post_picture);
+				FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
+						post.getPicture());
+				Bitmap bitmap = fbBitmap.getBitmap();
+				if (bitmap != null) {
+					imageView.setImageBitmap(bitmap);
+				} else {
+					PostPictureRequest request = new PostPictureRequest(this,
+							imageView, fbBitmap);
+					getGlobalState().getRequestQueue().addRequest(request);
 				}
 			}
-			
-			hideProgressDialog();
+
+			View fromPictureContainer = postView
+					.findViewById(R.id.view_post_from_picture);
+			FBUser fbUser = getGlobalState().getFBFactory().getUser(
+					post.getFromId());
+			if (fbUser.getLevel() == FBUser.Level.UNINITIALIZED) {
+				FromPictureRequest request = new FromPictureRequest(this,
+						fromPictureContainer, fbUser);
+				getGlobalState().getRequestQueue().addRequest(request);
+			} else {
+				FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
+						fbUser.getPicture());
+				Bitmap bitmap = fbBitmap.getBitmap();
+				if (bitmap != null) {
+					ImageView bottomImage = (ImageView) fromPictureContainer
+							.findViewById(R.id.view_layered_image_bottom);
+					bottomImage.setImageBitmap(null);
+					ImageView topImage = (ImageView) fromPictureContainer
+							.findViewById(R.id.view_layered_image_top);
+					topImage.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
+							PICTURE_ROUND_RADIUS));
+				} else {
+					FromPictureRequest request = new FromPictureRequest(this,
+							fromPictureContainer, fbUser);
+					getGlobalState().getRequestQueue().addRequest(request);
+				}
+			}
+
+			contentView.addView(postView);
 		}
 
 	}
 
-	/**
-	 * Private class for handling feed item picture requests.
-	 * 
-	 * @author harism
-	 */
-	private final class FeedPictureObserver implements FBObserver<FBBitmap>,
-			Runnable {
+	private final class FBFeedRequest extends RequestUI {
 
-		private FBBitmap bitmap;
+		private FBFeed fbFeed;
 
-		@Override
-		public void onComplete(final FBBitmap bitmap) {
-			this.bitmap = bitmap;
-			runOnUiThread(this);
+		public FBFeedRequest(Activity activity, FBFeed fbFeed) {
+			super(activity, activity);
+			this.fbFeed = fbFeed;
 		}
 
 		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
-		}
-
-		@Override
-		public void run() {
-			// Get feed item list view.
-			View itemList = findViewById(R.id.feed_list);
-			// Find feed item using itemId.
-			View itemView = null; //itemList.findViewWithTag(bitmap.getId());
-			// This shouldn't happen but just in case.
-			if (itemView != null) {
-				// Set image to feed item.
-				ImageView iv = (ImageView) itemView
-						.findViewById(R.id.feed_item_picture_image);
-				
-				Rect r = new Rect();
-				if (itemView.getLocalVisibleRect(r)) {
-					AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-					inAnimation.setDuration(700);
-					iv.setAnimation(inAnimation);
-				}
-				
-				iv.setImageBitmap(bitmap.getBitmap());
-				iv.setVisibility(View.VISIBLE);
+		public void execute() {
+			try {
+				fbFeed.load();
+			} catch (Exception ex) {
+				// Hide progress dialog.
+				hideProgressDialog();
+				// We don't want to see this happening but just in case.
+				showAlertDialog(ex.getLocalizedMessage());
 			}
 		}
+
+		@Override
+		public void executeUI() {
+			updateFeedView(fbFeed);
+			hideProgressDialog();
+		}
+
 	}
 
 	/**
@@ -302,35 +302,87 @@ public abstract class FeedActivity extends BaseActivity {
 	 * 
 	 * @author harism
 	 */
-	private final class FromPictureObserver implements FBObserver<FBBitmap>,
-			Runnable {
+	private final class FromPictureRequest extends RequestUI {
 
+		private View imageContainer;
+		private FBUser fbUser;
+		private FBBitmap fbBitmap;
+
+		public FromPictureRequest(Activity activity, View imageContainer,
+				FBUser fbUser) {
+			super(activity, activity);
+			this.imageContainer = imageContainer;
+			this.fbUser = fbUser;
+		}
+
+		@Override
+		public void execute() throws Exception {
+			fbUser.load(getGlobalState().getFBClient(), FBUser.Level.DEFAULT);
+			fbBitmap = getGlobalState().getFBFactory().getBitmap(
+					fbUser.getPicture());
+			fbBitmap.load();
+		}
+
+		@Override
+		public void executeUI() {
+			ImageView bottomImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_bottom);
+			ImageView topImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_top);
+
+			// If image container is visible on screen, do animation.
+			Rect visibleRect = new Rect();
+			if (imageContainer.getLocalVisibleRect(visibleRect)) {
+				// Update ImageView's bitmap with one received.
+				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+				inAnimation.setDuration(700);
+				topImage.setAnimation(inAnimation);
+
+				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+				outAnimation.setFillAfter(true);
+				outAnimation.setDuration(700);
+				bottomImage.startAnimation(outAnimation);
+			} else {
+				bottomImage.setAlpha(0);
+			}
+			// Round image corners.
+			Bitmap rounded = BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
+					PICTURE_ROUND_RADIUS);
+			topImage.setImageBitmap(rounded);
+		}
+	}
+
+	/**
+	 * Private class for handling feed post picture requests.
+	 * 
+	 * @author harism
+	 */
+	private final class PostPictureRequest extends RequestUI {
+
+		private ImageView imageView;
 		private FBBitmap bitmap;
 
-		@Override
-		public void onComplete(final FBBitmap bitmap) {
+		public PostPictureRequest(Activity activity, ImageView imageView,
+				FBBitmap bitmap) {
+			super(activity, activity);
+			this.imageView = imageView;
 			this.bitmap = bitmap;
-			runOnUiThread(this);
 		}
 
 		@Override
-		public void onError(Exception ex) {
-			// We don't care about errors.
+		public void execute() throws Exception {
+			bitmap.load();
 		}
 
 		@Override
-		public void run() {
-			// Get feed item list view.
-			View itemList = findViewById(R.id.feed_list);
-			// Find our item view using itemId.
-			View itemView = null; // itemList.findViewWithTag(bitmap.getId());
-			// This shouldn't happen but just in case.
-			if (itemView != null) {
-				// Set image to feed item view.
-				ImageView iv = (ImageView) itemView
-						.findViewById(R.id.feed_item_from_image);
-				iv.setImageBitmap(BitmapUtils.roundBitmap(bitmap.getBitmap(),
-						PICTURE_ROUND_RADIUS));
+		public void executeUI() {
+			imageView.setImageBitmap(bitmap.getBitmap());
+			// TODO: Image size is (0, 0) and animation never takes place.
+			Rect r = new Rect();
+			if (imageView.getLocalVisibleRect(r)) {
+				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+				inAnimation.setDuration(700);
+				imageView.startAnimation(inAnimation);
 			}
 		}
 	}
@@ -353,26 +405,7 @@ public abstract class FeedActivity extends BaseActivity {
 				showAlertDialog(url);
 				return true;
 			} else if (url.startsWith(PROTOCOL_SHOW_COMMENTS)) {
-				showProgressDialog();
-				String itemId = url.substring(PROTOCOL_SHOW_COMMENTS.length());
-				FBCommentList commentList = getGlobalState().getFBFactory()
-						.getCommentList(itemId);
-				commentList.load(new FBObserver<FBCommentList>() {
-					@Override
-					public void onComplete(final FBCommentList comments) {
-						hideProgressDialog();
-						runOnUiThread(new Runnable() {
-							public void run() {
-								new CommentsDialog(activity, comments).show();
-							}
-						});
-					}
-
-					@Override
-					public void onError(Exception error) {
-						hideProgressDialog();
-					}
-				});
+				showAlertDialog(url);
 				return true;
 			} else if (url.startsWith(PROTOCOL_SHOW_LIKES)) {
 				showAlertDialog(url);

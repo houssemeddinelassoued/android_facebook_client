@@ -45,7 +45,7 @@ public class FBFriendList {
 			
 			FBUser user = userMap.get(userObj.getString("uid"));
 			if (user == null) {
-				user = new FBUser(fbClient, userObj.getString("uid"));
+				user = new FBUser(userObj.getString("uid"));
 			}
 			
 			user.name = userObj.getString("name");

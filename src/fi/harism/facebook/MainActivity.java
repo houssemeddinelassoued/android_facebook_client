@@ -57,7 +57,10 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
-				Intent i = createIntent(NewsFeedActivity.class);
+				Intent i = createIntent(FeedActivity.class);
+				i.putExtra("fi.harism.facebook.FeedActivity.path", "me/home");
+				i.putExtra("fi.harism.facebook.FeedActivity.title",
+						getResources().getString(R.string.feed_news_text));
 				startActivity(i);
 			}
 		});
@@ -68,7 +71,10 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
-				Intent i = createIntent(ProfileFeedActivity.class);
+				Intent i = createIntent(FeedActivity.class);
+				i.putExtra("fi.harism.facebook.FeedActivity.path", "me/feed");
+				i.putExtra("fi.harism.facebook.FeedActivity.title",
+						getResources().getString(R.string.feed_profile_text));
 				startActivity(i);
 			}
 		});
@@ -212,12 +218,8 @@ public class MainActivity extends BaseActivity {
 		}
 
 		@Override
-		public void execute() {
-			try {
-				fbBitmap.load();
-			} catch (Exception ex) {
-				// Let image request fail quietly if that's the case.
-			}
+		public void execute() throws Exception {
+			fbBitmap.load();
 		}
 
 		@Override
@@ -239,12 +241,13 @@ public class MainActivity extends BaseActivity {
 		}
 
 		@Override
-		public void execute() {
+		public void execute() throws Exception {
 			try {
-				fbUser.load(FBUser.Level.FULL);
+				fbUser.load(getGlobalState().getFBClient(), FBUser.Level.FULL);
 			} catch (Exception ex) {
-				// TODO: This is rather disastrous actually.
+				// TODO: This is rather disastrous situation actually.
 				showAlertDialog(ex.toString());
+				throw ex;
 			}
 		}
 

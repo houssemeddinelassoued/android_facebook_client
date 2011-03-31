@@ -2,14 +2,22 @@ package fi.harism.facebook.dao;
 
 public class FBComment {
 	
-	private String fromName;
-	private String message;
-	private String createdTime;
+	private String id;
+	String fromId;
+	String fromName;
+	String message;
+	String createdTime;
 	
-	public FBComment(String fromName, String message, String createdTime) {
-		this.fromName = fromName;
-		this.message = message;
-		this.createdTime = createdTime;
+	FBComment(String id) {
+		this.id = id;
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
+	public String getFromId() {
+		return fromId;
 	}
 	
 	public String getFromName() {

@@ -17,6 +17,7 @@ public class FBChat {
 		this.fbStorage = fbStorage;
 		this.observer = observer;
 		chatObserver = new FBChatObserver();
+		fbStorage.chatHandler.addObserver(chatObserver);
 	}
 
 	public void onDestroy() {
@@ -41,7 +42,6 @@ public class FBChat {
 		String sessionKey = split[1];
 		String sessionSecret = secret.replace("\"", "");
 
-		fbStorage.chatHandler.addObserver(chatObserver);
 		fbStorage.chatHandler.connect(sessionKey, sessionSecret);
 	}
 
@@ -117,7 +117,7 @@ public class FBChat {
 
 			FBUser u = fbStorage.userMap.get(id);
 			if (u == null) {
-				u = new FBUser(fbStorage.fbClient, id);
+				u = new FBUser(id);
 				fbStorage.userMap.put(id, u);
 			}
 

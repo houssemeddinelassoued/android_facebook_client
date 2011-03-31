@@ -2,6 +2,7 @@ package fi.harism.facebook;
 
 import java.util.Vector;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -16,14 +17,18 @@ import android.widget.TextView;
 
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBChat;
-import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.dao.FBUser;
+import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 
+/**
+ * TODO: This is a disaster at the moment.
+ * 
+ * @author harism
+ */
 public class ChatActivity extends BaseActivity implements FBChat.Observer {
 
 	private FBChat fbChat;
-	// private FBBitmapCache fbBitmapCache;
 	private Bitmap defaultPicture;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +60,6 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			}
 		});
 
-		// fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		Bitmap bitmap = getGlobalState().getDefaultPicture();
 		defaultPicture = BitmapUtils.roundBitmap(bitmap, 7);
 
@@ -130,84 +134,109 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		if (v != null && user.getPresence() == FBUser.Presence.GONE) {
 			list.removeView(v);
 		} else if (v != null) {
-			// Update user presence somehow.
+			// TODO: Update user presence somehow.
 		} else {
 			v = getLayoutInflater().inflate(R.layout.view_friend, null);
 			TextView tv = (TextView) v.findViewById(R.id.view_friend_name);
 			tv.setText(user.getName());
-
-			// Search picture Container and set default profile picture into it.
-			View imageContainer = v.findViewById(R.id.view_friend_picture);
-			ImageView bottomView = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_bottom);
-			bottomView.setImageBitmap(defaultPicture);
 
 			v.setTag(user.getId());
 			v.setTag(R.id.view_storage, user);
 			v.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View item) {
+					FBUser fbUser = (FBUser) item.getTag(R.id.view_storage);
 					Intent i = createIntent(ChatSessionActivity.class);
-					i.putExtra("fi.harism.facebook.ChatSessionActivity",
-							(FBUser) item.getTag(R.id.view_storage));
+					i.putExtra("fi.harism.facebook.ChatSessionActivity.user",
+							fbUser);
 					startActivity(i);
 				}
 			});
 
 			list.addView(v);
 
-			if (user.getPicture() != null) {
-				// fbBitmapCache.load(user.getPicture(), user.getId(),
-				// new FBBitmapObserver());
+			// Search picture Container and set default profile picture into it.
+			View imageContainer = v.findViewById(R.id.view_friend_picture);
+			ImageView bottomView = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_bottom);
+
+			if (user.getLevel() != FBUser.Level.UNINITIALIZED) {
+				TextView nameView = (TextView) v
+						.findViewById(R.id.view_friend_name);
+				nameView.setText(user.getName());
+
+				FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
+						user.getPicture());
+				Bitmap bitmap = fbBitmap.getBitmap();
+				if (bitmap != null) {
+					ImageView topView = (ImageView) imageContainer
+							.findViewById(R.id.view_layered_image_top);
+					bottomView.setImageBitmap(null);
+					topView.setImageBitmap(bitmap);
+				} else {
+					bottomView.setImageBitmap(defaultPicture);
+					FBBitmapRequest request = new FBBitmapRequest(this, v, user);
+					getGlobalState().getRequestQueue().addRequest(request);
+				}
+			} else {
+				bottomView.setImageBitmap(defaultPicture);
+				FBBitmapRequest request = new FBBitmapRequest(this, v, user);
+				getGlobalState().getRequestQueue().addRequest(request);
 			}
 		}
 	}
 
-	private class FBBitmapObserver implements FBObserver<FBBitmap> {
+	private class FBBitmapRequest extends RequestUI {
 
-		@Override
-		public void onComplete(final FBBitmap bitmap) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
-					View v = null; // list.findViewWithTag(bitmap.getId());
-					if (v != null) {
-						// Search picture Container and set profile picture into
-						// it.
-						View imageContainer = v
-								.findViewById(R.id.view_friend_picture);
-						ImageView topImage = (ImageView) imageContainer
-								.findViewById(R.id.view_layered_image_top);
-						ImageView bottomImage = (ImageView) imageContainer
-								.findViewById(R.id.view_layered_image_bottom);
+		private View friendView;
+		private FBUser fbUser;
+		private FBBitmap fbBitmap;
 
-						Rect r = new Rect();
-						if (imageContainer.getLocalVisibleRect(r)) {
-							AlphaAnimation inAnimation = new AlphaAnimation(0,
-									1);
-							AlphaAnimation outAnimation = new AlphaAnimation(1,
-									0);
-							inAnimation.setDuration(700);
-							outAnimation.setDuration(700);
-							outAnimation.setFillAfter(true);
-
-							topImage.setAnimation(inAnimation);
-							bottomImage.startAnimation(outAnimation);
-						} else {
-							bottomImage.setAlpha(0);
-						}
-
-						topImage.setImageBitmap(BitmapUtils.roundBitmap(
-								bitmap.getBitmap(), 7));
-					}
-				}
-			});
+		public FBBitmapRequest(Activity activity, View friendView, FBUser fbUser) {
+			super(activity, activity);
+			this.friendView = friendView;
+			this.fbUser = fbUser;
 		}
 
 		@Override
-		public void onError(Exception error) {
+		public void execute() throws Exception {
+			fbUser.load(getGlobalState().getFBClient(), FBUser.Level.DEFAULT);
+			fbBitmap = getGlobalState().getFBFactory().getBitmap(
+					fbUser.getPicture());
+			fbBitmap.load();
 		}
 
+		@Override
+		public void executeUI() {
+			TextView nameView = (TextView) friendView
+					.findViewById(R.id.view_friend_name);
+			nameView.setText(fbUser.getName());
+
+			// Search picture Container and set default profile picture into it.
+			View imageContainer = friendView
+					.findViewById(R.id.view_friend_picture);
+			ImageView topImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_top);
+			ImageView bottomImage = (ImageView) imageContainer
+					.findViewById(R.id.view_layered_image_bottom);
+
+			Rect r = new Rect();
+			if (imageContainer.getLocalVisibleRect(r)) {
+				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+				inAnimation.setDuration(700);
+				outAnimation.setDuration(700);
+				outAnimation.setFillAfter(true);
+
+				topImage.setAnimation(inAnimation);
+				bottomImage.startAnimation(outAnimation);
+			} else {
+				bottomImage.setAlpha(0);
+			}
+
+			topImage.setImageBitmap(BitmapUtils.roundBitmap(
+					fbBitmap.getBitmap(), 7));
+		}
 	}
 
 }

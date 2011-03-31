@@ -9,10 +9,11 @@
 	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" >
-		<ImageView
+		<include
+			layout="@layout/view_layered_image"
 			android:layout_width="40dp"
 			android:layout_height="40dp"
-			android:id="@+id/feed_item_from_image" />
+			android:id="@+id/view_post_from_picture" />
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
@@ -23,12 +24,12 @@
 				style="@style/contentTextBold"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:id="@+id/feed_item_from_text" />
+				android:id="@+id/view_post_from" />
 			<TextView
 				style="@style/contentText"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:id="@+id/feed_item_message_text" />				
+				android:id="@+id/view_post_message" />				
 		</LinearLayout>
 	</LinearLayout>
 	
@@ -52,8 +53,7 @@
 				<ImageView
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:visibility="gone"
-					android:id="@+id/feed_item_picture_image" />
+					android:id="@+id/view_post_picture" />
 				<LinearLayout
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
@@ -64,24 +64,24 @@
 						style="@style/contentTextBold"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:id="@+id/feed_item_name_text" />
+						android:id="@+id/view_post_name" />
 					<TextView
 						style="@style/contentText"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:id="@+id/feed_item_caption_text" />
+						android:id="@+id/view_post_caption" />
 				</LinearLayout>
 			</LinearLayout>
 			<TextView
 				style="@style/contentText"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:id="@+id/feed_item_description_text" />
+				android:id="@+id/view_post_description" />
 			<TextView
 				style="@style/contentTextSmall"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:id="@+id/feed_item_details_text" />
+				android:id="@+id/view_post_details" />
 		</LinearLayout>
 	</LinearLayout>
 	

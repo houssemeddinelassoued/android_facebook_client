@@ -15,18 +15,13 @@ public class FBFactory {
 		fbStorage.reset();
 	}
 
-	public FBCommentList getCommentList(String itemId) {
-		return new FBCommentList(fbStorage, itemId);
-	}
-
-	public FBFeedList getNewsFeed() {
-		return new FBFeedList(fbStorage, FBFeedList.NEWS_FEED,
-				fbStorage.newsFeedList);
-	}
-
-	public FBFeedList getProfileFeed() {
-		return new FBFeedList(fbStorage, FBFeedList.PROFILE_FEED,
-				fbStorage.profileFeedList);
+	public FBFeed getFeed(String path) {
+		FBFeed feed = fbStorage.feedMap.get(path);
+		if (feed == null) {
+			feed = new FBFeed(fbStorage.fbClient, path);
+			fbStorage.feedMap.put(path, feed);
+		}
+		return feed;
 	}
 
 	public FBBitmap getBitmap(String url) {
@@ -40,7 +35,8 @@ public class FBFactory {
 	public FBUser getUser(String id) {
 		FBUser user = fbStorage.userMap.get(id);
 		if (user == null) {
-			user = new FBUser(fbStorage.fbClient, id);
+			user = new FBUser(id);
+			fbStorage.userMap.put(id, user);
 		}
 		return user;
 	}

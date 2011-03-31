@@ -2,8 +2,6 @@ package fi.harism.facebook.dialog;
 
 import fi.harism.facebook.R;
 import fi.harism.facebook.dao.FBComment;
-import fi.harism.facebook.dao.FBCommentList;
-import fi.harism.facebook.dao.FBObserver;
 import fi.harism.facebook.util.StringUtils;
 
 import android.app.Activity;
@@ -16,7 +14,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+// TODO: Implement this as an Activity instead.
+
+/*
 public class CommentsDialog extends Dialog {
+
 
 	private FBCommentList comments;
 
@@ -105,3 +107,4 @@ public class CommentsDialog extends Dialog {
 	}
 
 }
+*/

@@ -11,6 +11,11 @@ import android.widget.TextView;
 import fi.harism.facebook.dao.FBChat;
 import fi.harism.facebook.dao.FBUser;
 
+/**
+ * TODO: This is a disaster.
+ * 
+ * @author harism
+ */
 public class ChatSessionActivity extends BaseActivity implements
 		FBChat.Observer {
 
@@ -62,10 +67,11 @@ public class ChatSessionActivity extends BaseActivity implements
 		});
 
 		fbChat = getGlobalState().getFBFactory().getChat(this);
-		fbUser = (FBUser) getIntent().getSerializableExtra("fi.harism.facebook.ChatSessionActivity");
+		fbUser = (FBUser)getIntent().getSerializableExtra(
+				"fi.harism.facebook.ChatSessionActivity.user");
 		addText("Chatting with\nid=" + fbUser.getId() + "\n");
 		addText("name=" + fbUser.getName() + "\n\n");
-		
+
 		String title = getString(R.string.chat_session_title);
 		title = String.format(title, fbUser.getName());
 		TextView tv = (TextView) findViewById(R.id.chat_session_title);
@@ -79,7 +85,15 @@ public class ChatSessionActivity extends BaseActivity implements
 	}
 
 	private void connect() {
-		//fbChat.connect();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					fbChat.connect();
+				} catch (Exception ex) {
+					showAlertDialog(ex.toString());
+				}
+			}
+		}).start();
 	}
 
 	private void close() {

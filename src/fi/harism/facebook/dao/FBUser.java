@@ -12,9 +12,9 @@ import fi.harism.facebook.net.FBClient;
 
 public class FBUser implements Serializable {
 
-	private static final long serialVersionUID = 8817570826057668756L;
-
-	String id = null;
+	private static final long serialVersionUID = 1L;
+	
+	private String id = null;
 	String jid = null;
 	String name = null;
 	String picture = null;
@@ -37,12 +37,9 @@ public class FBUser implements Serializable {
 
 	Level level;
 
-	private FBClient fbClient;
-
 	private static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";
 
-	FBUser(FBClient fbClient, String id) {
-		this.fbClient = fbClient;
+	FBUser(String id) {
 		this.id = id;
 		this.presence = Presence.GONE;
 		this.level = Level.UNINITIALIZED;
@@ -96,7 +93,7 @@ public class FBUser implements Serializable {
 		return website;
 	}
 
-	public void load(Level level) throws Exception {
+	public void load(FBClient fbClient, Level level) throws Exception {
 		if (level == Level.DEFAULT) {
 			Bundle params = new Bundle();
 			params.putString("fields", "name, picture");
@@ -135,7 +132,6 @@ public class FBUser implements Serializable {
 			
 			this.level = Level.FULL;
 		}
-
 	}
 
 }
