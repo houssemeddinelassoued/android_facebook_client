@@ -31,10 +31,10 @@ public abstract class RequestUI extends Request {
 	}
 
 	/**
-	 * This method is called most likely from separate Thread. Implement this to
-	 * execute asynchronous code.
+	 * This method is called from separate Thread. Implement this to execute
+	 * asynchronous code. If Exception is thrown request execution ends at once.
 	 */
-	public abstract void execute();
+	public abstract void execute() throws Exception;
 
 	/**
 	 * This method is called always from UI thread. Implement this to update UI.
@@ -49,12 +49,17 @@ public abstract class RequestUI extends Request {
 	public boolean isCancelled() {
 		return isCancelled;
 	}
-	
+
 	@Override
 	public final void run() {
 		if (!isCancelled) {
-			execute();
-			activity.runOnUiThread(new RunnableUI());
+			try {
+				execute();
+				activity.runOnUiThread(new RunnableUI());
+			} catch (Exception ex) {
+				// We don't really care about errors but this prevents
+				// executeUI() from being called if execute fails.
+			}
 		}
 	}
 
