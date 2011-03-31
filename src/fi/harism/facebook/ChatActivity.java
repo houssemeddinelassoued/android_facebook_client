@@ -23,7 +23,7 @@ import fi.harism.facebook.util.BitmapUtils;
 public class ChatActivity extends BaseActivity implements FBChat.Observer {
 
 	private FBChat fbChat;
-	//private FBBitmapCache fbBitmapCache;
+	// private FBBitmapCache fbBitmapCache;
 	private Bitmap defaultPicture;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +55,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			}
 		});
 
-		//fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
+		// fbBitmapCache = getGlobalState().getFBFactory().getBitmapCache();
 		Bitmap bitmap = getGlobalState().getDefaultPicture();
 		defaultPicture = BitmapUtils.roundBitmap(bitmap, 7);
 
@@ -73,7 +73,15 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 	}
 
 	private void connect() {
-		//fbChat.connect();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					fbChat.connect();
+				} catch (Exception ex) {
+					showAlertDialog(ex.toString());
+				}
+			}
+		}).start();
 	}
 
 	private void close() {
@@ -149,8 +157,8 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			list.addView(v);
 
 			if (user.getPicture() != null) {
-				//fbBitmapCache.load(user.getPicture(), user.getId(),
-				//		new FBBitmapObserver());
+				// fbBitmapCache.load(user.getPicture(), user.getId(),
+				// new FBBitmapObserver());
 			}
 		}
 	}
@@ -162,7 +170,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			runOnUiThread(new Runnable() {
 				public void run() {
 					LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
-					View v = null; //list.findViewWithTag(bitmap.getId());
+					View v = null; // list.findViewWithTag(bitmap.getId());
 					if (v != null) {
 						// Search picture Container and set profile picture into
 						// it.
@@ -172,21 +180,23 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 								.findViewById(R.id.view_layered_image_top);
 						ImageView bottomImage = (ImageView) imageContainer
 								.findViewById(R.id.view_layered_image_bottom);
-						
+
 						Rect r = new Rect();
 						if (imageContainer.getLocalVisibleRect(r)) {
-							AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-							AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
+							AlphaAnimation inAnimation = new AlphaAnimation(0,
+									1);
+							AlphaAnimation outAnimation = new AlphaAnimation(1,
+									0);
 							inAnimation.setDuration(700);
 							outAnimation.setDuration(700);
 							outAnimation.setFillAfter(true);
-							
+
 							topImage.setAnimation(inAnimation);
 							bottomImage.startAnimation(outAnimation);
 						} else {
 							bottomImage.setAlpha(0);
-						}						
-						
+						}
+
 						topImage.setImageBitmap(BitmapUtils.roundBitmap(
 								bitmap.getBitmap(), 7));
 					}

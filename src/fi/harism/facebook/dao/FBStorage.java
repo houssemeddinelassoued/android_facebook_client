@@ -42,7 +42,7 @@ public class FBStorage {
 		newsFeedList.clear();
 		profileFeedList.clear();
 		
-		requestQueue.removeAllRequests();
+		requestQueue.removeRequests();
 		
 		chatHandler.disconnect();
 		

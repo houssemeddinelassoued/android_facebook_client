@@ -121,7 +121,7 @@ public class FBCommentList implements Iterable<FBComment> {
 		}
 
 		@Override
-		public void stop() {
+		public void cancel() {
 			// TODO:
 		}
 

@@ -1,5 +1,6 @@
 package fi.harism.facebook;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBFriendList;
 import fi.harism.facebook.dao.FBUser;
-import fi.harism.facebook.request.Request;
+import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
@@ -170,10 +171,10 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Updates friend list to screen.
 	 */
-	private final void updateFriendList(FBFriendList fbFriendList) {
+	private final void updateFriendList(FBFriendList fbFriendList) {		
 		// LinearLayout which is inside ScrollView.
-		LinearLayout scrollView = (LinearLayout) findViewById(R.id.friends_list);
-		scrollView.removeAllViews();
+		LinearLayout friendsView = (LinearLayout) findViewById(R.id.friends_list);
+		friendsView.removeAllViews();
 
 		for (FBUser friend : fbFriendList.getFriends()) {
 			String userId = friend.getId();
@@ -181,9 +182,9 @@ public class FriendsActivity extends BaseActivity {
 			String pictureUrl = friend.getPicture();
 
 			// Create default friend item view.
-			View friendItemView = createFriendItem(userId, name);
+			View friendView = createFriendItem(userId, name);
 			// Add friend item view to scrollable list.
-			scrollView.addView(friendItemView);
+			friendsView.addView(friendView);
 
 			FBBitmap picture = getGlobalState().getFBFactory().getBitmap(
 					pictureUrl);
@@ -239,70 +240,58 @@ public class FriendsActivity extends BaseActivity {
 	/**
 	 * Request for handling profile picture loading.
 	 */
-	private final class FBBitmapRequest extends Request {
+	private final class FBBitmapRequest extends RequestUI {
 
 		private FBUser fbUser;
 		private FBBitmap fbBitmap;
 
-		public FBBitmapRequest(Object key, FBUser fbUser, FBBitmap fbBitmap) {
-			super(key);
+		public FBBitmapRequest(Activity activity, FBUser fbUser,
+				FBBitmap fbBitmap) {
+			super(activity, activity);
 			this.fbUser = fbUser;
 			this.fbBitmap = fbBitmap;
 		}
 
 		@Override
-		public void run() {
+		public void execute() {
 			try {
 				fbBitmap.load();
-				runOnUiThread(new UIRunnable());
 			} catch (Exception ex) {
 			}
 		}
 
 		@Override
-		public void stop() {
-		}
-
-		private class UIRunnable implements Runnable {
-			@Override
-			public void run() {
-				updateProfilePicture(fbUser, fbBitmap.getBitmap());
-			}
+		public void executeUI() {
+			updateProfilePicture(fbUser, fbBitmap.getBitmap());
 		}
 	}
 
 	/**
 	 * Request for handling "me/friends" loading.
 	 */
-	private final class FBFriendListRequest extends Request {
+	private final class FBFriendListRequest extends RequestUI {
 
 		private FBFriendList fbFriendList;
 
-		public FBFriendListRequest(Object key, FBFriendList fbFriendList) {
-			super(key);
+		public FBFriendListRequest(Activity activity, FBFriendList fbFriendList) {
+			super(activity, activity);
 			this.fbFriendList = fbFriendList;
 		}
 
 		@Override
-		public void run() {
+		public void execute() {
 			try {
 				fbFriendList.load();
-				runOnUiThread(new UIRunnable());
 			} catch (Exception ex) {
+				hideProgressDialog();
 				showAlertDialog(ex.toString());
 			}
-			hideProgressDialog();
 		}
 
 		@Override
-		public void stop() {
-		}
-
-		private class UIRunnable implements Runnable {
-			@Override
-			public void run() {
-				updateFriendList(fbFriendList);
-			}
+		public void executeUI() {
+			updateFriendList(fbFriendList);
+			hideProgressDialog();
 		}
 	}
 

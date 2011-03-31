@@ -15,7 +15,7 @@ import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.net.FBClient;
-import fi.harism.facebook.request.Request;
+import fi.harism.facebook.request.RequestUI;
 
 /**
  * Main Activity of this application. Once Activity is launched it starts to
@@ -202,67 +202,55 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * Class for handling profile picture request.
 	 */
-	private final class FBBitmapRequest extends Request {
+	private final class FBBitmapRequest extends RequestUI {
 
 		private FBBitmap fbBitmap;
 
-		public FBBitmapRequest(Object key, FBBitmap fbBitmap) {
-			super(key);
+		public FBBitmapRequest(Activity activity, FBBitmap fbBitmap) {
+			super(activity, activity);
 			this.fbBitmap = fbBitmap;
 		}
 
 		@Override
-		public void run() {
+		public void execute() {
 			try {
 				fbBitmap.load();
-				runOnUiThread(new UIRunnable());
 			} catch (Exception ex) {
+				// Let image request fail quietly if that's the case.
 			}
 		}
 
 		@Override
-		public void stop() {
-		}
-
-		private class UIRunnable implements Runnable {
-			@Override
-			public void run() {
-				updateProfilePicture(fbBitmap);
-			}
+		public void executeUI() {
+			updateProfilePicture(fbBitmap);
 		}
 	}
 
 	/**
 	 * Class for handling "me" request.
 	 */
-	private final class FBUserRequest extends Request {
+	private final class FBUserRequest extends RequestUI {
 
 		private FBUser fbUser;
 
-		public FBUserRequest(Object key, FBUser fbUser) {
-			super(key);
+		public FBUserRequest(Activity activity, FBUser fbUser) {
+			super(activity, activity);
 			this.fbUser = fbUser;
 		}
 
 		@Override
-		public void run() {
+		public void execute() {
 			try {
 				fbUser.load(FBUser.Level.FULL);
-				runOnUiThread(new UIRunnable());
 			} catch (Exception ex) {
+				// TODO: This is rather disastrous actually.
 				showAlertDialog(ex.toString());
 			}
 		}
 
 		@Override
-		public void stop() {
-		}
-
-		private class UIRunnable implements Runnable {
-			@Override
-			public void run() {
-				updateProfileInfo(fbUser);
-			}
+		public void executeUI() {
+			updateProfileInfo(fbUser);
 		}
 
 	}

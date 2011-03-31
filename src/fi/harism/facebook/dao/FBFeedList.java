@@ -126,7 +126,7 @@ public class FBFeedList implements Iterable<FBFeedItem> {
 		}
 
 		@Override
-		public void stop() {
+		public void cancel() {
 			// TODO:
 		}
 
