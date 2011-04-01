@@ -243,7 +243,7 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void execute() throws Exception {
 			try {
-				fbUser.load(getGlobalState().getFBClient(), FBUser.Level.FULL);
+				fbUser.load(FBUser.Level.FULL);
 			} catch (Exception ex) {
 				// TODO: This is rather disastrous situation actually.
 				showAlertDialog(ex.toString());

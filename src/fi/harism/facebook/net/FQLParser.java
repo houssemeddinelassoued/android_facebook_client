@@ -1,24 +1,46 @@
 package fi.harism.facebook.net;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
+import org.json.JSONException;
 import org.json.JSONStringer;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 /**
  * Facebook FQL query parser. Utility methods for converting response xml into
  * JSONObject.
  * 
- * Examples:
- * https://api.facebook.com/method/fql.query?query=
- * SELECT uid,name,pic_square FROM user WHERE uid=1111111
- * SELECT uuid FROM user WHERE uid=111111
+ * Examples: https://api.facebook.com/method/fql.query?query= SELECT
+ * uid,name,pic_square FROM user WHERE uid=1111111 SELECT uuid FROM user WHERE
+ * uid=111111
  * 
  * @author harism
  */
 public class FQLParser {
+
+	/**
+	 * Checks if current tag is a list.
+	 * 
+	 * @param parser
+	 * @return
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 */
+	public static boolean isList(XmlPullParser parser) throws IOException,
+			XmlPullParserException {
+		parser.require(XmlPullParser.START_TAG, null, null);
+		for (int i = 0; i < parser.getAttributeCount(); ++i) {
+			if (parser.getAttributeName(i).equals("list")) {
+				return parser.getAttributeValue(i).equals("true");
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Parses xml from given InputStream and converts it to JSON presentation.
@@ -26,9 +48,12 @@ public class FQLParser {
 	 * @param is
 	 *            Xml InputStream.
 	 * @return JSON String presentation for xml.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws XmlPullParserException
 	 */
-	public static final String parse(InputStream is) throws Exception {
+	public static final String parse(InputStream is) throws IOException,
+			JSONException, XmlPullParserException {
 
 		Reader reader = new InputStreamReader(is);
 
@@ -50,7 +75,9 @@ public class FQLParser {
 		}
 
 		stringer.key(name);
-		if (!parseArray(stringer, parser)) {
+		if (isList(parser)) {
+			parseArray(stringer, parser);
+		} else {
 			parseObject(stringer, parser);
 		}
 
@@ -63,62 +90,27 @@ public class FQLParser {
 	 * 
 	 * @param stringer
 	 * @param parser
-	 * @return
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws XmlPullParserException
 	 */
-	public static boolean parseArray(JSONStringer stringer, XmlPullParser parser)
-			throws Exception {
-		parser.require(XmlPullParser.START_TAG, null, null);
+	public static void parseArray(JSONStringer stringer, XmlPullParser parser)
+			throws IOException, JSONException, XmlPullParserException {
+		String name = parser.getName();
+		parser.require(XmlPullParser.START_TAG, null, name);
 
-		if (optValue(parser, "list").equals("true")) {
-			String name = parser.getName();
-
-			stringer.array();
-			parser.nextTag();
-			while (parser.getEventType() != XmlPullParser.END_TAG) {
-				if (!parseArray(stringer, parser)) {
-					parseObject(stringer, parser);
-				}
-				parser.nextTag();
+		stringer.array();
+		parser.nextTag();
+		while (parser.getEventType() != XmlPullParser.END_TAG) {
+			if (isList(parser)) {
+				parseArray(stringer, parser);
+			} else {
+				parseObject(stringer, parser);
 			}
-			stringer.endArray();
-
-			parser.require(XmlPullParser.END_TAG, null, name);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Parses object element (==> there is no type attribute).
-	 * 
-	 * @param stringer
-	 * @param parser
-	 * @return
-	 * @throws Exception
-	 */
-	public static boolean parseObject(JSONStringer stringer,
-			XmlPullParser parser) throws Exception {
-		parser.require(XmlPullParser.START_TAG, null, null);
-
-		if (!optValue(parser, "list").equals("true")) {
-			String name = parser.getName();
-
-			stringer.object();
 			parser.nextTag();
-
-			while (parser.getEventType() != XmlPullParser.END_TAG) {
-				parseContent(stringer, parser);
-				parser.nextTag();
-			}
-
-			stringer.endObject();
-
-			parser.require(XmlPullParser.END_TAG, null, name);
-			return true;
 		}
-
-		return false;
+		stringer.endArray();
+		parser.require(XmlPullParser.END_TAG, null, name);
 	}
 
 	/**
@@ -126,16 +118,19 @@ public class FQLParser {
 	 * 
 	 * @param stringer
 	 * @param parser
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws XmlPullParserException
 	 */
 	public static void parseContent(JSONStringer stringer, XmlPullParser parser)
-			throws Exception {
-		parser.require(XmlPullParser.START_TAG, null, null);
-
+			throws IOException, JSONException, XmlPullParserException {
 		String name = parser.getName();
+		parser.require(XmlPullParser.START_TAG, null, name);
 		stringer.key(name);
 
-		if (!parseArray(stringer, parser)) {
+		if (isList(parser)) {
+			parseArray(stringer, parser);
+		} else {
 			parser.next();
 			String text = null;
 			if (parser.getEventType() == XmlPullParser.TEXT) {
@@ -159,22 +154,28 @@ public class FQLParser {
 	}
 
 	/**
-	 * Searches for given attribute value from current tag.
+	 * Parses object element (==> there is no list="true" attribute).
 	 * 
+	 * @param stringer
 	 * @param parser
-	 * @param attribute
-	 * @return
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws XmlPullParserException
 	 */
-	public static String optValue(XmlPullParser parser, String attribute)
-			throws Exception {
-		parser.require(XmlPullParser.START_TAG, null, null);
-		for (int i = 0; i < parser.getAttributeCount(); ++i) {
-			if (parser.getAttributeName(i).equals(attribute)) {
-				return parser.getAttributeValue(i);
-			}
+	public static void parseObject(JSONStringer stringer, XmlPullParser parser)
+			throws IOException, JSONException, XmlPullParserException {
+		String name = parser.getName();
+		parser.require(XmlPullParser.START_TAG, null, name);
+
+		stringer.object();
+		parser.nextTag();
+		while (parser.getEventType() != XmlPullParser.END_TAG) {
+			parseContent(stringer, parser);
+			parser.nextTag();
 		}
-		return "";
+		stringer.endObject();
+
+		parser.require(XmlPullParser.END_TAG, null, name);
 	}
 
 }

@@ -67,8 +67,9 @@ public class ChatSessionActivity extends BaseActivity implements
 		});
 
 		fbChat = getGlobalState().getFBFactory().getChat(this);
-		fbUser = (FBUser)getIntent().getSerializableExtra(
+		String userId = getIntent().getStringExtra(
 				"fi.harism.facebook.ChatSessionActivity.user");
+		fbUser = getGlobalState().getFBFactory().getUser(userId);
 		addText("Chatting with\nid=" + fbUser.getId() + "\n");
 		addText("name=" + fbUser.getName() + "\n\n");
 

@@ -317,7 +317,7 @@ public class FeedActivity extends BaseActivity {
 
 		@Override
 		public void execute() throws Exception {
-			fbUser.load(getGlobalState().getFBClient(), FBUser.Level.DEFAULT);
+			fbUser.load(FBUser.Level.DEFAULT);
 			fbBitmap = getGlobalState().getFBFactory().getBitmap(
 					fbUser.getPicture());
 			fbBitmap.load();

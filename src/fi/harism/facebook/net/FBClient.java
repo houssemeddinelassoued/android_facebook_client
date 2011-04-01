@@ -1,11 +1,15 @@
 package fi.harism.facebook.net;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,6 +18,7 @@ import android.os.Bundle;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
+import com.facebook.android.Util;
 
 /**
  * FacebookClient class encapsulates all Facebook Android API functionality.
@@ -150,7 +155,7 @@ public class FBClient {
 	 *            Request parameters.
 	 * @return Response String.
 	 */
-	public String request(Bundle parameters) throws Exception {
+	public String request(Bundle parameters) throws IOException {
 		return facebook.request(parameters);
 	}
 
@@ -160,9 +165,11 @@ public class FBClient {
 	 * @param graphPath
 	 *            Facebook Graph API path.
 	 * @return JSON object for response.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
 	 */
-	public JSONObject request(String graphPath) throws Exception {
+	public JSONObject request(String graphPath) throws IOException,
+			JSONException {
 		return request(graphPath, null);
 	}
 
@@ -174,10 +181,11 @@ public class FBClient {
 	 * @param requestParameters
 	 *            Additional request parameters.
 	 * @return JSON object for response.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
 	 */
 	public JSONObject request(String graphPath, Bundle requestParameters)
-			throws Exception {
+			throws IOException, JSONException {
 		return request(graphPath, requestParameters, "GET");
 	}
 
@@ -191,16 +199,19 @@ public class FBClient {
 	 * @param method
 	 *            HTTP method e.g. "GET", "POST".
 	 * @return JSON Object for response.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
 	 */
 	public JSONObject request(String graphPath, Bundle requestParameters,
-			String method) throws Exception {
+			String method) throws IOException, JSONException {
 		String response = facebook
 				.request(graphPath, requestParameters, method);
 		try {
-			return com.facebook.android.Util.parseJson(response);
-		} catch (com.facebook.android.FacebookError error) {
-			throw new Exception(error.getMessage());
+			return Util.parseJson(response);
+		} catch (FacebookError error) {
+			// TODO: Handle FacebookError more properly.. Try to catch
+			// unauthorized especially.
+			throw new IOException(error.getMessage());
 		}
 	}
 
@@ -211,9 +222,13 @@ public class FBClient {
 	 * @param query
 	 *            FQL query string.
 	 * @return JSON presentation for response.
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws MalformedURLException
+	 * @throws XmlPullParserException
 	 */
-	public JSONObject requestFQL(String query) throws Exception {
+	public JSONObject requestFQL(String query) throws IOException,
+			JSONException, MalformedURLException, XmlPullParserException {
 
 		String token = URLEncoder.encode(facebook.getAccessToken());
 		query = URLEncoder.encode(query);
@@ -229,7 +244,8 @@ public class FBClient {
 
 		JSONObject error = out.optJSONObject("error");
 		if (error != null) {
-			throw new Exception("FQL error: " + error.getString("error_msg"));
+			// TODO: It might be a good idea to check different error messages.
+			throw new IOException("FQL error: " + error.getString("error_msg"));
 		}
 
 		return out;

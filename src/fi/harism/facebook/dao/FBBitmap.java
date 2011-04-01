@@ -1,28 +1,55 @@
 package fi.harism.facebook.dao;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+
+import fi.harism.facebook.util.DataCache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+/**
+ * Class for handling image loading and caching.
+ * 
+ * @author harism
+ */
 public class FBBitmap {
 
-	private FBStorage fbStorage;
+	// Internal data storage.
+	private DataCache imageCache;
+	// Url for this image.
 	private String url;
+	// Image data.
 	private byte[] bitmapData;
 
-	public FBBitmap(FBStorage fbStorage, String url) {
-		this.fbStorage = fbStorage;
+	/**
+	 * Default constructor.
+	 * 
+	 * @param imageCache
+	 *            DataCache instance.
+	 * @param url
+	 *            Url for image.
+	 */
+	FBBitmap(DataCache imageCache, String url) {
+		this.imageCache = imageCache;
 		this.url = url;
-		this.bitmapData = fbStorage.imageCache.getData(url);
+		// Set bitmapData from imageCache, will be null if not found.
+		this.bitmapData = imageCache.getData(url);
 	}
 
+	/**
+	 * Returns url for this image.
+	 */
 	public String getUrl() {
 		return url;
 	}
 
+	/**
+	 * Returns Bitmap object if image has been loaded, null otherwise.
+	 */
 	public Bitmap getBitmap() {
 		if (bitmapData != null) {
 			return BitmapFactory.decodeByteArray(bitmapData, 0,
@@ -32,7 +59,16 @@ public class FBBitmap {
 		}
 	}
 
-	public Bitmap load() throws Exception {
+	/**
+	 * Loads image from given url. If there is a image loaded already this
+	 * method will reload image anyway. Returns loaded Bitmap and stores it for
+	 * further getBitmap() calls.
+	 * 
+	 * @return Bitmap loaded.
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 */
+	public Bitmap load() throws IOException, MalformedURLException {
 		// Open InputStream for given url.
 		URL u = new URL(url);
 		InputStream is = u.openStream();
@@ -46,7 +82,7 @@ public class FBBitmap {
 		}
 
 		bitmapData = imageBuffer.toByteArray();
-		fbStorage.imageCache.setData(url, bitmapData);
+		imageCache.setData(url, bitmapData);
 
 		return BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
 	}
