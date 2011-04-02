@@ -5,13 +5,10 @@ import java.util.Vector;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.AlphaAnimation;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -20,6 +17,7 @@ import fi.harism.facebook.dao.FBChat;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
+import fi.harism.facebook.view.ProfilePictureView;
 
 /**
  * TODO: This is a disaster at the moment.
@@ -155,10 +153,9 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 
 			list.addView(v);
 
-			// Search picture Container and set default profile picture into it.
-			View imageContainer = v.findViewById(R.id.view_friend_picture);
-			ImageView bottomView = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_bottom);
+			// Set default profile picture.
+			ProfilePictureView profilePic = (ProfilePictureView) v
+					.findViewById(R.id.view_friend_picture);
 
 			if (user.getLevel() != FBUser.Level.UNINITIALIZED) {
 				TextView nameView = (TextView) v
@@ -169,17 +166,14 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 						user.getPicture());
 				Bitmap bitmap = fbBitmap.getBitmap();
 				if (bitmap != null) {
-					ImageView topView = (ImageView) imageContainer
-							.findViewById(R.id.view_layered_image_top);
-					bottomView.setImageBitmap(null);
-					topView.setImageBitmap(bitmap);
+					profilePic.setBitmap(bitmap);
 				} else {
-					bottomView.setImageBitmap(defaultPicture);
+					profilePic.setBitmap(defaultPicture);
 					FBBitmapRequest request = new FBBitmapRequest(this, v, user);
 					getGlobalState().getRequestQueue().addRequest(request);
 				}
 			} else {
-				bottomView.setImageBitmap(defaultPicture);
+				profilePic.setBitmap(defaultPicture);
 				FBBitmapRequest request = new FBBitmapRequest(this, v, user);
 				getGlobalState().getRequestQueue().addRequest(request);
 			}
@@ -213,29 +207,10 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			nameView.setText(fbUser.getName());
 
 			// Search picture Container and set default profile picture into it.
-			View imageContainer = friendView
+			ProfilePictureView profilePic = (ProfilePictureView) friendView
 					.findViewById(R.id.view_friend_picture);
-			ImageView topImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_top);
-			ImageView bottomImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_bottom);
-
-			Rect r = new Rect();
-			if (imageContainer.getLocalVisibleRect(r)) {
-				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-				inAnimation.setDuration(700);
-				outAnimation.setDuration(700);
-				outAnimation.setFillAfter(true);
-
-				topImage.setAnimation(inAnimation);
-				bottomImage.startAnimation(outAnimation);
-			} else {
-				bottomImage.setAlpha(0);
-			}
-
-			topImage.setImageBitmap(BitmapUtils.roundBitmap(
-					fbBitmap.getBitmap(), 7));
+			profilePic.setBitmap(BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
+					7));
 		}
 	}
 

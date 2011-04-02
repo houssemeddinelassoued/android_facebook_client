@@ -2,17 +2,12 @@ package fi.harism.facebook;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
@@ -22,6 +17,7 @@ import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
+import fi.harism.facebook.view.ProfilePictureView;
 
 /**
  * Friends list Activity. Once created it first loads "me/friends" from Facebook
@@ -115,12 +111,10 @@ public class FriendsActivity extends BaseActivity {
 				+ userId, spanClickObserver);
 		// nameTextView.setText(name);
 
-		// Search picture Container and set default profile picture into it.
-		View imageContainer = friendItemView
-				.findViewById(R.id.view_friend_picture);
-		ImageView bottomView = (ImageView) imageContainer
-				.findViewById(R.id.view_layered_image_bottom);
-		bottomView.setImageBitmap(defaultPicture);
+		// Set default profile picture.
+		// ProfilePictureView profilePic = (ProfilePictureView) friendItemView
+		// .findViewById(R.id.view_friend_picture);
+		// profilePic.setBitmap(defaultPicture);
 
 		// Store user id as a tag to friend item View.
 		friendItemView.setTag(userId);
@@ -186,54 +180,20 @@ public class FriendsActivity extends BaseActivity {
 			// Add friend item view to scrollable list.
 			friendsView.addView(friendView);
 
+			ProfilePictureView profilePic = (ProfilePictureView) friendView
+					.findViewById(R.id.view_friend_picture);
 			FBBitmap picture = getGlobalState().getFBFactory().getBitmap(
 					pictureUrl);
-			if (picture.getBitmap() != null) {
-				updateProfilePicture(friend, picture.getBitmap());
+			Bitmap bitmap = picture.getBitmap();
+			if (bitmap != null) {
+				profilePic.setBitmap(BitmapUtils.roundBitmap(bitmap,
+						PICTURE_ROUND_RADIUS));
 			} else {
-				FBBitmapRequest request = new FBBitmapRequest(this, friend,
+				profilePic.setBitmap(defaultPicture);
+				FBBitmapRequest request = new FBBitmapRequest(this, profilePic,
 						picture);
 				getGlobalState().getRequestQueue().addRequest(request);
 			}
-		}
-	}
-
-	private final void updateProfilePicture(FBUser user, Bitmap bitmap) {
-		// Search for corresponding friend item View.
-		View friendItemsView = findViewById(R.id.friends_list);
-		View friendView = friendItemsView.findViewWithTag(user.getId());
-
-		// If we found one.
-		if (friendView != null) {
-			// Search picture Container and layered pictures in it.
-			View imageContainer = friendView
-					.findViewById(R.id.view_friend_picture);
-			ImageView bottomImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_bottom);
-			ImageView topImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_top);
-
-			// If image container is visible on screen, do animation.
-			Rect visibleRect = new Rect();
-			if (imageContainer.getLocalVisibleRect(visibleRect)) {
-				// Update ImageView's bitmap with one received.
-				AnimationSet inAnimation = new AnimationSet(false);
-				inAnimation.addAnimation(new AlphaAnimation(0, 1));
-				inAnimation.addAnimation(new ScaleAnimation(2, 1, 2, 1));
-				inAnimation.setDuration(700);
-				topImage.setAnimation(inAnimation);
-
-				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-				outAnimation.setFillAfter(true);
-				outAnimation.setDuration(700);
-				bottomImage.startAnimation(outAnimation);
-			} else {
-				bottomImage.setAlpha(0);
-			}
-			// Round image corners.
-			Bitmap rounded = BitmapUtils.roundBitmap(bitmap,
-					PICTURE_ROUND_RADIUS);
-			topImage.setImageBitmap(rounded);
 		}
 	}
 
@@ -242,24 +202,27 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final class FBBitmapRequest extends RequestUI {
 
-		private FBUser fbUser;
+		private ProfilePictureView profilePic;
 		private FBBitmap fbBitmap;
+		private Bitmap bitmap;
 
-		public FBBitmapRequest(Activity activity, FBUser fbUser,
-				FBBitmap fbBitmap) {
+		public FBBitmapRequest(Activity activity,
+				ProfilePictureView profilePic, FBBitmap fbBitmap) {
 			super(activity, activity);
-			this.fbUser = fbUser;
+			this.profilePic = profilePic;
 			this.fbBitmap = fbBitmap;
 		}
 
 		@Override
 		public void execute() throws Exception {
 			fbBitmap.load();
+			bitmap = BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
+					PICTURE_ROUND_RADIUS);
 		}
 
 		@Override
 		public void executeUI() {
-			updateProfilePicture(fbUser, fbBitmap.getBitmap());
+			profilePic.setBitmap(bitmap);
 		}
 	}
 

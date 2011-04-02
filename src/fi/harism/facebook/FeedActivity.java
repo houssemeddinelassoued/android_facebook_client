@@ -20,10 +20,10 @@ import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
+import fi.harism.facebook.view.ProfilePictureView;
 
 /**
- * Feed Activity for showing feed listings.
- * TODO: This is a disaster.
+ * Feed Activity for showing feed listings. TODO: This is a disaster.
  * 
  * @author harism
  */
@@ -205,11 +205,9 @@ public class FeedActivity extends BaseActivity {
 		detailsView.setMovementMethod(LinkMovementMethod.getInstance());
 
 		// Set default picture as sender's picture.
-		View pictureContainer = feedItemView
+		ProfilePictureView profilePic = (ProfilePictureView) feedItemView
 				.findViewById(R.id.view_post_from_picture);
-		ImageView bottomImage = (ImageView) pictureContainer
-				.findViewById(R.id.view_layered_image_bottom);
-		bottomImage.setImageBitmap(defaultPicture);
+		profilePic.setBitmap(defaultPicture);
 
 		return feedItemView;
 	}
@@ -236,29 +234,24 @@ public class FeedActivity extends BaseActivity {
 				}
 			}
 
-			View fromPictureContainer = postView
+			ProfilePictureView profilePic = (ProfilePictureView) postView
 					.findViewById(R.id.view_post_from_picture);
 			FBUser fbUser = getGlobalState().getFBFactory().getUser(
 					post.getFromId());
 			if (fbUser.getLevel() == FBUser.Level.UNINITIALIZED) {
 				FromPictureRequest request = new FromPictureRequest(this,
-						fromPictureContainer, fbUser);
+						profilePic, fbUser);
 				getGlobalState().getRequestQueue().addRequest(request);
 			} else {
 				FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
 						fbUser.getPicture());
 				Bitmap bitmap = fbBitmap.getBitmap();
 				if (bitmap != null) {
-					ImageView bottomImage = (ImageView) fromPictureContainer
-							.findViewById(R.id.view_layered_image_bottom);
-					bottomImage.setImageBitmap(null);
-					ImageView topImage = (ImageView) fromPictureContainer
-							.findViewById(R.id.view_layered_image_top);
-					topImage.setImageBitmap(BitmapUtils.roundBitmap(bitmap,
+					profilePic.setBitmap(BitmapUtils.roundBitmap(bitmap,
 							PICTURE_ROUND_RADIUS));
 				} else {
 					FromPictureRequest request = new FromPictureRequest(this,
-							fromPictureContainer, fbUser);
+							profilePic, fbUser);
 					getGlobalState().getRequestQueue().addRequest(request);
 				}
 			}
@@ -304,14 +297,14 @@ public class FeedActivity extends BaseActivity {
 	 */
 	private final class FromPictureRequest extends RequestUI {
 
-		private View imageContainer;
+		private ProfilePictureView profilePic;
 		private FBUser fbUser;
 		private FBBitmap fbBitmap;
 
-		public FromPictureRequest(Activity activity, View imageContainer,
-				FBUser fbUser) {
+		public FromPictureRequest(Activity activity,
+				ProfilePictureView profilePic, FBUser fbUser) {
 			super(activity, activity);
-			this.imageContainer = imageContainer;
+			this.profilePic = profilePic;
 			this.fbUser = fbUser;
 		}
 
@@ -325,30 +318,9 @@ public class FeedActivity extends BaseActivity {
 
 		@Override
 		public void executeUI() {
-			ImageView bottomImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_bottom);
-			ImageView topImage = (ImageView) imageContainer
-					.findViewById(R.id.view_layered_image_top);
-
-			// If image container is visible on screen, do animation.
-			Rect visibleRect = new Rect();
-			if (imageContainer.getLocalVisibleRect(visibleRect)) {
-				// Update ImageView's bitmap with one received.
-				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-				inAnimation.setDuration(700);
-				topImage.setAnimation(inAnimation);
-
-				AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-				outAnimation.setFillAfter(true);
-				outAnimation.setDuration(700);
-				bottomImage.startAnimation(outAnimation);
-			} else {
-				bottomImage.setAlpha(0);
-			}
-			// Round image corners.
 			Bitmap rounded = BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
 					PICTURE_ROUND_RADIUS);
-			topImage.setImageBitmap(rounded);
+			profilePic.setBitmap(rounded);
 		}
 	}
 

@@ -10,12 +10,12 @@ import android.view.View;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.net.FBClient;
 import fi.harism.facebook.request.RequestUI;
+import fi.harism.facebook.view.ProfilePictureView;
 
 /**
  * Main Activity of this application. Once Activity is launched it starts to
@@ -34,11 +34,9 @@ public class MainActivity extends BaseActivity {
 		final Activity self = this;
 
 		// Set default picture as user picture.
-		View imageContainer = findViewById(R.id.main_user_image);
-		ImageView bottomImage = (ImageView) imageContainer
-				.findViewById(R.id.view_layered_image_bottom);
 		Bitmap picture = getGlobalState().getDefaultPicture();
-		bottomImage.setImageBitmap(picture);
+		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.main_profile_picture);
+		picView.setBitmap(picture);
 
 		// Add onClick listener to "Friends" button.
 		Button friendsButton = (Button) findViewById(R.id.main_button_friends);
@@ -182,27 +180,8 @@ public class MainActivity extends BaseActivity {
 	}
 
 	private void updateProfilePicture(FBBitmap fbBitmapMe) {
-		View imageContainer = findViewById(R.id.main_user_image);
-		ImageView bottomImage = (ImageView) imageContainer
-				.findViewById(R.id.view_layered_image_bottom);
-		ImageView topImage = (ImageView) imageContainer
-				.findViewById(R.id.view_layered_image_top);
-
-		Rect r = new Rect();
-		if (imageContainer.getLocalVisibleRect(r)) {
-			AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-			AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-			inAnimation.setDuration(700);
-			outAnimation.setDuration(700);
-			outAnimation.setFillAfter(true);
-
-			topImage.setAnimation(inAnimation);
-			bottomImage.startAnimation(outAnimation);
-		} else {
-			bottomImage.setAlpha(0);
-		}
-
-		topImage.setImageBitmap(fbBitmapMe.getBitmap());
+		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.main_profile_picture);
+		picView.setBitmap(fbBitmapMe.getBitmap());
 	}
 
 	/**
