@@ -20,8 +20,8 @@
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/login_button"
-			android:id="@+id/login_button_login" />
+			android:text="@string/activity_login_button"
+			android:id="@+id/activity_login_button" />
 	</LinearLayout>
 	<TextView
 		style="@style/contentContainer"
@@ -30,7 +30,7 @@
 		android:layout_below="@id/header"
 		android:layout_above="@id/footer"
 		android:gravity="center"
-		android:text="@string/login_text"
+		android:text="@string/activity_login_content"
 		android:textSize="26sp"
 		android:textColor="#000000" />
 </RelativeLayout>

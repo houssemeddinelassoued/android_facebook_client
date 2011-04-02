@@ -30,6 +30,7 @@
 		style="@style/contentText"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_marginLeft="5dp"
 		android:id="@+id/view_user_detail_content" />
 
 </LinearLayout>

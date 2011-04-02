@@ -20,7 +20,7 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_vertical"
-			android:layout_marginLeft="5dp"
+			android:layout_marginLeft="10dp"
 			android:id="@+id/activity_user_name" />
 	</LinearLayout>
 	
@@ -35,7 +35,7 @@
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/activity_user_show_wall"
+			android:text="@string/activity_user_button_wall"
 			android:id="@+id/activity_user_button_wall" />
 	</LinearLayout>
 	

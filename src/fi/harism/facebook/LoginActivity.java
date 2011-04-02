@@ -32,7 +32,7 @@ public class LoginActivity extends BaseActivity {
 		
 		final Activity self = this;
 		// Add onClickListener to 'login' button.
-		View loginButton = findViewById(R.id.login_button_login);
+		View loginButton = findViewById(R.id.activity_login_button);
 		loginButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

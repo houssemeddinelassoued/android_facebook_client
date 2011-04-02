@@ -1,11 +1,10 @@
 package fi.harism.facebook;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
@@ -23,26 +22,22 @@ import fi.harism.facebook.util.StringUtils;
 import fi.harism.facebook.view.ProfilePictureView;
 
 /**
- * Feed Activity for showing feed listings. TODO: This is a disaster.
+ * Feed Activity for showing feed listings.
  * 
  * @author harism
  */
 public class FeedActivity extends BaseActivity {
 
 	// Default picture used as sender's profile picture.
-	private Bitmap defaultPicture = null;
+	private Bitmap mDefaultPicture = null;
 	// Rounding radius for user picture.
 	// TODO: Move this value to resources instead.
 	private static final int PICTURE_ROUND_RADIUS = 7;
 
-	// Span onClick observer for profile and comments protocols.
-	private SpanClickObserver spanClickObserver = null;
+	// Span onClick observer for profile protocol.
+	private SpanClickObserver mSpanClickObserver = null;
 	// Static protocol name for showing profile.
 	private static final String PROTOCOL_SHOW_PROFILE = "showprofile://";
-	// Static protocol name for showing comments.
-	private static final String PROTOCOL_SHOW_COMMENTS = "showcomments://";
-	// Static protocol name for showing likes.
-	private static final String PROTOCOL_SHOW_LIKES = "showlikes://";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,11 +46,11 @@ public class FeedActivity extends BaseActivity {
 		setContentView(R.layout.activity_feed);
 
 		// Create default picture from resources.
-		defaultPicture = getGlobalState().getDefaultPicture();
-		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
+		mDefaultPicture = getGlobalState().getDefaultPicture();
+		mDefaultPicture = BitmapUtils.roundBitmap(mDefaultPicture,
 				PICTURE_ROUND_RADIUS);
 
-		spanClickObserver = new SpanClickObserver(this);
+		mSpanClickObserver = new SpanClickObserver();
 
 		TextView title = (TextView) findViewById(R.id.header);
 		title.setText(getIntent().getStringExtra(
@@ -66,7 +61,7 @@ public class FeedActivity extends BaseActivity {
 						"fi.harism.facebook.FeedActivity.path"));
 		final Activity self = this;
 
-		View updateButton = findViewById(R.id.feed_button_update);
+		View updateButton = findViewById(R.id.activity_feed_button_update);
 		updateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -105,33 +100,27 @@ public class FeedActivity extends BaseActivity {
 	}
 
 	/**
-	 * Creates new feed post.
-	 * 
-	 * @param feedItem
-	 *            Feed FBPost to be added.
+	 * Creates new feed post View.
 	 */
-	private View createPostView(FBPost feedItem) {
-		String itemId = feedItem.getId();
-
+	private View createPostView(FBPost post) {
 		// Create default Feed Item view.
-		View feedItemView = getLayoutInflater().inflate(R.layout.view_post,
-				null);
+		View postView = getLayoutInflater().inflate(R.layout.view_post, null);
 
 		// We need id of sender later on to trigger profile picture loading.
-		String fromId = feedItem.getFromId();
+		String fromId = post.getFromId();
 		// Get sender's name or use empty string if none found.
-		String fromName = feedItem.getFromName();
+		String fromName = post.getFromName();
 
 		// Set sender's name.
-		TextView fromView = (TextView) feedItemView
+		TextView fromView = (TextView) postView
 				.findViewById(R.id.view_post_from);
 		StringUtils.setTextLink(fromView, fromName, PROTOCOL_SHOW_PROFILE
-				+ fromId, spanClickObserver);
+				+ fromId, mSpanClickObserver);
 
 		// Get message from feed item. Message is the one user can add as a
 		// description to items posted.
-		String message = feedItem.getMessage();
-		TextView messageView = (TextView) feedItemView
+		String message = post.getMessage();
+		TextView messageView = (TextView) postView
 				.findViewById(R.id.view_post_message);
 		if (message != null) {
 			StringUtils.setTextLinks(messageView, message, null);
@@ -141,13 +130,12 @@ public class FeedActivity extends BaseActivity {
 
 		// Get name from feed item. Name is shortish description like string
 		// for feed item.
-		String name = feedItem.getName();
-		TextView nameView = (TextView) feedItemView
+		String name = post.getName();
+		TextView nameView = (TextView) postView
 				.findViewById(R.id.view_post_name);
 		if (name != null) {
-			if (feedItem.getLink() != null) {
-				StringUtils.setTextLink(nameView, name, feedItem.getLink(),
-						null);
+			if (post.getLink() != null) {
+				StringUtils.setTextLink(nameView, name, post.getLink(), null);
 			} else {
 				nameView.setText(name);
 			}
@@ -155,8 +143,8 @@ public class FeedActivity extends BaseActivity {
 			nameView.setVisibility(View.GONE);
 		}
 
-		String caption = feedItem.getCaption();
-		TextView captionView = (TextView) feedItemView
+		String caption = post.getCaption();
+		TextView captionView = (TextView) postView
 				.findViewById(R.id.view_post_caption);
 		if (caption != null) {
 			StringUtils.setTextLinks(captionView, caption, null);
@@ -166,8 +154,8 @@ public class FeedActivity extends BaseActivity {
 
 		// Get description from feed item. This is longer description for
 		// feed item.
-		String description = feedItem.getDescription();
-		TextView descriptionView = (TextView) feedItemView
+		String description = post.getDescription();
+		TextView descriptionView = (TextView) postView
 				.findViewById(R.id.view_post_description);
 		if (description != null) {
 			StringUtils.setTextLinks(descriptionView, description, null);
@@ -175,45 +163,23 @@ public class FeedActivity extends BaseActivity {
 			descriptionView.setVisibility(View.GONE);
 		}
 
-		// Get created time from feed item.
-		String created = feedItem.getCreatedTime();
-		TextView detailsView = (TextView) feedItemView
+		// Convert created time to more readable format.
+		String createdTime = post.getCreatedTime();
+		createdTime = StringUtils.convertFBTime(createdTime);
+		TextView detailsView = (TextView) postView
 				.findViewById(R.id.view_post_details);
-		String details = "";
-		if (created != null) {
-			details += StringUtils.convertFBTime(created);
-			details += "  á  ";
-		}
-		int commentsSpanStart = details.length();
-		details += "Comments (" + feedItem.getCommentsCount() + ")";
-		int commentsSpanEnd = details.length();
-		details += "  á  ";
-		int likesSpanStart = details.length();
-		details += "Likes (" + feedItem.getLikesCount() + ")";
-		int likesSpanEnd = details.length();
-		SpannableString detailsString = new SpannableString(details);
-		FacebookURLSpan commentsSpan = new FacebookURLSpan(
-				PROTOCOL_SHOW_COMMENTS + itemId);
-		commentsSpan.setObserver(spanClickObserver);
-		detailsString.setSpan(commentsSpan, commentsSpanStart, commentsSpanEnd,
-				0);
-		FacebookURLSpan likesSpan = new FacebookURLSpan(PROTOCOL_SHOW_LIKES
-				+ itemId);
-		likesSpan.setObserver(spanClickObserver);
-		detailsString.setSpan(likesSpan, likesSpanStart, likesSpanEnd, 0);
-		detailsView.setText(detailsString);
-		detailsView.setMovementMethod(LinkMovementMethod.getInstance());
+		detailsView.setText(getResources().getString(
+				R.string.activity_feed_post_details, createdTime,
+				post.getCommentsCount(), post.getLikesCount()));
 
-		// Set default picture as sender's picture.
-		ProfilePictureView profilePic = (ProfilePictureView) feedItemView
-				.findViewById(R.id.view_post_from_picture);
-		profilePic.setBitmap(defaultPicture);
-
-		return feedItemView;
+		return postView;
 	}
 
+	/**
+	 * Updates list of post views from given FBFeed.
+	 */
 	private void updateFeedView(FBFeed fbFeed) {
-		LinearLayout contentView = (LinearLayout) findViewById(R.id.feed_list);
+		LinearLayout contentView = (LinearLayout) findViewById(R.id.activity_feed_content);
 		contentView.removeAllViews();
 		for (FBPost post : fbFeed.getPosts()) {
 			View postView = createPostView(post);
@@ -239,6 +205,7 @@ public class FeedActivity extends BaseActivity {
 			FBUser fbUser = getGlobalState().getFBFactory().getUser(
 					post.getFromId());
 			if (fbUser.getLevel() == FBUser.Level.UNINITIALIZED) {
+				profilePic.setBitmap(mDefaultPicture);
 				FromPictureRequest request = new FromPictureRequest(this,
 						profilePic, fbUser);
 				getGlobalState().getRequestQueue().addRequest(request);
@@ -250,6 +217,7 @@ public class FeedActivity extends BaseActivity {
 					profilePic.setBitmap(BitmapUtils.roundBitmap(bitmap,
 							PICTURE_ROUND_RADIUS));
 				} else {
+					profilePic.setBitmap(mDefaultPicture);
 					FromPictureRequest request = new FromPictureRequest(this,
 							profilePic, fbUser);
 					getGlobalState().getRequestQueue().addRequest(request);
@@ -261,19 +229,22 @@ public class FeedActivity extends BaseActivity {
 
 	}
 
+	/**
+	 * Request for handling FBFeed loading.
+	 */
 	private final class FBFeedRequest extends RequestUI {
 
-		private FBFeed fbFeed;
+		private FBFeed mFBFeed;
 
 		public FBFeedRequest(Activity activity, FBFeed fbFeed) {
 			super(activity, activity);
-			this.fbFeed = fbFeed;
+			mFBFeed = fbFeed;
 		}
 
 		@Override
 		public void execute() {
 			try {
-				fbFeed.load();
+				mFBFeed.load();
 			} catch (Exception ex) {
 				// Hide progress dialog.
 				hideProgressDialog();
@@ -284,103 +255,91 @@ public class FeedActivity extends BaseActivity {
 
 		@Override
 		public void executeUI() {
-			updateFeedView(fbFeed);
+			updateFeedView(mFBFeed);
 			hideProgressDialog();
 		}
 
 	}
 
 	/**
-	 * Private class for handling actual profile picture requests.
-	 * 
-	 * @author harism
+	 * Private class for handling sender/from picture requests.
 	 */
 	private final class FromPictureRequest extends RequestUI {
 
-		private ProfilePictureView profilePic;
-		private FBUser fbUser;
-		private FBBitmap fbBitmap;
+		private ProfilePictureView mProfilePic;
+		private FBUser mFBUser;
+		private FBBitmap mFBBitmap;
 
 		public FromPictureRequest(Activity activity,
 				ProfilePictureView profilePic, FBUser fbUser) {
 			super(activity, activity);
-			this.profilePic = profilePic;
-			this.fbUser = fbUser;
+			mProfilePic = profilePic;
+			mFBUser = fbUser;
 		}
 
 		@Override
 		public void execute() throws Exception {
-			fbUser.load(FBUser.Level.DEFAULT);
-			fbBitmap = getGlobalState().getFBFactory().getBitmap(
-					fbUser.getPicture());
-			fbBitmap.load();
+			mFBUser.load(FBUser.Level.DEFAULT);
+			mFBBitmap = getGlobalState().getFBFactory().getBitmap(
+					mFBUser.getPicture());
+			mFBBitmap.load();
 		}
 
 		@Override
 		public void executeUI() {
-			Bitmap rounded = BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
+			Bitmap rounded = BitmapUtils.roundBitmap(mFBBitmap.getBitmap(),
 					PICTURE_ROUND_RADIUS);
-			profilePic.setBitmap(rounded);
+			mProfilePic.setBitmap(rounded);
 		}
 	}
 
 	/**
 	 * Private class for handling feed post picture requests.
-	 * 
-	 * @author harism
 	 */
 	private final class PostPictureRequest extends RequestUI {
 
-		private ImageView imageView;
-		private FBBitmap bitmap;
+		private ImageView mImageView;
+		private FBBitmap mFBBitmap;
 
 		public PostPictureRequest(Activity activity, ImageView imageView,
-				FBBitmap bitmap) {
+				FBBitmap fbBitmap) {
 			super(activity, activity);
-			this.imageView = imageView;
-			this.bitmap = bitmap;
+			mImageView = imageView;
+			mFBBitmap = fbBitmap;
 		}
 
 		@Override
 		public void execute() throws Exception {
-			bitmap.load();
+			mFBBitmap.load();
 		}
 
 		@Override
 		public void executeUI() {
-			imageView.setImageBitmap(bitmap.getBitmap());
+			mImageView.setImageBitmap(mFBBitmap.getBitmap());
 			// TODO: Image size is (0, 0) and animation never takes place.
 			Rect r = new Rect();
-			if (imageView.getLocalVisibleRect(r)) {
+			if (mImageView.getLocalVisibleRect(r)) {
 				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
 				inAnimation.setDuration(700);
-				imageView.startAnimation(inAnimation);
+				mImageView.startAnimation(inAnimation);
 			}
 		}
 	}
 
 	/**
-	 * Click listener for our own protocols. Rest is handled by default handler.
+	 * Click listener for our own link protocol. Rest is handled by default
+	 * handler.
 	 */
 	private final class SpanClickObserver implements
 			FacebookURLSpan.ClickObserver {
-		private BaseActivity activity = null;
-
-		public SpanClickObserver(BaseActivity activity) {
-			this.activity = activity;
-		}
-
 		@Override
 		public boolean onClick(FacebookURLSpan span) {
 			String url = span.getURL();
 			if (url.startsWith(PROTOCOL_SHOW_PROFILE)) {
-				showAlertDialog(url);
-				return true;
-			} else if (url.startsWith(PROTOCOL_SHOW_COMMENTS)) {
-				showAlertDialog(url);
-				return true;
-			} else if (url.startsWith(PROTOCOL_SHOW_LIKES)) {
-				showAlertDialog(url);
+				String userId = url.substring(PROTOCOL_SHOW_PROFILE.length());
+				Intent i = createIntent(UserActivity.class);
+				i.putExtra("fi.harism.facebook.UserActivity.user", userId);
+				startActivity(i);
 				return true;
 			}
 			return false;

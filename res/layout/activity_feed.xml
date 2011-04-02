@@ -19,8 +19,8 @@
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/feed_update_text"
-			android:id="@+id/feed_button_update" />
+			android:text="@string/activity_feed_button_update"
+			android:id="@+id/activity_feed_button_update" />
 	</LinearLayout>
 	<ScrollView
 		style="@style/contentContainer"
@@ -29,11 +29,10 @@
 		android:layout_below="@id/header"
 		android:layout_above="@id/footer" >
 		<LinearLayout
-			android:id="@+id/feed_list"
+			android:id="@+id/activity_feed_content"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical" />
 	</ScrollView>
 
 </RelativeLayout>
-

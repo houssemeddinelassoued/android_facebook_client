@@ -6,28 +6,29 @@
 	
 	<!-- User Activity -->
 	<string name="activity_user_wall_title">%s\'s Wall</string>
-	<string name="activity_user_show_wall">Show Wall</string>
+	<string name="activity_user_button_wall">Show Wall</string>
 
 	<!-- Feed Activity -->
-	<string name="feed_news_text">News Feed</string>
-	<string name="feed_profile_text">Wall</string>
-	<string name="feed_update_text">Update</string>
+	<string name="activity_feed_news_title">News Feed</string>
+	<string name="activity_feed_profile_title">Wall</string>
+	<string name="activity_feed_button_update">Update</string>
+	<string name="activity_feed_post_details" formatted="false">%s  ·  Comments(%d)  ·  Likes(%d)</string>
 
 	<!-- Friends Activity -->
-	<string name="friends_search_text">Search</string>
+	<string name="activity_friends_search">Search</string>
 
 	<!-- Login Activity -->
-	<string name="login_text"><b>Facebook</b>\nClient\nExample</string>
-	<string name="login_button">Login</string>
+	<string name="activity_login_content"><b>Facebook</b>\nClient\nExample</string>
+	<string name="activity_login_button">Login</string>
 
 	<!-- Main Activity -->
-	<string name="main_button_news_feed_text">News Feed</string>
-	<string name="main_button_wall_text">Wall</string>
-	<string name="main_button_friends_text">Friends</string>
-	<string name="main_button_profile_text">Profile</string>
-	<string name="main_button_chat_text">Chat</string>
-	<string name="main_logout_text">Logout</string>
-	<string name="main_loading_text">Loading profile information..</string>
+	<string name="activity_main_button_news">News Feed</string>
+	<string name="activity_main_button_wall">Wall</string>
+	<string name="activity_main_button_friends">Friends</string>
+	<string name="activity_main_button_profile">Profile</string>
+	<string name="activity_main_button_chat">Chat</string>
+	<string name="activity_main_button_logout">Logout</string>
+	<string name="activity_main_loading">Loading profile information..</string>
 	
 	<!--  Chat Activity -->
 	<string name="chat_title">Friends Online</string>

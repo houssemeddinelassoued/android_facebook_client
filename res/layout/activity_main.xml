@@ -8,31 +8,13 @@
 		style="@style/headerContainer"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:id="@+id/header" >
-		
-		<!-- 
-		<AbsoluteLayout
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:layout_gravity="center_vertical"
-			android:background="#80000000"
-			android:padding="1dp" >
-			<include
-				layout="@layout/view_layered_image"
-				android:layout_height="40dp"
-				android:layout_width="40dp"
-				android:id="@+id/main_user_image" />
-		</AbsoluteLayout>
-		-->
-		
+		android:id="@+id/header" >	
 		<fi.harism.facebook.view.ProfilePictureView
 			android:layout_height="42dp"
 			android:layout_width="42dp"
 			android:background="#40000000"
 			android:padding="2dp"
-			android:id="@+id/main_profile_picture" />
-		
-		
+			android:id="@+id/activity_main_profile_picture" />
 		<FrameLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content" >
@@ -46,21 +28,22 @@
 					style="@style/headerText"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:id="@+id/main_user_name" />
+					android:id="@+id/activity_main_name" />
 				<TextView
 					style="@style/headerText"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:textStyle="normal"
-					android:id="@+id/main_user_status" />
+					android:id="@+id/activity_main_status" />
 			</LinearLayout>
 			<TextView
 				style="@style/headerText"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:text="@string/main_loading_text"
-				android:id="@+id/main_loading_text" />
+				android:layout_gravity="center_vertical"
+				android:layout_marginLeft="10dp"
+				android:text="@string/activity_main_loading"
+				android:id="@+id/activity_main_loading" />
 		</FrameLayout>
 	</LinearLayout>
 	<LinearLayout
@@ -74,8 +57,8 @@
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/main_logout_text"
-			android:id="@+id/main_button_logout" />
+			android:text="@string/activity_main_button_logout"
+			android:id="@+id/activity_main_button_logout" />
 	</LinearLayout>
 	<ScrollView
 		style="@style/contentContainer"
@@ -90,28 +73,28 @@
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"
-				android:id="@+id/main_button_news_feed"
-				android:text="@string/main_button_news_feed_text" />
+				android:id="@+id/activity_main_button_news"
+				android:text="@string/activity_main_button_news" />
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"
-				android:id="@+id/main_button_wall"
-				android:text="@string/main_button_wall_text" />
+				android:id="@+id/activity_main_button_wall"
+				android:text="@string/activity_main_button_wall" />
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"
-				android:id="@+id/main_button_friends"
-				android:text="@string/main_button_friends_text" />
+				android:id="@+id/activity_main_button_friends"
+				android:text="@string/activity_main_button_friends" />
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"
-				android:id="@+id/main_button_profile"
-				android:text="@string/main_button_profile_text" />
+				android:id="@+id/activity_main_button_profile"
+				android:text="@string/activity_main_button_profile" />
 			<Button
 				android:layout_height="wrap_content"
 				android:layout_width="fill_parent"
-				android:id="@+id/main_button_chat"
-				android:text="@string/main_button_chat_text" />
+				android:id="@+id/activity_main_button_chat"
+				android:text="@string/activity_main_button_chat" />
 		</LinearLayout>
 	</ScrollView>
 

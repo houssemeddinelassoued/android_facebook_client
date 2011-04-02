@@ -51,14 +51,14 @@ public class FriendsActivity extends BaseActivity {
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
-		EditText searchEditor = (EditText) findViewById(R.id.friends_edit_search);
+		EditText searchEditor = (EditText) findViewById(R.id.activity_friends_search_edit);
 		searchEditor.addTextChangedListener(searchObserver);
 
 		// Create default picture shared among friend items.
 		mDefaultPicture = getGlobalState().getDefaultPicture();
 		mDefaultPicture = BitmapUtils.roundBitmap(mDefaultPicture,
 				PICTURE_ROUND_RADIUS);
-		
+
 		mRequestQueue = getGlobalState().getRequestQueue();
 		mFriendViewClickObserver = new FriendViewClickObserver();
 
@@ -95,9 +95,9 @@ public class FriendsActivity extends BaseActivity {
 	}
 
 	/**
-	 * Toggles friend view's visibility according to given search text.
-	 * Method tries to find given search text within the name TextView found
-	 * inside given friendItem.
+	 * Toggles friend view's visibility according to given search text. Method
+	 * tries to find given search text within the name TextView found inside
+	 * given friendItem.
 	 * 
 	 * @param friendItem
 	 *            Friend item View.
@@ -128,11 +128,11 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final void updateFriendList(FBFriendList fbFriendList) {
 		// LinearLayout which is inside ScrollView.
-		LinearLayout friendsView = (LinearLayout) findViewById(R.id.friends_list);
+		LinearLayout friendsView = (LinearLayout) findViewById(R.id.activity_friends_content);
 		friendsView.removeAllViews();
-		
+
 		// Sort friend list.
-		Vector<FBUser> friends =fbFriendList.getFriends();
+		Vector<FBUser> friends = fbFriendList.getFriends();
 		Comparator<FBUser> comparator = new Comparator<FBUser>() {
 			@Override
 			public int compare(FBUser object1, FBUser object2) {
@@ -154,8 +154,9 @@ public class FriendsActivity extends BaseActivity {
 			friendView.setName(name);
 			friendView.setTag(userId);
 			friendView.setOnClickListener(mFriendViewClickObserver);
-			
-			String affiliations = TextUtils.join(", ", friend.getAffiliations());
+
+			String affiliations = TextUtils
+					.join(", ", friend.getAffiliations());
 			friendView.setDetails(affiliations);
 
 			// Add friend item view to scrollable list.
@@ -185,8 +186,8 @@ public class FriendsActivity extends BaseActivity {
 		private FBBitmap mFBBitmap;
 		private Bitmap mBitmap;
 
-		public FBBitmapRequest(Activity activity,
-				FriendView friendView, FBBitmap fbBitmap) {
+		public FBBitmapRequest(Activity activity, FriendView friendView,
+				FBBitmap fbBitmap) {
 			super(activity, activity);
 			mFriendView = friendView;
 			mFBBitmap = fbBitmap;
@@ -244,11 +245,10 @@ public class FriendsActivity extends BaseActivity {
 			// Get editor text.
 			String searchText = editable.toString();
 			// Find LinearLayout containing our friend items.
-			LinearLayout friendList = (LinearLayout) findViewById(R.id.friends_list);
+			LinearLayout friendList = (LinearLayout) findViewById(R.id.activity_friends_content);
 			// Iterate through all child Views.
 			for (int i = 0; i < friendList.getChildCount(); ++i) {
-				FriendView friendView= (FriendView) friendList
-						.getChildAt(i);
+				FriendView friendView = (FriendView) friendList.getChildAt(i);
 				toggleFriendViewVisibility(friendView, searchText);
 			}
 		}
@@ -265,14 +265,14 @@ public class FriendsActivity extends BaseActivity {
 			// We are not interested in this callback.
 		}
 	}
-	
+
 	/**
 	 * Private class for handling FriendView clicking.
 	 */
 	private class FriendViewClickObserver implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			String userId = (String)v.getTag();
+			String userId = (String) v.getTag();
 			Intent i = createIntent(UserActivity.class);
 			i.putExtra("fi.harism.facebook.UserActivity.user", userId);
 			startActivity(i);

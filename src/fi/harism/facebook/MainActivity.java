@@ -35,11 +35,11 @@ public class MainActivity extends BaseActivity {
 
 		// Set default picture as user picture.
 		Bitmap picture = getGlobalState().getDefaultPicture();
-		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.main_profile_picture);
+		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_main_profile_picture);
 		picView.setBitmap(picture);
 
 		// Add onClick listener to "Friends" button.
-		Button friendsButton = (Button) findViewById(R.id.main_button_friends);
+		Button friendsButton = (Button) findViewById(R.id.activity_main_button_friends);
 		friendsButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -50,35 +50,39 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Add onClick listener to "News Feed" button.
-		Button newsFeedButton = (Button) findViewById(R.id.main_button_news_feed);
+		Button newsFeedButton = (Button) findViewById(R.id.activity_main_button_news);
 		newsFeedButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
 				Intent i = createIntent(FeedActivity.class);
 				i.putExtra("fi.harism.facebook.FeedActivity.path", "me/home");
-				i.putExtra("fi.harism.facebook.FeedActivity.title",
-						getResources().getString(R.string.feed_news_text));
+				i.putExtra(
+						"fi.harism.facebook.FeedActivity.title",
+						getResources().getString(
+								R.string.activity_feed_news_title));
 				startActivity(i);
 			}
 		});
 
 		// Add onClick listener to "Wall" button.
-		Button wallButton = (Button) findViewById(R.id.main_button_wall);
+		Button wallButton = (Button) findViewById(R.id.activity_main_button_wall);
 		wallButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
 				Intent i = createIntent(FeedActivity.class);
 				i.putExtra("fi.harism.facebook.FeedActivity.path", "me/feed");
-				i.putExtra("fi.harism.facebook.FeedActivity.title",
-						getResources().getString(R.string.feed_profile_text));
+				i.putExtra(
+						"fi.harism.facebook.FeedActivity.title",
+						getResources().getString(
+								R.string.activity_feed_profile_title));
 				startActivity(i);
 			}
 		});
 
 		// Add onClick listener to "Profile" button.
-		Button profileButton = (Button) findViewById(R.id.main_button_profile);
+		Button profileButton = (Button) findViewById(R.id.activity_main_button_profile);
 		profileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -89,7 +93,7 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Add onClick listener to "Chat" button.
-		Button chatButton = (Button) findViewById(R.id.main_button_chat);
+		Button chatButton = (Button) findViewById(R.id.activity_main_button_chat);
 		chatButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -100,7 +104,7 @@ public class MainActivity extends BaseActivity {
 		});
 
 		// Add onClick listener to "Logout" button.
-		View logoutButton = findViewById(R.id.main_button_logout);
+		View logoutButton = findViewById(R.id.activity_main_button_logout);
 		logoutButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -143,17 +147,17 @@ public class MainActivity extends BaseActivity {
 	}
 
 	private void updateProfileInfo(FBUser fbUserMe) {
-		TextView nameView = (TextView) findViewById(R.id.main_user_name);
+		TextView nameView = (TextView) findViewById(R.id.activity_main_name);
 		nameView.setText(fbUserMe.getName());
 
-		TextView statusView = (TextView) findViewById(R.id.main_user_status);
+		TextView statusView = (TextView) findViewById(R.id.activity_main_status);
 		if (fbUserMe.getStatus() == null || fbUserMe.getStatus().length() == 0) {
 			statusView.setVisibility(View.GONE);
 		} else {
 			statusView.setText(fbUserMe.getStatus());
 		}
 
-		TextView loadingView = (TextView) findViewById(R.id.main_loading_text);
+		TextView loadingView = (TextView) findViewById(R.id.activity_main_loading);
 
 		Rect r = new Rect();
 		if (nameView.getLocalVisibleRect(r)
@@ -182,7 +186,7 @@ public class MainActivity extends BaseActivity {
 	}
 
 	private void updateProfilePicture(FBBitmap fbBitmapMe) {
-		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.main_profile_picture);
+		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_main_profile_picture);
 		picView.setBitmap(fbBitmapMe.getBitmap());
 	}
 
