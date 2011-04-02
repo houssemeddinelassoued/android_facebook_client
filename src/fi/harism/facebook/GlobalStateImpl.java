@@ -16,45 +16,45 @@ import fi.harism.facebook.request.RequestQueue;
 public class GlobalStateImpl extends Application implements GlobalState {
 
 	// RequestQueue instance.
-	private RequestQueue requestQueue = null;
+	private RequestQueue mRequestQueue = null;
 	// FBClient instance.
-	private FBClient fbClient = null;
+	private FBClient mFBClient = null;
 	// FBFactory instance;
-	private FBFactory fbFactory = null;
+	private FBFactory mFBFactory = null;
 	// Default profile picture.
-	private Bitmap defaultPicture = null;
+	private Bitmap mDefaultPicture = null;
 
 	@Override
 	public Bitmap getDefaultPicture() {
-		if (defaultPicture == null) {
-			defaultPicture = BitmapFactory.decodeResource(getResources(),
+		if (mDefaultPicture == null) {
+			mDefaultPicture = BitmapFactory.decodeResource(getResources(),
 					R.drawable.default_profile_picture);
 		}
-		return defaultPicture;
+		return mDefaultPicture;
 	}
 
 	@Override
 	public FBClient getFBClient() {
-		if (fbClient == null) {
-			fbClient= new FBClient();
+		if (mFBClient == null) {
+			mFBClient= new FBClient();
 		}
-		return fbClient;
+		return mFBClient;
 	}
 	
 	@Override
 	public FBFactory getFBFactory() {
-		if (fbFactory == null) {
-			fbFactory= new FBFactory(getRequestQueue(), getFBClient());
+		if (mFBFactory == null) {
+			mFBFactory= new FBFactory(getRequestQueue(), getFBClient());
 		}
-		return fbFactory;
+		return mFBFactory;
 	}
 	
 	@Override
 	public RequestQueue getRequestQueue() {
-		if (requestQueue == null) {
-			requestQueue = new RequestQueue();
+		if (mRequestQueue == null) {
+			mRequestQueue = new RequestQueue();
 		}
-		return requestQueue;
+		return mRequestQueue;
 	}
 
 }

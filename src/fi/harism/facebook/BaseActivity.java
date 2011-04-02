@@ -14,7 +14,7 @@ import android.content.Intent;
 public class BaseActivity extends Activity {
 
 	// ProgressDialog instance.
-	private ProgressDialog progressDialog = null;
+	private ProgressDialog mProgressDialog = null;
 
 	/**
 	 * Creates an intent for given class. This method makes it easier to create
@@ -47,9 +47,9 @@ public class BaseActivity extends Activity {
 	 * @see showProgressDialog()
 	 */
 	public void hideProgressDialog() {
-		if (progressDialog != null) {
-			progressDialog.dismiss();
-			progressDialog = null;
+		if (mProgressDialog != null) {
+			mProgressDialog.dismiss();
+			mProgressDialog = null;
 		}
 	}
 
@@ -71,14 +71,14 @@ public class BaseActivity extends Activity {
 	 * to make sure hideProgressDialog is called after wards.
 	 */
 	public void showProgressDialog() {
-		if (progressDialog == null) {
-			progressDialog = new ProgressDialog(this);
+		if (mProgressDialog == null) {
+			mProgressDialog = new ProgressDialog(this);
 			// TODO: Either give message as parameter to this function or make
 			// it a constant string resource.
-			progressDialog.setMessage("Loading..");
-			progressDialog.setCancelable(false);
+			mProgressDialog.setMessage("Loading..");
+			mProgressDialog.setCancelable(false);
 		}
-		progressDialog.show();
+		mProgressDialog.show();
 	}
 
 }

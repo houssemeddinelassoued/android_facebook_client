@@ -212,17 +212,17 @@ public class MainActivity extends BaseActivity {
 	 */
 	private final class FBUserRequest extends RequestUI {
 
-		private FBUser fbUser;
+		private FBUser mFBUser;
 
 		public FBUserRequest(Activity activity, FBUser fbUser) {
 			super(activity, activity);
-			this.fbUser = fbUser;
+			mFBUser = fbUser;
 		}
 
 		@Override
 		public void execute() throws Exception {
 			try {
-				fbUser.load(FBUser.Level.FULL);
+				mFBUser.load(FBUser.Level.FULL);
 			} catch (Exception ex) {
 				// TODO: This is rather disastrous situation actually.
 				showAlertDialog(ex.toString());
@@ -232,7 +232,7 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void executeUI() {
-			updateProfileInfo(fbUser);
+			updateProfileInfo(mFBUser);
 		}
 
 	}
