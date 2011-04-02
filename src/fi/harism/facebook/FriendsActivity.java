@@ -4,20 +4,19 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBFriendList;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
-import fi.harism.facebook.util.StringUtils;
-import fi.harism.facebook.view.ProfilePictureView;
+import fi.harism.facebook.view.FriendView;
 
 /**
  * Friends list Activity. Once created it first loads "me/friends" from Facebook
@@ -31,11 +30,11 @@ import fi.harism.facebook.view.ProfilePictureView;
 public class FriendsActivity extends BaseActivity {
 
 	// Default profile picture.
-	private Bitmap defaultPicture = null;
+	private Bitmap mDefaultPicture = null;
 	// Radius value for rounding profile images.
 	private static final int PICTURE_ROUND_RADIUS = 7;
 	// Span onClick observer for profile and comments protocols.
-	private SpanClickObserver spanClickObserver = null;
+	private SpanClickObserver mSpanClickObserver = null;
 	// Static protocol name for showing profile.
 	private static final String PROTOCOL_SHOW_PROFILE = "showprofile://";
 
@@ -45,7 +44,7 @@ public class FriendsActivity extends BaseActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_friends);
 
-		spanClickObserver = new SpanClickObserver(this);
+		mSpanClickObserver = new SpanClickObserver(this);
 
 		// Add text changed observer to search editor.
 		SearchEditorObserver searchObserver = new SearchEditorObserver();
@@ -53,8 +52,8 @@ public class FriendsActivity extends BaseActivity {
 		searchEditor.addTextChangedListener(searchObserver);
 
 		// Create default picture shared among friend items.
-		defaultPicture = getGlobalState().getDefaultPicture();
-		defaultPicture = BitmapUtils.roundBitmap(defaultPicture,
+		mDefaultPicture = getGlobalState().getDefaultPicture();
+		mDefaultPicture = BitmapUtils.roundBitmap(mDefaultPicture,
 				PICTURE_ROUND_RADIUS);
 
 		// Trigger asynchronous friend list loading if needed.
@@ -99,36 +98,34 @@ public class FriendsActivity extends BaseActivity {
 	 *            User name.
 	 * @return New friend item view.
 	 */
-	private final View createFriendItem(String userId, String name) {
-		// Create new friend item View.
-		View friendItemView = getLayoutInflater().inflate(R.layout.view_friend,
-				null);
-
-		// Find name TextView and set its value.
-		TextView nameTextView = (TextView) friendItemView
-				.findViewById(R.id.view_friend_name);
-		StringUtils.setTextLink(nameTextView, name, PROTOCOL_SHOW_PROFILE
-				+ userId, spanClickObserver);
-		// nameTextView.setText(name);
-
-		// Set default profile picture.
-		// ProfilePictureView profilePic = (ProfilePictureView) friendItemView
-		// .findViewById(R.id.view_friend_picture);
-		// profilePic.setBitmap(defaultPicture);
-
-		// Store user id as a tag to friend item View.
-		friendItemView.setTag(userId);
-
-		// This is rather useless at the moment, as we are calling this method
-		// mostly once search text has not been changed. But just in case for
-		// the future, toggle friend item View's visibility according to search
-		// text.
-		EditText searchEditText = (EditText) findViewById(R.id.friends_edit_search);
-		String searchText = searchEditText.getText().toString();
-		toggleFriendItemVisibility(friendItemView, searchText);
-
-		return friendItemView;
-	}
+	/*
+	 * private final View createFriendItem(String userId, String name) { //
+	 * Create new friend item View. View friendItemView =
+	 * getLayoutInflater().inflate(R.layout.view_friend, null);
+	 * 
+	 * // Find name TextView and set its value. TextView nameTextView =
+	 * (TextView) friendItemView .findViewById(R.id.view_friend_name);
+	 * StringUtils.setTextLink(nameTextView, name, PROTOCOL_SHOW_PROFILE +
+	 * userId, spanClickObserver); // nameTextView.setText(name);
+	 * 
+	 * // Set default profile picture. // ProfilePictureView profilePic =
+	 * (ProfilePictureView) friendItemView //
+	 * .findViewById(R.id.view_friend_picture); //
+	 * profilePic.setBitmap(defaultPicture);
+	 * 
+	 * // Store user id as a tag to friend item View.
+	 * friendItemView.setTag(userId);
+	 * 
+	 * // This is rather useless at the moment, as we are calling this method //
+	 * mostly once search text has not been changed. But just in case for // the
+	 * future, toggle friend item View's visibility according to search // text.
+	 * EditText searchEditText = (EditText)
+	 * findViewById(R.id.friends_edit_search); String searchText =
+	 * searchEditText.getText().toString();
+	 * toggleFriendItemVisibility(friendItemView, searchText);
+	 * 
+	 * return friendItemView; }
+	 */
 
 	/**
 	 * Toggles friend item View's visibility according to given search text.
@@ -140,25 +137,22 @@ public class FriendsActivity extends BaseActivity {
 	 * @param searchText
 	 *            Current search text.
 	 */
-	private final void toggleFriendItemVisibility(View friendItem,
+	private final void toggleFriendItemVisibility(FriendView friendView,
 			String searchText) {
 		// We are not case sensitive.
 		searchText = searchText.toLowerCase();
 
-		// Locate name TextView.
-		TextView nameTextView = (TextView) friendItem
-				.findViewById(R.id.view_friend_name);
 		// Get name from TextView.
-		String friendName = nameTextView.getText().toString();
+		String name = friendView.getName();
 		// We are still not case sensitive.
-		friendName = friendName.toLowerCase();
+		name = name.toLowerCase();
 
 		// Toggle friend item visibility regarding to if searchText is found
 		// within name. This is rather naive approach but works good enough :)
-		if (friendName.contains(searchText)) {
-			friendItem.setVisibility(View.VISIBLE);
+		if (name.contains(searchText)) {
+			friendView.setVisibility(View.VISIBLE);
 		} else {
-			friendItem.setVisibility(View.GONE);
+			friendView.setVisibility(View.GONE);
 		}
 	}
 
@@ -176,21 +170,27 @@ public class FriendsActivity extends BaseActivity {
 			String pictureUrl = friend.getPicture();
 
 			// Create default friend item view.
-			View friendView = createFriendItem(userId, name);
+			// View friendView = createFriendItem(userId, name);
+			FriendView friendView = (FriendView) getLayoutInflater().inflate(
+					R.layout.view_friend, null);
+			friendView.setName(name);
+			friendView.setTag(userId);
+			
+			String affiliations = TextUtils.join(", ", friend.getAffiliations());
+			friendView.setDetails(affiliations);
+
 			// Add friend item view to scrollable list.
 			friendsView.addView(friendView);
 
-			ProfilePictureView profilePic = (ProfilePictureView) friendView
-					.findViewById(R.id.view_friend_picture);
 			FBBitmap picture = getGlobalState().getFBFactory().getBitmap(
 					pictureUrl);
 			Bitmap bitmap = picture.getBitmap();
 			if (bitmap != null) {
-				profilePic.setBitmap(BitmapUtils.roundBitmap(bitmap,
+				friendView.setPicture(BitmapUtils.roundBitmap(bitmap,
 						PICTURE_ROUND_RADIUS));
 			} else {
-				profilePic.setBitmap(defaultPicture);
-				FBBitmapRequest request = new FBBitmapRequest(this, profilePic,
+				friendView.setPicture(mDefaultPicture);
+				FBBitmapRequest request = new FBBitmapRequest(this, friendView,
 						picture);
 				getGlobalState().getRequestQueue().addRequest(request);
 			}
@@ -202,27 +202,27 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final class FBBitmapRequest extends RequestUI {
 
-		private ProfilePictureView profilePic;
-		private FBBitmap fbBitmap;
-		private Bitmap bitmap;
+		private FriendView mFriendView;
+		private FBBitmap mFBBitmap;
+		private Bitmap mBitmap;
 
 		public FBBitmapRequest(Activity activity,
-				ProfilePictureView profilePic, FBBitmap fbBitmap) {
+				FriendView friendView, FBBitmap fbBitmap) {
 			super(activity, activity);
-			this.profilePic = profilePic;
-			this.fbBitmap = fbBitmap;
+			mFriendView = friendView;
+			mFBBitmap = fbBitmap;
 		}
 
 		@Override
 		public void execute() throws Exception {
-			fbBitmap.load();
-			bitmap = BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
+			mFBBitmap.load();
+			mBitmap = BitmapUtils.roundBitmap(mFBBitmap.getBitmap(),
 					PICTURE_ROUND_RADIUS);
 		}
 
 		@Override
 		public void executeUI() {
-			profilePic.setBitmap(bitmap);
+			mFriendView.setPicture(mBitmap);
 		}
 	}
 
@@ -231,17 +231,17 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final class FBFriendListRequest extends RequestUI {
 
-		private FBFriendList fbFriendList;
+		private FBFriendList mFBFriendList;
 
 		public FBFriendListRequest(Activity activity, FBFriendList fbFriendList) {
 			super(activity, activity);
-			this.fbFriendList = fbFriendList;
+			mFBFriendList = fbFriendList;
 		}
 
 		@Override
 		public void execute() throws Exception {
 			try {
-				fbFriendList.load();
+				mFBFriendList.load();
 			} catch (Exception ex) {
 				hideProgressDialog();
 				showAlertDialog(ex.toString());
@@ -251,7 +251,7 @@ public class FriendsActivity extends BaseActivity {
 
 		@Override
 		public void executeUI() {
-			updateFriendList(fbFriendList);
+			updateFriendList(mFBFriendList);
 			hideProgressDialog();
 		}
 	}
@@ -268,9 +268,9 @@ public class FriendsActivity extends BaseActivity {
 			LinearLayout friendList = (LinearLayout) findViewById(R.id.friends_list);
 			// Iterate through all child Views.
 			for (int i = 0; i < friendList.getChildCount(); ++i) {
-				LinearLayout friendItem = (LinearLayout) friendList
+				FriendView friendView= (FriendView) friendList
 						.getChildAt(i);
-				toggleFriendItemVisibility(friendItem, searchText);
+				toggleFriendItemVisibility(friendView, searchText);
 			}
 		}
 
