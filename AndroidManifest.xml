@@ -20,6 +20,7 @@
         <activity android:name="FeedActivity" />
         <activity android:name="ChatActivity" />
         <activity android:name="ChatSessionActivity" />
+        <activity android:name="UserActivity" />
     </application>
     
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>

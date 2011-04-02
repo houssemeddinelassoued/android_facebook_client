@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Vector;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
@@ -36,7 +37,9 @@ public class FriendsActivity extends BaseActivity {
 	// RequestQueue instance.
 	private RequestQueue mRequestQueue;
 	// Default profile picture.
-	private Bitmap mDefaultPicture = null;
+	private Bitmap mDefaultPicture;
+	// OnClickListener for FriendViews.
+	private FriendViewClickObserver mFriendViewClickObserver;
 	// Radius value for rounding profile images.
 	private static final int PICTURE_ROUND_RADIUS = 7;
 
@@ -57,6 +60,7 @@ public class FriendsActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 		
 		mRequestQueue = getGlobalState().getRequestQueue();
+		mFriendViewClickObserver = new FriendViewClickObserver();
 
 		// Trigger asynchronous friend list loading if needed.
 		FBFriendList fbFriendList = getGlobalState().getFBFactory()
@@ -149,6 +153,7 @@ public class FriendsActivity extends BaseActivity {
 					R.layout.view_friend, null);
 			friendView.setName(name);
 			friendView.setTag(userId);
+			friendView.setOnClickListener(mFriendViewClickObserver);
 			
 			String affiliations = TextUtils.join(", ", friend.getAffiliations());
 			friendView.setDetails(affiliations);
@@ -258,6 +263,19 @@ public class FriendsActivity extends BaseActivity {
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
 			// We are not interested in this callback.
+		}
+	}
+	
+	/**
+	 * Private class for handling FriendView clicking.
+	 */
+	private class FriendViewClickObserver implements View.OnClickListener {
+		@Override
+		public void onClick(View v) {
+			String userId = (String)v.getTag();
+			Intent i = createIntent(UserActivity.class);
+			i.putExtra("fi.harism.facebook.UserActivity.user", userId);
+			startActivity(i);
 		}
 	}
 

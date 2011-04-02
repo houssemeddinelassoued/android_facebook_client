@@ -3,6 +3,10 @@
 
 	<!-- Application name -->
 	<string name="app_name">Facebook Client</string>
+	
+	<!-- User Activity -->
+	<string name="activity_user_wall_title">%s\'s Wall</string>
+	<string name="activity_user_show_wall">Show Wall</string>
 
 	<!-- Feed Activity -->
 	<string name="feed_news_text">News Feed</string>

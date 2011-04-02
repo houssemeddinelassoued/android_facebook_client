@@ -82,7 +82,9 @@ public class MainActivity extends BaseActivity {
 		profileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showAlertDialog("Implement me..");
+				Intent i = createIntent(UserActivity.class);
+				i.putExtra("fi.harism.facebook.UserActivity.user", "me");
+				startActivity(i);
 			}
 		});
 

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" >
+
+	<LinearLayout
+		style="@style/headerContainer"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:id="@+id/header" >	
+		<fi.harism.facebook.view.ProfilePictureView
+			android:layout_height="42dp"
+			android:layout_width="42dp"
+			android:background="#40000000"
+			android:padding="2dp"
+			android:id="@+id/activity_user_picture" />
+		<TextView
+			style="@style/headerText"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:layout_marginLeft="5dp"
+			android:id="@+id/activity_user_name" />
+	</LinearLayout>
+	
+	<LinearLayout
+		style="@style/footerContainer"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:gravity="center"
+		android:id="@+id/footer" >
+		<Button
+			style="@style/footerButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/activity_user_show_wall"
+			android:id="@+id/activity_user_button_wall" />
+	</LinearLayout>
+	
+	<ScrollView
+		style="@style/contentContainer"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/header"
+		android:layout_above="@id/footer" >
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:id="@+id/activity_user_content" />
+	</ScrollView>
+
+</RelativeLayout>
