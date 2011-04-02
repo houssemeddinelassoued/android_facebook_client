@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-
 import fi.harism.facebook.net.FBClient;
 
 /**
@@ -18,78 +17,78 @@ import fi.harism.facebook.net.FBClient;
  */
 public class FBPost {
 
-	private FBClient fbClient;
-	private String id;
-	String type;
-	String fromId;
-	String fromName;
-	String message;
-	String picture;
-	String link;
-	String name;
-	String caption;
-	String description;
-	String createdTime;
-	Vector<FBComment> comments;
-	int commentsCount;
-	int likesCount;
+	private FBClient mFBClient;
+	private String mId;
+	String mType;
+	String mFromId;
+	String mFromName;
+	String mMessage;
+	String mPicture;
+	String mLink;
+	String mName;
+	String mCaption;
+	String mDescription;
+	String mCreatedTime;
+	Vector<FBComment> mComments;
+	int mCommentsCount;
+	int mLikesCount;
 
 	FBPost(FBClient fbClient, String id) {
-		this.fbClient = fbClient;
-		this.id = id;
-		comments = new Vector<FBComment>();
+		mFBClient = fbClient;
+		mId = id;
+		mComments = new Vector<FBComment>();
 	}
 
 	public String getCaption() {
-		return caption;
-	}
-
-	public String getCreatedTime() {
-		return createdTime;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public String getFromId() {
-		return fromId;
-	}
-
-	public String getFromName() {
-		return fromName;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getLink() {
-		return link;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getPicture() {
-		return picture;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public int getLikesCount() {
-		return likesCount;
+		return mCaption;
 	}
 
 	public int getCommentsCount() {
-		return commentsCount;
+		return mCommentsCount;
+	}
+
+	public String getCreatedTime() {
+		return mCreatedTime;
+	}
+
+	public String getDescription() {
+		return mDescription;
+	}
+
+	public String getFromId() {
+		return mFromId;
+	}
+
+	public String getFromName() {
+		return mFromName;
+	}
+
+	public String getId() {
+		return mId;
+	}
+
+	public int getLikesCount() {
+		return mLikesCount;
+	}
+
+	public String getLink() {
+		return mLink;
+	}
+
+	public String getMessage() {
+		return mMessage;
+	}
+
+	public String getName() {
+		return mName;
+	}
+
+	public String getPicture() {
+		return mPicture;
+	}
+
+	public String getType() {
+		return mType;
 	}
 
 	/**
@@ -101,13 +100,13 @@ public class FBPost {
 	 */
 	public void loadAllComments() throws IOException, JSONException {
 		Bundle params = new Bundle();
-		params.putString(FBClient.TOKEN, fbClient.getAccessToken());
+		params.putString(FBClient.TOKEN, mFBClient.getAccessToken());
 		params.putString("fields", "id, from,message,created_time");
 		params.putString("limit", "999999");
 
-		JSONObject resp = fbClient.request(id + "/comments", params);
+		JSONObject resp = mFBClient.request(mId + "/comments", params);
 
-		comments.removeAllElements();
+		mComments.removeAllElements();
 		JSONArray data = resp.getJSONArray("data");
 		if (data != null) {
 			for (int i = 0; i < data.length(); ++i) {
@@ -119,11 +118,11 @@ public class FBPost {
 				String message = comment.getString("message");
 				String createdTime = comment.getString("created_time");
 				FBComment c = new FBComment(id);
-				c.fromId = fromId;
-				c.fromName = fromName;
-				c.message = message;
-				c.createdTime = createdTime;
-				comments.add(c);
+				c.mFromId = fromId;
+				c.mFromName = fromName;
+				c.mMessage = message;
+				c.mCreatedTime = createdTime;
+				mComments.add(c);
 			}
 		}
 	}
@@ -137,9 +136,9 @@ public class FBPost {
 	 */
 	public void postComment(String message) throws IOException, JSONException {
 		Bundle params = new Bundle();
-		params.putString(FBClient.TOKEN, fbClient.getAccessToken());
+		params.putString(FBClient.TOKEN, mFBClient.getAccessToken());
 		params.putString("message", message);
-		fbClient.request(id + "/comments", params, "POST");
+		mFBClient.request(mId + "/comments", params, "POST");
 	}
 
 }

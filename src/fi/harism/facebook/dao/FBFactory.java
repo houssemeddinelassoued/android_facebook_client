@@ -10,62 +10,62 @@ import fi.harism.facebook.util.DataCache;
 
 public class FBFactory {
 
-	private RequestQueue requestQueue;
-	private FBClient fbClient;
+	private RequestQueue mRequestQueue;
+	private FBClient mFBClient;
 
-	private HashMap<String, FBFeed> feedMap;
-	private DataCache imageCache;
-	private ChatHandler chatHandler;
-	private HashMap<String, FBUser> userMap;
-	private Vector<String> friendIdList;
+	private HashMap<String, FBFeed> mFeedMap;
+	private DataCache mImageCache;
+	private ChatHandler mChatHandler;
+	private HashMap<String, FBUser> mUserMap;
+	private Vector<String> mFriendIdList;
 
 	public FBFactory(RequestQueue requestQueue, FBClient fbClient) {
-		this.requestQueue = requestQueue;
-		this.fbClient = fbClient;
+		mRequestQueue = requestQueue;
+		mFBClient = fbClient;
 
-		feedMap = new HashMap<String, FBFeed>();
-		imageCache = new DataCache(1024000);
-		chatHandler = new ChatHandler();
-		userMap = new HashMap<String, FBUser>();
-		friendIdList = new Vector<String>();
+		mFeedMap = new HashMap<String, FBFeed>();
+		mImageCache = new DataCache(1024000);
+		mChatHandler = new ChatHandler();
+		mUserMap = new HashMap<String, FBUser>();
+		mFriendIdList = new Vector<String>();
 	}
 
 	public FBBitmap getBitmap(String url) {
-		return new FBBitmap(imageCache, url);
+		return new FBBitmap(mImageCache, url);
 	}
 
 	public FBChat getChat(FBChat.Observer observer) {
-		return new FBChat(chatHandler, fbClient, userMap, observer);
+		return new FBChat(mChatHandler, mFBClient, mUserMap, observer);
 	}
 
 	public FBFeed getFeed(String path) {
-		FBFeed feed = feedMap.get(path);
+		FBFeed feed = mFeedMap.get(path);
 		if (feed == null) {
-			feed = new FBFeed(fbClient, path);
-			feedMap.put(path, feed);
+			feed = new FBFeed(mFBClient, path);
+			mFeedMap.put(path, feed);
 		}
 		return feed;
 	}
 
 	public FBFriendList getFriendList() {
-		return new FBFriendList(fbClient, userMap, friendIdList);
+		return new FBFriendList(mFBClient, mUserMap, mFriendIdList);
 	}
 
 	public FBUser getUser(String id) {
-		FBUser user = userMap.get(id);
+		FBUser user = mUserMap.get(id);
 		if (user == null) {
-			user = new FBUser(fbClient, id);
-			userMap.put(id, user);
+			user = new FBUser(mFBClient, id);
+			mUserMap.put(id, user);
 		}
 		return user;
 	}
 
 	public void reset() {
-		feedMap.clear();
-		requestQueue.removeRequests();
-		chatHandler.disconnect();
-		userMap.clear();
-		friendIdList.clear();		
+		mFeedMap.clear();
+		mRequestQueue.removeRequests();
+		mChatHandler.disconnect();
+		mUserMap.clear();
+		mFriendIdList.clear();		
 	}
 
 }

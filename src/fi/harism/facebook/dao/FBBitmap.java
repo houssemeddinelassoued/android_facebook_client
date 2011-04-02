@@ -6,10 +6,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import fi.harism.facebook.util.DataCache;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import fi.harism.facebook.util.DataCache;
 
 /**
  * Class for handling image loading and caching.
@@ -19,11 +18,11 @@ import android.graphics.BitmapFactory;
 public class FBBitmap {
 
 	// Internal data storage.
-	private DataCache imageCache;
+	private DataCache mImageCache;
 	// Url for this image.
-	private String url;
+	private String mUrl;
 	// Image data.
-	private byte[] bitmapData;
+	private byte[] mBitmapData;
 
 	/**
 	 * Default constructor.
@@ -34,29 +33,29 @@ public class FBBitmap {
 	 *            Url for image.
 	 */
 	FBBitmap(DataCache imageCache, String url) {
-		this.imageCache = imageCache;
-		this.url = url;
+		mImageCache = imageCache;
+		mUrl = url;
 		// Set bitmapData from imageCache, will be null if not found.
-		this.bitmapData = imageCache.getData(url);
-	}
-
-	/**
-	 * Returns url for this image.
-	 */
-	public String getUrl() {
-		return url;
+		mBitmapData = imageCache.getData(url);
 	}
 
 	/**
 	 * Returns Bitmap object if image has been loaded, null otherwise.
 	 */
 	public Bitmap getBitmap() {
-		if (bitmapData != null) {
-			return BitmapFactory.decodeByteArray(bitmapData, 0,
-					bitmapData.length);
+		if (mBitmapData != null) {
+			return BitmapFactory.decodeByteArray(mBitmapData, 0,
+					mBitmapData.length);
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Returns url for this image.
+	 */
+	public String getUrl() {
+		return mUrl;
 	}
 
 	/**
@@ -70,7 +69,7 @@ public class FBBitmap {
 	 */
 	public Bitmap load() throws IOException, MalformedURLException {
 		// Open InputStream for given url.
-		URL u = new URL(url);
+		URL u = new URL(mUrl);
 		InputStream is = u.openStream();
 		ByteArrayOutputStream imageBuffer = new ByteArrayOutputStream();
 
@@ -81,10 +80,10 @@ public class FBBitmap {
 			imageBuffer.write(buffer, 0, readLength);
 		}
 
-		bitmapData = imageBuffer.toByteArray();
-		imageCache.setData(url, bitmapData);
+		mBitmapData = imageBuffer.toByteArray();
+		mImageCache.setData(mUrl, mBitmapData);
 
-		return BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
+		return BitmapFactory.decodeByteArray(mBitmapData, 0, mBitmapData.length);
 	}
 
 }

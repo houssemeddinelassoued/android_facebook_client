@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.os.Bundle;
-
 import fi.harism.facebook.net.FBClient;
 
 /**
@@ -30,31 +29,31 @@ import fi.harism.facebook.net.FBClient;
 public class FBUser {
 
 	// FBClient instance.
-	private FBClient fbClient;
+	private FBClient mFBClient;
 	// User id.
-	private String id = null;
+	private String mId = null;
 	// User Jabber id.
-	String jid = null;
+	String mJid = null;
 	// User name.
-	String name = null;
+	String mName = null;
 	// User picture url.
-	String picture = null;
+	String mPicture = null;
 	// Latest status message.
-	String status = null;
+	String mStatus = null;
 	// Home town name.
-	String hometownLocation = null;
+	String mHometownLocation = null;
 	// Current location.
-	String currentLocation = null;
+	String mCurrentLocation = null;
 	// Email address.
-	String email = null;
+	String mEmail = null;
 	// Web site.
-	String website = null;
+	String mWebsite = null;
 	// 'Networks'.
-	Vector<String> affiliations = null;
+	Vector<String> mAffiliations;
 	// Current presence, chat related.
-	Presence presence;
+	Presence mPresence;
 	// User information level.
-	Level level;
+	Level mLevel;
 	// SELECT clause for FQL query.
 	private static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";;
 
@@ -67,94 +66,95 @@ public class FBUser {
 	 *            User id.
 	 */
 	FBUser(FBClient fbClient, String id) {
-		this.fbClient = fbClient;
-		this.id = id;
-		this.presence = Presence.GONE;
-		this.level = Level.UNINITIALIZED;
+		mFBClient = fbClient;
+		mId = id;
+		mPresence = Presence.GONE;
+		mLevel = Level.UNINITIALIZED;
+		mAffiliations = new Vector<String>();
 	}
 
 	/**
 	 * Returns list of user's affiliations/networks.
 	 */
 	public Vector<String> getAffiliations() {
-		return affiliations;
+		return mAffiliations;
 	}
 
 	/**
 	 * Returns user's current location.
 	 */
 	public String getCurrentLocation() {
-		return currentLocation;
+		return mCurrentLocation;
 	}
 
 	/**
 	 * Returns user's email address.
 	 */
 	public String getEmail() {
-		return email;
+		return mEmail;
 	}
 
 	/**
 	 * Returns user's home town name.
 	 */
 	public String getHometownLocation() {
-		return hometownLocation;
+		return mHometownLocation;
 	}
 
 	/**
 	 * Returns user id.
 	 */
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * Returns Jabber ID for current user.
 	 */
 	public String getJid() {
-		return jid;
+		return mJid;
 	}
 
 	/**
 	 * Returns information level for this FBUser instance.
 	 */
 	public Level getLevel() {
-		return level;
+		return mLevel;
 	}
 
 	/**
 	 * Returns user's name.
 	 */
 	public String getName() {
-		return name;
+		return mName;
 	}
 
 	/**
 	 * Returns user profile picture url.
 	 */
 	public String getPicture() {
-		return picture;
+		return mPicture;
 	}
 
 	/**
 	 * Returns user's current chat presence.
 	 */
 	public Presence getPresence() {
-		return presence;
+		return mPresence;
 	}
 
 	/**
 	 * Returns user's latest status message.
 	 */
 	public String getStatus() {
-		return status;
+		return mStatus;
 	}
 
 	/**
 	 * Returns user's website url.
 	 */
 	public String getWebsite() {
-		return website;
+		return mWebsite;
 	}
 
 	/**
@@ -170,14 +170,14 @@ public class FBUser {
 		if (level == Level.DEFAULT) {
 			Bundle params = new Bundle();
 			params.putString("fields", "name, picture");
-			JSONObject response = fbClient.request(id, params);
-			this.name = response.getString("name");
-			this.picture = response.getString("picture");
-			if (this.level != Level.FULL) {
-				this.level = Level.DEFAULT;
+			JSONObject response = mFBClient.request(mId, params);
+			this.mName = response.getString("name");
+			this.mPicture = response.getString("picture");
+			if (this.mLevel != Level.FULL) {
+				this.mLevel = Level.DEFAULT;
 			}
 		} else if (level == Level.FULL) {
-			String uid = id;
+			String uid = mId;
 			if (uid.equals("me")) {
 				uid = "me()";
 			}
@@ -187,7 +187,7 @@ public class FBUser {
 			query.append("FROM user WHERE uid = ");
 			query.append(uid);
 
-			JSONObject resp = fbClient.requestFQL(query.toString());
+			JSONObject resp = mFBClient.requestFQL(query.toString());
 			JSONArray data = resp.getJSONArray("data");
 			if (data.length() != 1) {
 				throw new IOException("Received more than 1 user information.");
@@ -195,15 +195,15 @@ public class FBUser {
 
 			JSONObject userObj = data.getJSONObject(0);
 
-			this.name = userObj.getString("name");
-			this.picture = userObj.getString("pic_square");
+			this.mName = userObj.getString("name");
+			this.mPicture = userObj.getString("pic_square");
 
 			JSONObject statusObj = userObj.optJSONObject("status");
 			if (statusObj != null) {
-				this.status = statusObj.getString("message");
+				this.mStatus = statusObj.getString("message");
 			}
 
-			this.level = Level.FULL;
+			this.mLevel = Level.FULL;
 		}
 	}
 

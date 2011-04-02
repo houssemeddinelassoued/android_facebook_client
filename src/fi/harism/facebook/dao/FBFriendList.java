@@ -18,9 +18,9 @@ import fi.harism.facebook.net.FBClient;
  */
 public class FBFriendList {
 
-	private FBClient fbClient;
-	private HashMap<String, FBUser> userMap;
-	private Vector<String> friendIds;
+	private FBClient mFBClient;
+	private HashMap<String, FBUser> mUserMap;
+	private Vector<String> mFriendIds;
 
 	private static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";
 
@@ -33,9 +33,9 @@ public class FBFriendList {
 	 */
 	FBFriendList(FBClient fbClient, HashMap<String, FBUser> userMap,
 			Vector<String> friendIds) {
-		this.fbClient = fbClient;
-		this.userMap = userMap;
-		this.friendIds = friendIds;
+		mFBClient = fbClient;
+		mUserMap = userMap;
+		mFriendIds = friendIds;
 	}
 
 	/**
@@ -43,8 +43,8 @@ public class FBFriendList {
 	 */
 	public Vector<FBUser> getFriends() {
 		Vector<FBUser> friends = new Vector<FBUser>();
-		for (String id : friendIds) {
-			friends.add(userMap.get(id));
+		for (String id : mFriendIds) {
+			friends.add(mUserMap.get(id));
 		}
 		return friends;
 	}
@@ -58,7 +58,7 @@ public class FBFriendList {
 		query.append(SELECT);
 		query.append("FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me())");
 
-		JSONObject resp = fbClient.requestFQL(query.toString());
+		JSONObject resp = mFBClient.requestFQL(query.toString());
 		JSONArray data = resp.getJSONArray("data");
 
 		// TODO: It might be a good idea to move user creation/updating to
@@ -67,26 +67,35 @@ public class FBFriendList {
 		for (int i = 0; i < data.length(); ++i) {
 			JSONObject userObj = data.getJSONObject(i);
 
-			FBUser user = userMap.get(userObj.getString("uid"));
+			FBUser user = mUserMap.get(userObj.getString("uid"));
 			if (user == null) {
-				user = new FBUser(fbClient, userObj.getString("uid"));
+				user = new FBUser(mFBClient, userObj.getString("uid"));
 			}
 
-			user.name = userObj.getString("name");
-			user.picture = userObj.getString("pic_square");
+			user.mName = userObj.getString("name");
+			user.mPicture = userObj.getString("pic_square");
 
 			JSONObject statusObj = userObj.optJSONObject("status");
 			if (statusObj != null) {
-				user.status = statusObj.getString("message");
+				user.mStatus = statusObj.getString("message");
+			}
+			
+			user.mAffiliations.clear();
+			JSONArray affiliations = userObj.optJSONArray("affiliations");
+			if (affiliations != null) {
+				for (int j=0; j<affiliations.length(); ++j) {
+					user.mAffiliations.add(affiliations.getJSONObject(j)
+							.getString("name"));
+				}
 			}
 
 			tempList.add(user);
 		}
 
-		friendIds.clear();
+		mFriendIds.clear();
 		for (FBUser friend : tempList) {
-			friendIds.add(friend.getId());
-			userMap.put(friend.getId(), friend);
+			mFriendIds.add(friend.getId());
+			mUserMap.put(friend.getId(), friend);
 		}
 	}
 

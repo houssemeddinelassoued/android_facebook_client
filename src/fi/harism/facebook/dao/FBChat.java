@@ -18,15 +18,15 @@ import fi.harism.facebook.net.FBClient;
 public class FBChat {
 
 	// Actual chat implementation instance.
-	private ChatHandler chatHandler;
+	private ChatHandler mChatHandler;
 	// FBClient instance.
-	private FBClient fbClient;
+	private FBClient mFBClient;
 	// User map.
-	private HashMap<String, FBUser> userMap;
+	private HashMap<String, FBUser> mUserMap;
 	// Our ChatHandler observer.
-	private FBChatObserver chatObserver;
+	private FBChatObserver mChatObserver;
 	// Client observer.
-	private Observer observer;
+	private Observer mObserver;
 
 	/**
 	 * Default constructor.
@@ -38,26 +38,12 @@ public class FBChat {
 	 */
 	FBChat(ChatHandler chatHandler, FBClient fbClient,
 			HashMap<String, FBUser> userMap, Observer observer) {
-		this.chatHandler = chatHandler;
-		this.fbClient = fbClient;
-		this.userMap = userMap;
-		this.observer = observer;
-		chatObserver = new FBChatObserver();
-		chatHandler.addObserver(chatObserver);
-	}
-
-	/**
-	 * This method should be called once owner is about to be destroyed.
-	 */
-	public void onDestroy() {
-		chatHandler.removeObserver(chatObserver);
-	}
-
-	/**
-	 * Returns log for debugging and implementation causes.
-	 */
-	public String getLog() {
-		return chatHandler.getLog();
+		mChatHandler = chatHandler;
+		mFBClient = fbClient;
+		mUserMap = userMap;
+		mObserver = observer;
+		mChatObserver = new FBChatObserver();
+		chatHandler.addObserver(mChatObserver);
 	}
 
 	/**
@@ -66,10 +52,10 @@ public class FBChat {
 	public void connect() throws IOException {
 		Bundle params = new Bundle();
 		params.putString("method", "auth.promoteSession");
-		String secret = fbClient.request(params);
+		String secret = mFBClient.request(params);
 		// Access token is a string of form aaaa|bbbb|cccc
 		// where bbbb is session key.
-		String[] split = fbClient.getAccessToken().split("\\|");
+		String[] split = mFBClient.getAccessToken().split("\\|");
 		if (split.length != 3) {
 			// It is possible FB changes access token eventually.
 			throw new IOException("Malformed access token.");
@@ -77,7 +63,21 @@ public class FBChat {
 		String sessionKey = split[1];
 		String sessionSecret = secret.replace("\"", "");
 
-		chatHandler.connect(sessionKey, sessionSecret);
+		mChatHandler.connect(sessionKey, sessionSecret);
+	}
+
+	/**
+	 * Disconnects underlying ChatConnection.
+	 */
+	public void disconnect() {
+		mChatHandler.disconnect();
+	}
+
+	/**
+	 * Returns log for debugging and implementation causes.
+	 */
+	public String getLog() {
+		return mChatHandler.getLog();
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class FBChat {
 	 * been observing presence changes.
 	 */
 	public Vector<FBUser> getUsers() {
-		Vector<ChatUser> users = chatHandler.getUsers();
+		Vector<ChatUser> users = mChatHandler.getUsers();
 		Vector<FBUser> out = new Vector<FBUser>();
 		for (ChatUser user : users) {
 			String jid = user.getJID();
@@ -94,10 +94,10 @@ public class FBChat {
 			if (id.charAt(0) == '-') {
 				id = id.substring(1);
 			}
-			FBUser u = userMap.get(id);
+			FBUser u = mUserMap.get(id);
 			if (u == null) {
-				u = new FBUser(fbClient, id);
-				userMap.put(id, u);
+				u = new FBUser(mFBClient, id);
+				mUserMap.put(id, u);
 			}
 			FBUser.Presence presence;
 			switch (user.getPresence()) {
@@ -111,27 +111,27 @@ public class FBChat {
 				presence = FBUser.Presence.GONE;
 				break;
 			}
-			u.presence = presence;
+			u.mPresence = presence;
 			out.add(u);
 		}
 		return out;
 	}
 
 	/**
-	 * Sends message to given user.
+	 * This method should be called once owner is about to be destroyed.
 	 */
-	public void sendMessage(FBUser to, String message) {
-		ChatUser user = chatHandler.getUser(to.getJid());
-		if (user != null) {
-			chatHandler.sendMessage(user, message);
-		}
+	public void onDestroy() {
+		mChatHandler.removeObserver(mChatObserver);
 	}
 
 	/**
-	 * Disconnects underlying ChatConnection.
+	 * Sends message to given user.
 	 */
-	public void disconnect() {
-		chatHandler.disconnect();
+	public void sendMessage(FBUser to, String message) {
+		ChatUser user = mChatHandler.getUser(to.getJid());
+		if (user != null) {
+			mChatHandler.sendMessage(user, message);
+		}
 	}
 
 	public interface Observer {
@@ -139,21 +139,34 @@ public class FBChat {
 
 		public void onDisconnected();
 
-		public void onPresenceChanged(FBUser user);
-
 		public void onMessage(FBUser from, String message);
+
+		public void onPresenceChanged(FBUser user);
 	}
 
 	private class FBChatObserver implements ChatObserver.Handler {
 
 		@Override
 		public void onConnected() {
-			observer.onConnected();
+			mObserver.onConnected();
 		}
 
 		@Override
 		public void onDisconnected() {
-			observer.onDisconnected();
+			mObserver.onDisconnected();
+		}
+
+		@Override
+		public void onMessage(ChatUser from, String message) {
+			String jid = from.getJID();
+			String id = jid.substring(0, jid.indexOf('@'));
+			if (id.charAt(0) == '-') {
+				id = id.substring(1);
+			}
+			FBUser user = mUserMap.get(id);
+			if (user != null) {
+				mObserver.onMessage(user, message);
+			}
 		}
 
 		@Override
@@ -176,28 +189,15 @@ public class FBChat {
 				break;
 			}
 
-			FBUser u = userMap.get(id);
+			FBUser u = mUserMap.get(id);
 			if (u == null) {
-				u = new FBUser(fbClient, id);
-				userMap.put(id, u);
+				u = new FBUser(mFBClient, id);
+				mUserMap.put(id, u);
 			}
 
-			u.jid = jid;
-			u.presence = presence;
-			observer.onPresenceChanged(u);
-		}
-
-		@Override
-		public void onMessage(ChatUser from, String message) {
-			String jid = from.getJID();
-			String id = jid.substring(0, jid.indexOf('@'));
-			if (id.charAt(0) == '-') {
-				id = id.substring(1);
-			}
-			FBUser user = userMap.get(id);
-			if (user != null) {
-				observer.onMessage(user, message);
-			}
+			u.mJid = jid;
+			u.mPresence = presence;
+			mObserver.onPresenceChanged(u);
 		}
 	}
 

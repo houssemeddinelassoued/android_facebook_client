@@ -8,18 +8,18 @@ package fi.harism.facebook.dao;
 public class FBComment {
 
 	// Comment id.
-	private String id;
+	private String mId;
 	// Sender id.
-	String fromId;
+	String mFromId;
 	// Sender name.
-	String fromName;
+	String mFromName;
 	// Comment message/content.
-	String message;
+	String mMessage;
 	// Creation time.
-	String createdTime;
+	String mCreatedTime;
 
 	FBComment(String id) {
-		this.id = id;
+		mId = id;
 	}
 
 	/**
@@ -27,35 +27,35 @@ public class FBComment {
 	 * created/posted.
 	 */
 	public String getCreatedTime() {
-		return createdTime;
+		return mCreatedTime;
 	}
 
 	/**
 	 * Returns user id for person who sent the comment.
 	 */
 	public String getFromId() {
-		return fromId;
+		return mFromId;
 	}
 
 	/**
 	 * Returns name of person who sent the comment.
 	 */
 	public String getFromName() {
-		return fromName;
+		return mFromName;
 	}
 
 	/**
 	 * Returns comment id.
 	 */
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * Returns comment content/message.
 	 */
 	public String getMessage() {
-		return message;
+		return mMessage;
 	}
 
 }
