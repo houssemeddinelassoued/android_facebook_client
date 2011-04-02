@@ -32,8 +32,12 @@ public class FBUser {
 	private FBClient mFBClient;
 	// User id.
 	private String mId = null;
+	// User sex.
+	String mSex = null;
 	// User Jabber id.
 	String mJid = null;
+	// User birthday.
+	String mBirthday = null;
 	// User name.
 	String mName = null;
 	// User picture url.
@@ -55,7 +59,7 @@ public class FBUser {
 	// User information level.
 	Level mLevel;
 	// SELECT clause for FQL query.
-	private static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";;
+	static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";;
 
 	/**
 	 * Default constructor.
@@ -81,6 +85,13 @@ public class FBUser {
 	}
 
 	/**
+	 * Returns user's birthday.
+	 */
+	public String getBirthday() {
+		return mBirthday;
+	}
+
+	/**
 	 * Returns user's current location.
 	 */
 	public String getCurrentLocation() {
@@ -93,7 +104,7 @@ public class FBUser {
 	public String getEmail() {
 		return mEmail;
 	}
-
+	
 	/**
 	 * Returns user's home town name.
 	 */
@@ -114,7 +125,7 @@ public class FBUser {
 	public String getJid() {
 		return mJid;
 	}
-
+	
 	/**
 	 * Returns information level for this FBUser instance.
 	 */
@@ -141,6 +152,13 @@ public class FBUser {
 	 */
 	public Presence getPresence() {
 		return mPresence;
+	}
+
+	/**
+	 * Returns user's sex.
+	 */
+	public String getSex() {
+		return mSex;
 	}
 
 	/**
@@ -171,11 +189,7 @@ public class FBUser {
 			Bundle params = new Bundle();
 			params.putString("fields", "name, picture");
 			JSONObject response = mFBClient.request(mId, params);
-			this.mName = response.getString("name");
-			this.mPicture = response.getString("picture");
-			if (this.mLevel != Level.FULL) {
-				this.mLevel = Level.DEFAULT;
-			}
+			update(response, Level.DEFAULT);
 		} else if (level == Level.FULL) {
 			String uid = mId;
 			if (uid.equals("me")) {
@@ -194,17 +208,50 @@ public class FBUser {
 			}
 
 			JSONObject userObj = data.getJSONObject(0);
-
-			this.mName = userObj.getString("name");
-			this.mPicture = userObj.getString("pic_square");
+			update(userObj, Level.FULL);
+		}
+	}
+	
+	/**
+	 * Updates user information from provided JSONObject.
+	 * 
+	 * @param userObj
+	 * @param level
+	 * @throws JSONException
+	 */
+	void update(JSONObject userObj, Level level) throws JSONException {
+		if (level == Level.DEFAULT) {
+			mName = userObj.getString("name");
+			mPicture = userObj.getString("picture");
+			if (mLevel != Level.FULL) {
+				mLevel = Level.DEFAULT;
+			}
+		} else if (level == Level.FULL) {
+			mName = userObj.getString("name");
+			mPicture = userObj.getString("pic_square");
 
 			JSONObject statusObj = userObj.optJSONObject("status");
 			if (statusObj != null) {
-				this.mStatus = statusObj.getString("message");
+				mStatus = statusObj.getString("message");
 			}
-
-			this.mLevel = Level.FULL;
+			
+			mAffiliations.clear();
+			JSONArray affiliations = userObj.optJSONArray("affiliations");
+			if (affiliations != null) {
+				for (int j=0; j<affiliations.length(); ++j) {
+					mAffiliations.add(affiliations.getJSONObject(j)
+							.getString("name"));
+				}
+			}
+			
+			mBirthday = userObj.optString("birthday", null);
+			mSex = userObj.optString("sex", null);
+			mWebsite = userObj.optString("website", null);
+			mEmail = userObj.optString("email", null);
+			
+			mLevel = Level.FULL;
 		}
+		
 	}
 
 	public enum Level {

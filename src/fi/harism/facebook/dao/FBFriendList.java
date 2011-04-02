@@ -22,8 +22,6 @@ public class FBFriendList {
 	private HashMap<String, FBUser> mUserMap;
 	private Vector<String> mFriendIds;
 
-	private static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";
-
 	/**
 	 * Default constructor.
 	 * 
@@ -55,14 +53,12 @@ public class FBFriendList {
 	public void load() throws IOException, JSONException, XmlPullParserException {
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT");
-		query.append(SELECT);
+		query.append(FBUser.SELECT);
 		query.append("FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me())");
 
 		JSONObject resp = mFBClient.requestFQL(query.toString());
 		JSONArray data = resp.getJSONArray("data");
 
-		// TODO: It might be a good idea to move user creation/updating to
-		// FBUser instead.
 		Vector<FBUser> tempList = new Vector<FBUser>();
 		for (int i = 0; i < data.length(); ++i) {
 			JSONObject userObj = data.getJSONObject(i);
@@ -71,24 +67,7 @@ public class FBFriendList {
 			if (user == null) {
 				user = new FBUser(mFBClient, userObj.getString("uid"));
 			}
-
-			user.mName = userObj.getString("name");
-			user.mPicture = userObj.getString("pic_square");
-
-			JSONObject statusObj = userObj.optJSONObject("status");
-			if (statusObj != null) {
-				user.mStatus = statusObj.getString("message");
-			}
-			
-			user.mAffiliations.clear();
-			JSONArray affiliations = userObj.optJSONArray("affiliations");
-			if (affiliations != null) {
-				for (int j=0; j<affiliations.length(); ++j) {
-					user.mAffiliations.add(affiliations.getJSONObject(j)
-							.getString("name"));
-				}
-			}
-
+			user.update(userObj, FBUser.Level.FULL);
 			tempList.add(user);
 		}
 
