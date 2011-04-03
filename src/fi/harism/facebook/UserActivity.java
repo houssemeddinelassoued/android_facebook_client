@@ -29,14 +29,12 @@ public class UserActivity extends BaseActivity {
 		mUserId = getIntent().getStringExtra(
 				"fi.harism.facebook.UserActivity.user");
 		FBUser fbUser = getGlobalState().getFBFactory().getUser(mUserId);
+		
+		setUserInfo(fbUser);
 		if (fbUser.getLevel() != FBUser.Level.FULL) {
 			showProgressDialog();
-			ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_user_picture);
-			picView.setBitmap(getGlobalState().getDefaultPicture());
 			ProfileRequest request = new ProfileRequest(this, fbUser);
 			getGlobalState().getRequestQueue().addRequest(request);
-		} else {
-			setUserInfo(fbUser);
 		}
 
 		Button wallButton = (Button) findViewById(R.id.activity_user_button_wall);
@@ -73,9 +71,11 @@ public class UserActivity extends BaseActivity {
 	}
 
 	private void setUserInfo(FBUser fbUser) {
-		TextView nameView = (TextView) findViewById(R.id.activity_user_name);
-		nameView.setText(fbUser.getName());
 		mUserName = fbUser.getName();
+		if (fbUser.getName() != null) {
+			TextView nameView = (TextView) findViewById(R.id.activity_user_name);
+			nameView.setText(fbUser.getName());
+		}
 
 		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_user_picture);
 		FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
@@ -167,6 +167,7 @@ public class UserActivity extends BaseActivity {
 				mFBUser.load(FBUser.Level.FULL);
 			} catch (Exception ex) {
 				hideProgressDialog();
+				showAlertDialog(ex.toString());
 				throw ex;
 			}
 		}
