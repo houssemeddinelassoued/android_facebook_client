@@ -97,8 +97,8 @@ public class UserActivity extends BaseActivity {
 		if (fbUser.getBirthday() != null) {
 			details.addView(createDetailView("Birthday", fbUser.getBirthday()));
 		}
-		if (fbUser.getSex() != null) {
-			details.addView(createDetailView("Sex", fbUser.getSex()));
+		if (fbUser.getGender() != null) {
+			details.addView(createDetailView("Gender", fbUser.getGender()));
 		}
 		if (fbUser.getAffiliations().size() > 0) {
 			String networks = TextUtils.join(", ", fbUser.getAffiliations());
@@ -110,13 +110,15 @@ public class UserActivity extends BaseActivity {
 		if (fbUser.getWebsite() != null) {
 			details.addView(createDetailView("Web Site", fbUser.getWebsite()));
 		}
-		if (fbUser.getHometownLocation() != null) {
-			details.addView(createDetailView("Hometown", fbUser.getHometownLocation()));
+		if (fbUser.getHometown() != null) {
+			details.addView(createDetailView("Hometown", fbUser.getHometown()));
 		}
-		if (fbUser.getCurrentLocation() != null) {
-			details.addView(createDetailView("Current Location", fbUser.getCurrentLocation()));
+		if (fbUser.getLocation() != null) {
+			details.addView(createDetailView("Current Location", fbUser.getLocation()));
 		}
-		
+		if (fbUser.getPhone() != null) {
+			details.addView(createDetailView("Phone", fbUser.getPhone()));
+		}
 		
 	}
 	
