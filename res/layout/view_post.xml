@@ -21,10 +21,9 @@
 			android:orientation="vertical" >
 			<TextView
 				style="@style/contentTextBold"
-				android:layout_width="wrap_content"
+				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				android:singleLine="true"
-				android:ellipsize="end"
 				android:id="@+id/view_post_from" />
 			<TextView
 				style="@style/contentText"
