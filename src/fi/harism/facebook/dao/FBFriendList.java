@@ -9,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.os.Bundle;
+
 import fi.harism.facebook.net.FBClient;
 
 /**
@@ -50,24 +52,22 @@ public class FBFriendList {
 	/**
 	 * Loads/updates friend list.
 	 */
-	public void load() throws IOException, JSONException, XmlPullParserException {
-		StringBuilder query = new StringBuilder();
-		query.append("SELECT");
-		query.append(FBUser.SELECT);
-		query.append("FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me())");
-
-		JSONObject resp = mFBClient.requestFQL(query.toString());
+	public void load() throws IOException, JSONException, XmlPullParserException {	
+		Bundle params = new Bundle();
+		params.putString("fields", "id, name, picture");
+		JSONObject resp = mFBClient.request("me/friends", params);
+		
 		JSONArray data = resp.getJSONArray("data");
 
 		Vector<FBUser> tempList = new Vector<FBUser>();
 		for (int i = 0; i < data.length(); ++i) {
 			JSONObject userObj = data.getJSONObject(i);
 
-			FBUser user = mUserMap.get(userObj.getString("uid"));
+			FBUser user = mUserMap.get(userObj.getString("id"));
 			if (user == null) {
-				user = new FBUser(mFBClient, userObj.getString("uid"));
+				user = new FBUser(mFBClient, userObj.getString("id"));
 			}
-			user.update(userObj, FBUser.Level.FULL);
+			user.update(userObj, FBUser.Level.DEFAULT);
 			tempList.add(user);
 		}
 
