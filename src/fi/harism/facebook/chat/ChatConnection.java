@@ -20,8 +20,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import android.util.Base64;
-
 /**
  * Class for actual chat connection. Once connect method has been called it
  * opens a socket connection to chat server, starts login procedure etc., and
@@ -368,8 +366,7 @@ public class ChatConnection {
 			NoSuchAlgorithmException, XmlPullParserException {
 
 		parser.require(XmlPullParser.START_TAG, null, "challenge");
-		String challenge = new String(Base64.decode(parser.nextText(),
-				Base64.DEFAULT));
+		String challenge = new String(Base64.decode(parser.nextText()));
 
 		String params[] = challenge.split("&");
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -415,8 +412,7 @@ public class ChatConnection {
 
 		StringBuilder out = new StringBuilder();
 		out.append("<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>");
-		out.append(Base64.encodeToString(response.toString().getBytes(),
-				Base64.NO_WRAP));
+		out.append(Base64.encodeToString(response.toString().getBytes(), false));
 		out.append("</response>");
 
 		writer.write(out.toString());
