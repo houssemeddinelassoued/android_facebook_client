@@ -185,9 +185,10 @@ public class FeedActivity extends BaseActivity {
 			View postView = createPostView(post);
 			postView.setTag(post.getId());
 
+			ImageView imageView = (ImageView) postView
+					.findViewById(R.id.view_post_picture);
 			if (post.getPicture() != null) {
-				ImageView imageView = (ImageView) postView
-						.findViewById(R.id.view_post_picture);
+				imageView.setVisibility(View.VISIBLE);
 				FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
 						post.getPicture());
 				Bitmap bitmap = fbBitmap.getBitmap();
@@ -198,6 +199,8 @@ public class FeedActivity extends BaseActivity {
 							imageView, fbBitmap);
 					getGlobalState().getRequestQueue().addRequest(request);
 				}
+			} else {
+				imageView.setVisibility(View.GONE);
 			}
 
 			ProfilePictureView profilePic = (ProfilePictureView) postView

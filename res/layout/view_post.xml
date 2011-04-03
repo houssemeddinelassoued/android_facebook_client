@@ -16,19 +16,21 @@
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
 			android:layout_marginLeft="5dp"
+			android:layout_gravity="center_vertical"
 			android:orientation="vertical" >
 			<TextView
 				style="@style/contentTextBold"
-				android:layout_width="fill_parent"
+				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:ellipsize="marquee"
 				android:id="@+id/view_post_from" />
 			<TextView
 				style="@style/contentText"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:id="@+id/view_post_message" />				
+				android:id="@+id/view_post_message" />
 		</LinearLayout>
 	</LinearLayout>
 	
@@ -46,30 +48,30 @@
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="10dp"
 			android:orientation="vertical" >
-			<LinearLayout
+			<RelativeLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content" >
 				<ImageView
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
+					android:layout_marginRight="5dp"
 					android:id="@+id/view_post_picture" />
-				<LinearLayout
-					android:layout_width="fill_parent"
+				<TextView
+					style="@style/contentTextBold"
+					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_marginLeft="5dp"
-					android:orientation="vertical" >
-					<TextView
-						style="@style/contentTextBold"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:id="@+id/view_post_name" />
-					<TextView
-						style="@style/contentText"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:id="@+id/view_post_caption" />
-				</LinearLayout>
-			</LinearLayout>
+					android:layout_toRightOf="@id/view_post_picture"
+					android:layout_alignWithParentIfMissing="true"
+					android:id="@+id/view_post_name" />
+				<TextView
+					style="@style/contentText"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_toRightOf="@id/view_post_picture"
+					android:layout_below="@id/view_post_name"
+					android:layout_alignWithParentIfMissing="true"
+					android:id="@+id/view_post_caption" />
+			</RelativeLayout>
 			<TextView
 				style="@style/contentText"
 				android:layout_width="wrap_content"
