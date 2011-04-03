@@ -61,9 +61,9 @@ public class FBClient {
 			String permissions[] = {
 					// For reading streams and posting comments.
 					"read_stream", "publish_stream",
-					// Not much in use at the moment.
+					// For latest status message.
 					"user_status", "friends_status",
-					// Needed to login to chat.facebook.com.
+					// Needed for login to chat.facebook.com.
 					"xmpp_login" };
 			// Call actual authorization procedure.
 			facebook.authorize(activity, permissions,
