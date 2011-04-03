@@ -41,6 +41,25 @@ public class FQLParser {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if current tag is a null value.
+	 * 
+	 * @param parser
+	 * @return
+	 * @throws IOException
+	 * @throws XmlPullParserException
+	 */
+	public static boolean isNull(XmlPullParser parser) throws IOException,
+			XmlPullParserException {
+		parser.require(XmlPullParser.START_TAG, null, null);
+		for (int i = 0; i < parser.getAttributeCount(); ++i) {
+			if (parser.getAttributeName(i).equals("xsi:nil")) {
+				return parser.getAttributeValue(i).equals("true");
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Parses xml from given InputStream and converts it to JSON presentation.
@@ -126,6 +145,13 @@ public class FQLParser {
 			throws IOException, JSONException, XmlPullParserException {
 		String name = parser.getName();
 		parser.require(XmlPullParser.START_TAG, null, name);
+		
+		if (isNull(parser)) {
+			parser.nextTag();
+			parser.require(XmlPullParser.END_TAG, null, name);
+			return;
+		}		
+		
 		stringer.key(name);
 
 		if (isList(parser)) {
