@@ -124,11 +124,6 @@ public class MainActivity extends BaseActivity {
 	}
 
 	@Override
-	public final Dialog onCreateDialog(int id) {
-		return onCreateDialog(id, null);
-	}
-
-	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		getGlobalState().getRequestQueue().removeRequests(this);
