@@ -106,12 +106,9 @@ public class FeedActivity extends BaseActivity {
 		// Create default Feed Item view.
 		View postView = getLayoutInflater().inflate(R.layout.view_post, null);
 
-		// We need id of sender later on to trigger profile picture loading.
-		String fromId = post.getFromId();
-		// Get sender's name or use empty string if none found.
-		String fromName = post.getFromName();
-
 		// Set sender's name.
+		String fromId = post.getFromId();
+		String fromName = post.getFromName();
 		TextView fromView = (TextView) postView
 				.findViewById(R.id.view_post_from);
 		StringUtils.setTextLink(fromView, fromName, PROTOCOL_SHOW_PROFILE
