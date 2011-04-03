@@ -32,8 +32,8 @@ public class FBUser {
 	private FBClient mFBClient;
 	// User id.
 	private String mId = null;
-	// User sex.
-	String mSex = null;
+	// User gender.
+	String mGender = null;
 	// User Jabber id.
 	String mJid = null;
 	// User birthday.
@@ -45,21 +45,27 @@ public class FBUser {
 	// Latest status message.
 	String mStatus = null;
 	// Home town name.
-	String mHometownLocation = null;
+	String mHometown = null;
 	// Current location.
-	String mCurrentLocation = null;
+	String mLocation = null;
 	// Email address.
 	String mEmail = null;
 	// Web site.
 	String mWebsite = null;
+	// Phone number.
+	String mPhone;
 	// 'Networks'.
 	Vector<String> mAffiliations;
 	// Current presence, chat related.
 	Presence mPresence;
 	// User information level.
 	Level mLevel;
-	// SELECT clause for FQL query.
-	static final String SELECT = " uid, name, pic_square, affiliations, birthday,sex, hometown_location, current_location, status, website, email ";;
+	// Fields required for DEFAULT level.
+	static final String FIELDS_DEFAULT = "id, name, picture";
+	// Fields required for FULL level (for page).
+	static final String FIELDS_PAGE = "id, name, picture, birthday, hometown, location, statuses, website, phone";
+	// SELECT clause for FULL level FQL query (for user).
+	static final String SELECT = " uid, name, pic_square, affiliations, birthday, sex, hometown_location, current_location, status, website, email ";
 
 	/**
 	 * Default constructor.
@@ -76,7 +82,7 @@ public class FBUser {
 		mLevel = Level.UNINITIALIZED;
 		mAffiliations = new Vector<String>();
 	}
-
+	
 	/**
 	 * Returns list of user's affiliations/networks.
 	 */
@@ -94,8 +100,8 @@ public class FBUser {
 	/**
 	 * Returns user's current location.
 	 */
-	public String getCurrentLocation() {
-		return mCurrentLocation;
+	public String getLocation() {
+		return mLocation;
 	}
 
 	/**
@@ -106,10 +112,17 @@ public class FBUser {
 	}
 	
 	/**
+	 * Returns's user's phone number (available only for pages).
+	 */
+	public String getPhone() {
+		return mPhone;
+	}
+	
+	/**
 	 * Returns user's home town name.
 	 */
-	public String getHometownLocation() {
-		return mHometownLocation;
+	public String getHometown() {
+		return mHometown;
 	}
 
 	/**
@@ -155,10 +168,10 @@ public class FBUser {
 	}
 
 	/**
-	 * Returns user's sex.
+	 * Returns user's gender.
 	 */
-	public String getSex() {
-		return mSex;
+	public String getGender() {
+		return mGender;
 	}
 
 	/**
@@ -187,7 +200,7 @@ public class FBUser {
 			XmlPullParserException {
 		if (level == Level.DEFAULT) {
 			Bundle params = new Bundle();
-			params.putString("fields", "name, picture");
+			params.putString("fields", FIELDS_DEFAULT);
 			JSONObject response = mFBClient.request(mId, params);
 			update(response, Level.DEFAULT);
 		} else if (level == Level.FULL) {
@@ -203,12 +216,15 @@ public class FBUser {
 
 			JSONObject resp = mFBClient.requestFQL(query.toString());
 			JSONArray data = resp.getJSONArray("data");
-			if (data.length() != 1) {
-				throw new IOException("Received more than 1 user information.");
+			if (data.length() == 1) {
+				resp = data.getJSONObject(0);
+			} else {
+				Bundle params = new Bundle();
+				params.putString("limit", "1");
+				params.putString("fields", FIELDS_PAGE);
+				resp = mFBClient.request(mId, params);
 			}
-
-			JSONObject userObj = data.getJSONObject(0);
-			update(userObj, Level.FULL);
+			update(resp, Level.FULL);
 		}
 	}
 	
@@ -227,27 +243,51 @@ public class FBUser {
 				mLevel = Level.DEFAULT;
 			}
 		} else if (level == Level.FULL) {
-			mName = userObj.getString("name");
-			mPicture = userObj.getString("pic_square");
+			if (userObj.opt("id") != null) {			
+				mName = userObj.getString("name");
+				mPicture = userObj.getString("picture");
 
-			JSONObject statusObj = userObj.optJSONObject("status");
-			if (statusObj != null) {
-				mStatus = statusObj.getString("message");
-			}
-			
-			mAffiliations.clear();
-			JSONArray affiliations = userObj.optJSONArray("affiliations");
-			if (affiliations != null) {
-				for (int j=0; j<affiliations.length(); ++j) {
-					mAffiliations.add(affiliations.getJSONObject(j)
-							.getString("name"));
+				mStatus = null;
+				JSONObject statusObj = userObj.optJSONObject("statuses");
+				if (statusObj != null) {
+					JSONArray data = statusObj.getJSONArray("data");
+					if (data.length() > 0) {
+						mStatus = data.getJSONObject(0).getString("message");
+					}
 				}
-			}
 			
-			mBirthday = userObj.optString("birthday", null);
-			mSex = userObj.optString("sex", null);
-			mWebsite = userObj.optString("website", null);
-			mEmail = userObj.optString("email", null);
+				mBirthday = userObj.optString("birthday", null);
+				mGender = userObj.optString("gender", null);
+				mWebsite = userObj.optString("website", null);
+				mEmail = userObj.optString("email", null);
+				mPhone = userObj.optString("phone", null);
+				mHometown = userObj.optString("hometown", null);
+				mLocation = userObj.optString("location", null);
+			} else {
+				mName = userObj.getString("name");
+				mPicture = userObj.getString("pic_square");
+
+				JSONObject statusObj = userObj.optJSONObject("status");
+				if (statusObj != null) {
+					mStatus = statusObj.getString("message");
+				}
+				
+				mAffiliations.clear();
+				JSONArray affiliations = userObj.optJSONArray("affiliations");
+				if (affiliations != null) {
+					for (int j=0; j<affiliations.length(); ++j) {
+						mAffiliations.add(affiliations.getJSONObject(j)
+								.getString("name"));
+					}
+				}
+				
+				mBirthday = userObj.optString("birthday", null);
+				mGender = userObj.optString("sex", null);
+				mWebsite = userObj.optString("website", null);
+				mEmail = userObj.optString("email", null);
+				mHometown = userObj.optString("hometown_location", null);
+				mLocation = userObj.optString("current_location", null);
+			}
 			
 			mLevel = Level.FULL;
 		}
