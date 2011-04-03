@@ -40,9 +40,9 @@
 	<string name="chat_session_title">Chat with > %s</string>
 	<string name="chat_session_button_send">Send</string>
 	
-	<!-- Comments Dialog -->
-	<string name="dialog_comments_title">Comments</string>
-	<string name="dialog_comments_send">Send</string>
+	<!-- Post Activity -->
+	<string name="activity_post_title">Comments</string>
+	<string name="activity_post_button_send">Send</string>
 	
 	<!-- Profile Dialog -->
 	<string name="dialog_profile_title">Profile</string>

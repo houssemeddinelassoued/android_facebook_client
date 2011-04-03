@@ -33,9 +33,12 @@ public class FeedActivity extends BaseActivity {
 	// Rounding radius for user picture.
 	// TODO: Move this value to resources instead.
 	private static final int PICTURE_ROUND_RADIUS = 7;
-
 	// Span onClick observer for profile protocol.
-	private SpanClickObserver mSpanClickObserver = null;
+	private SpanClickObserver mSpanClickObserver;
+	// Feed path.
+	private String mFeedPath;
+	// Observer for post onClick events.
+	private PostClickObserver mPostClickObserver;
 	// Static protocol name for showing profile.
 	private static final String PROTOCOL_SHOW_PROFILE = "showprofile://";
 
@@ -51,14 +54,16 @@ public class FeedActivity extends BaseActivity {
 				PICTURE_ROUND_RADIUS);
 
 		mSpanClickObserver = new SpanClickObserver();
+		mPostClickObserver = new PostClickObserver();
 
 		TextView title = (TextView) findViewById(R.id.header);
 		title.setText(getIntent().getStringExtra(
 				"fi.harism.facebook.FeedActivity.title"));
 
-		final FBFeed fbFeed = getGlobalState().getFBFactory().getFeed(
-				getIntent().getStringExtra(
-						"fi.harism.facebook.FeedActivity.path"));
+		mFeedPath = getIntent().getStringExtra(
+				"fi.harism.facebook.FeedActivity.path");
+		final FBFeed fbFeed = getGlobalState().getFBFactory()
+				.getFeed(mFeedPath);
 		final Activity self = this;
 
 		View updateButton = findViewById(R.id.activity_feed_button_update);
@@ -223,7 +228,8 @@ public class FeedActivity extends BaseActivity {
 					getGlobalState().getRequestQueue().addRequest(request);
 				}
 			}
-
+			
+			postView.setOnClickListener(mPostClickObserver);
 			contentView.addView(postView);
 		}
 
@@ -344,5 +350,20 @@ public class FeedActivity extends BaseActivity {
 			}
 			return false;
 		}
+	}
+	
+	/**
+	 * Click observer for post items.
+	 */
+	private final class PostClickObserver implements View.OnClickListener {
+		@Override
+		public void onClick(View v) {
+			String postId = (String)v.getTag();
+			Intent i = createIntent(PostActivity.class);
+			i.putExtra(PostActivity.INTENT_FEED_PATH, mFeedPath);
+			i.putExtra(PostActivity.INTENT_POST_ID, postId);
+			startActivity(i);
+		}
+		
 	}
 }

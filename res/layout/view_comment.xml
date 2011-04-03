@@ -8,17 +8,17 @@
 		style="@style/contentTextBold"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/dialog_comments_item_from_text" />
+		android:id="@+id/view_comment_from" />
 	<TextView
 		style="@style/contentText"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/dialog_comments_item_message_text" />
+		android:id="@+id/view_comment_message" />
 	<TextView
 		style="@style/contentTextSmall"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/dialog_comments_item_created_text" />
+		android:id="@+id/view_comment_details" />
 	<ImageView
 		android:layout_width="fill_parent"
 		android:layout_height="2px"

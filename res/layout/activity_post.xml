@@ -7,7 +7,7 @@
 		style="@style/headerContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="@string/dialog_comments_title"
+		android:text="@string/activity_post_title"
 		android:id="@+id/header"/>
 	<RelativeLayout
 		style="@style/footerContainer"
@@ -21,14 +21,14 @@
 			android:layout_height="wrap_content"
 			android:layout_alignParentRight="true"
 			android:layout_marginLeft="5dp"
-			android:text="@string/dialog_comments_send"
-			android:id="@+id/dialog_comments_button_send" />
+			android:text="@string/activity_post_button_send"
+			android:id="@+id/activity_post_button_send" />
 		<EditText
 			style="@style/editText"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/dialog_comments_button_send"
-			android:id="@+id/dialog_comments_edit" />
+			android:layout_toLeftOf="@id/activity_post_button_send"
+			android:id="@+id/activity_post_edit" />
 	</RelativeLayout>
 	<ScrollView
 		style="@style/contentContainer"
@@ -41,7 +41,7 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
 			android:padding="5dp"
-			android:id="@+id/dialog_comments_item_list" />
+			android:id="@+id/activity_post_content" />
 	</ScrollView>
 </RelativeLayout>
 

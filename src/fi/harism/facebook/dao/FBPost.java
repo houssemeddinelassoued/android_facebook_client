@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.util.Log;
 import fi.harism.facebook.net.FBClient;
 
 /**
@@ -19,24 +20,36 @@ public class FBPost {
 
 	private FBClient mFBClient;
 	private String mId;
-	String mType;
-	String mFromId;
-	String mFromName;
-	String mMessage;
-	String mPicture;
-	String mLink;
-	String mName;
-	String mCaption;
-	String mDescription;
-	String mCreatedTime;
-	Vector<FBComment> mComments;
-	int mCommentsCount;
-	int mLikesCount;
+	private String mType;
+	private String mFromId;
+	private String mFromName;
+	private String mToId;
+	private String mToName;
+	private String mMessage;
+	private String mPicture;
+	private String mLink;
+	private String mName;
+	private String mCaption;
+	private String mDescription;
+	private String mCreatedTime;
+	private Vector<FBComment> mComments;
+	private int mCommentsCount;
+	private int mLikesCount;
+
+	static final String FIELDS = "id,type,from,to,message,picture,link,name,caption,description,created_time,comments,likes";
 
 	FBPost(FBClient fbClient, String id) {
 		mFBClient = fbClient;
 		mId = id;
 		mComments = new Vector<FBComment>();
+	}
+
+	public String getToId() {
+		return mToId;
+	}
+
+	public String getToName() {
+		return mToName;
 	}
 
 	public String getCaption() {
@@ -90,7 +103,11 @@ public class FBPost {
 	public String getType() {
 		return mType;
 	}
-
+	
+	public Vector<FBComment> getComments() {
+		return mComments;
+	}
+	
 	/**
 	 * Loads all comments for this post. Usually there are 2-3 comments max
 	 * loaded from FBFeed but not all.
@@ -125,6 +142,102 @@ public class FBPost {
 				mComments.add(c);
 			}
 		}
+		mCommentsCount = mComments.size();
+	}
+	
+	public void update() throws IOException, JSONException {
+		Bundle params = new Bundle();
+		params.putString(FBClient.TOKEN, mFBClient.getAccessToken());
+		JSONObject resp = mFBClient.request(mId, params);
+		
+		JSONObject likesObj = resp.optJSONObject("likes");
+		if (likesObj != null) {
+			mLikesCount = likesObj.getInt("count");
+		}
+		
+		mComments.clear();
+		JSONObject commentsObj = resp.optJSONObject("comments");
+		if (commentsObj != null) {
+			mCommentsCount = commentsObj.getInt("count");
+			JSONArray commentsData = commentsObj.optJSONArray("data");
+			if (commentsData != null) {
+				for (int i=0; i<commentsData.length(); ++i) {
+					JSONObject comment = commentsData.getJSONObject(i);
+					FBComment c = new FBComment(comment.getString("id"));
+					// TODO: What to do with null values here.
+					if (comment.optJSONObject("from") != null) {
+						c.mFromId = comment.getJSONObject("from").getString(
+								"id");
+						c.mFromName = comment.getJSONObject("from").getString(
+								"name");
+					} else {
+						c.mFromId = null;
+						c.mFromName = null;
+					}
+					c.mMessage = comment.getString("message");
+					c.mCreatedTime = comment.getString("created_time");
+					mComments.add(c);					
+				}
+			}
+		}	
+	}
+
+	void update(JSONObject postObj) throws JSONException {
+		mType = postObj.getString("type");
+		mFromId = postObj.getJSONObject("from").getString("id");
+		mFromName = postObj.getJSONObject("from").getString("name");
+
+		// TODO: Handle multiple receivers?
+		JSONObject to = postObj.optJSONObject("to");
+		if (to != null) {
+			mToId = to.getJSONArray("data").getJSONObject(0).getString("id");
+			mToName = to.getJSONArray("data").getJSONObject(0)
+					.getString("name");
+		} else {
+			mToId = mToName = null;
+		}
+
+		mMessage = postObj.optString("message", null);
+		mPicture = postObj.optString("picture", null);
+		mLink = postObj.optString("link", null);
+		mName = postObj.optString("name", null);
+		mCaption = postObj.optString("caption", null);
+		mDescription = postObj.optString("description", null);
+		mCreatedTime = postObj.optString("created_time", null);
+
+		mComments.clear();
+		if (postObj.optJSONObject("comments") != null) {
+			JSONObject comments = postObj.getJSONObject("comments");
+			JSONArray commentsData = comments.optJSONArray("data");
+			if (commentsData != null) {
+				for (int j = 0; j < commentsData.length(); ++j) {
+					JSONObject comment = commentsData.getJSONObject(j);
+					FBComment c = new FBComment(comment.getString("id"));
+					// TODO: What to do with null values here.
+					if (comment.optJSONObject("from") != null) {
+						c.mFromId = comment.getJSONObject("from").getString(
+								"id");
+						c.mFromName = comment.getJSONObject("from").getString(
+								"name");
+					} else {
+						c.mFromId = null;
+						c.mFromName = null;
+					}
+					c.mMessage = comment.getString("message");
+					c.mCreatedTime = comment.getString("created_time");
+					mComments.add(c);
+				}
+			}
+			mCommentsCount = comments.getInt("count");
+		} else {
+			mCommentsCount = 0;
+		}
+
+		if (postObj.optJSONObject("likes") != null) {
+			mLikesCount = postObj.getJSONObject("likes").getInt("count");
+		} else {
+			mLikesCount = 0;
+		}
 	}
 
 	/**
@@ -134,7 +247,7 @@ public class FBPost {
 	 * @throws IOException
 	 * @throws JSONException
 	 */
-	public void postComment(String message) throws IOException, JSONException {
+	public void sendComment(String message) throws IOException, JSONException {
 		Bundle params = new Bundle();
 		params.putString(FBClient.TOKEN, mFBClient.getAccessToken());
 		params.putString("message", message);
