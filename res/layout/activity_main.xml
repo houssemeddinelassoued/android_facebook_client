@@ -6,46 +6,22 @@
 
 	<LinearLayout
 		style="@style/headerContainer"
-		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:id="@+id/header" >	
-		<fi.harism.facebook.view.ProfilePictureView
-			android:layout_height="42dp"
-			android:layout_width="42dp"
-			android:background="#40000000"
-			android:padding="2dp"
-			android:id="@+id/activity_main_profile_picture" />
-		<FrameLayout
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:id="@+id/header" >
+		<ImageView
+			android:layout_width="30dp"
+			android:layout_height="30dp"
+			android:layout_marginRight="2dp"
+			android:src="@drawable/pic_application_small" />
+		<TextView
+			style="@style/headerText"
+			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" >
-			<LinearLayout
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:layout_marginLeft="10dp"
-				android:layout_gravity="center_vertical"
-				android:orientation="vertical" >
-				<TextView
-					style="@style/headerText"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:id="@+id/activity_main_name" />
-				<TextView
-					style="@style/headerText"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:textStyle="normal"
-					android:id="@+id/activity_main_status" />
-			</LinearLayout>
-			<TextView
-				style="@style/headerText"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center_vertical"
-				android:layout_marginLeft="10dp"
-				android:text="@string/activity_main_loading"
-				android:id="@+id/activity_main_loading" />
-		</FrameLayout>
+			android:text="@string/app_name" />
 	</LinearLayout>
+	
 	<LinearLayout
 		style="@style/footerContainer"
 		android:layout_width="fill_parent"
@@ -60,42 +36,54 @@
 			android:text="@string/activity_main_button_logout"
 			android:id="@+id/activity_main_button_logout" />
 	</LinearLayout>
-	<ScrollView
+	
+	<LinearLayout
 		style="@style/contentContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/header"
-		android:layout_above="@id/footer" >
-		<LinearLayout
-			android:orientation="vertical"
+		android:layout_above="@id/footer"
+		android:orientation="vertical" >
+		<TextView
+			style="@style/separator"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/activity_main_current_user" />
+		<include
+			layout="@layout/view_user"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/activity_main_current_user" />
+		<TextView
+			style="@style/separator"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/activity_main_options" />
+		<ScrollView
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content" >
-			<Button
-				android:layout_height="wrap_content"
+			<!-- TODO: Implement me as GridView -->
+			<LinearLayout
 				android:layout_width="fill_parent"
-				android:id="@+id/activity_main_button_news"
-				android:text="@string/activity_main_button_news" />
-			<Button
 				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:id="@+id/activity_main_button_wall"
-				android:text="@string/activity_main_button_wall" />
-			<Button
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:id="@+id/activity_main_button_friends"
-				android:text="@string/activity_main_button_friends" />
-			<Button
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:id="@+id/activity_main_button_profile"
-				android:text="@string/activity_main_button_profile" />
-			<Button
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:id="@+id/activity_main_button_chat"
-				android:text="@string/activity_main_button_chat" />
-		</LinearLayout>
-	</ScrollView>
+				android:orientation="vertical" >
+				<include
+					layout="@layout/view_main_button"
+					android:id="@+id/activity_main_button_news" />
+				<include
+					layout="@layout/view_main_button"
+					android:id="@+id/activity_main_button_wall" />
+				<include
+					layout="@layout/view_main_button"
+					android:id="@+id/activity_main_button_friends" />
+				<include
+					layout="@layout/view_main_button"
+					android:id="@+id/activity_main_button_chat" />
+				<include
+					layout="@layout/view_main_button"
+					android:id="@+id/activity_main_button_profile" />
+			</LinearLayout>
+		</ScrollView>
+	</LinearLayout>
 
 </RelativeLayout>
