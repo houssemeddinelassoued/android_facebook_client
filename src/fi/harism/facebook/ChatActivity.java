@@ -17,7 +17,7 @@ import fi.harism.facebook.dao.FBChat;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
-import fi.harism.facebook.view.ProfilePictureView;
+import fi.harism.facebook.view.BitmapSwitcher;
 
 /**
  * TODO: This is a disaster at the moment.
@@ -134,7 +134,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		} else if (v != null) {
 			// TODO: Update user presence somehow.
 		} else {
-			v = getLayoutInflater().inflate(R.layout.view_friend, null);
+			v = getLayoutInflater().inflate(R.layout.view_user, null);
 			TextView tv = (TextView) v.findViewById(R.id.view_friend_name);
 			tv.setText(user.getName());
 
@@ -154,7 +154,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			list.addView(v);
 
 			// Set default profile picture.
-			ProfilePictureView profilePic = (ProfilePictureView) v
+			BitmapSwitcher profilePic = (BitmapSwitcher) v
 					.findViewById(R.id.view_friend_picture);
 
 			if (user.getLevel() != FBUser.Level.UNINITIALIZED) {
@@ -207,7 +207,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			nameView.setText(fbUser.getName());
 
 			// Search picture Container and set default profile picture into it.
-			ProfilePictureView profilePic = (ProfilePictureView) friendView
+			BitmapSwitcher profilePic = (BitmapSwitcher) friendView
 					.findViewById(R.id.view_friend_picture);
 			profilePic.setBitmap(BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
 					7));

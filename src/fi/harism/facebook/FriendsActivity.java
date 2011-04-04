@@ -21,7 +21,7 @@ import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.request.RequestQueue;
 import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
-import fi.harism.facebook.view.FriendView;
+import fi.harism.facebook.view.UserView;
 
 /**
  * Friends list Activity. Once created it first loads "me/friends" from Facebook
@@ -104,7 +104,7 @@ public class FriendsActivity extends BaseActivity {
 	 * @param searchText
 	 *            Current search text.
 	 */
-	private final void toggleFriendViewVisibility(FriendView friendView,
+	private final void toggleFriendViewVisibility(UserView friendView,
 			String searchText) {
 		// We are not case sensitive.
 		searchText = searchText.toLowerCase();
@@ -148,9 +148,8 @@ public class FriendsActivity extends BaseActivity {
 			String pictureUrl = friend.getPicture();
 
 			// Create default friend item view.
-			// View friendView = createFriendItem(userId, name);
-			FriendView friendView = (FriendView) getLayoutInflater().inflate(
-					R.layout.view_friend, null);
+			UserView friendView = (UserView) getLayoutInflater().inflate(
+					R.layout.view_user, null);
 			friendView.setName(name);
 			friendView.setTag(userId);
 			friendView.setOnClickListener(mFriendViewClickObserver);
@@ -182,11 +181,11 @@ public class FriendsActivity extends BaseActivity {
 	 */
 	private final class FBBitmapRequest extends RequestUI {
 
-		private FriendView mFriendView;
+		private UserView mFriendView;
 		private FBBitmap mFBBitmap;
 		private Bitmap mBitmap;
 
-		public FBBitmapRequest(Activity activity, FriendView friendView,
+		public FBBitmapRequest(Activity activity, UserView friendView,
 				FBBitmap fbBitmap) {
 			super(activity, activity);
 			mFriendView = friendView;
@@ -248,7 +247,7 @@ public class FriendsActivity extends BaseActivity {
 			LinearLayout friendList = (LinearLayout) findViewById(R.id.activity_friends_content);
 			// Iterate through all child Views.
 			for (int i = 0; i < friendList.getChildCount(); ++i) {
-				FriendView friendView = (FriendView) friendList.getChildAt(i);
+				UserView friendView = (UserView) friendList.getChildAt(i);
 				toggleFriendViewVisibility(friendView, searchText);
 			}
 		}

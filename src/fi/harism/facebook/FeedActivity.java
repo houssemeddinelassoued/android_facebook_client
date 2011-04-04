@@ -19,7 +19,7 @@ import fi.harism.facebook.request.RequestUI;
 import fi.harism.facebook.util.BitmapUtils;
 import fi.harism.facebook.util.FacebookURLSpan;
 import fi.harism.facebook.util.StringUtils;
-import fi.harism.facebook.view.ProfilePictureView;
+import fi.harism.facebook.view.BitmapSwitcher;
 
 /**
  * Feed Activity for showing feed listings.
@@ -205,7 +205,7 @@ public class FeedActivity extends BaseActivity {
 				imageView.setVisibility(View.GONE);
 			}
 
-			ProfilePictureView profilePic = (ProfilePictureView) postView
+			BitmapSwitcher profilePic = (BitmapSwitcher) postView
 					.findViewById(R.id.view_post_from_picture);
 			FBUser fbUser = getGlobalState().getFBFactory().getUser(
 					post.getFromId());
@@ -272,12 +272,12 @@ public class FeedActivity extends BaseActivity {
 	 */
 	private final class FromPictureRequest extends RequestUI {
 
-		private ProfilePictureView mProfilePic;
+		private BitmapSwitcher mProfilePic;
 		private FBUser mFBUser;
 		private FBBitmap mFBBitmap;
 
 		public FromPictureRequest(Activity activity,
-				ProfilePictureView profilePic, FBUser fbUser) {
+				BitmapSwitcher profilePic, FBUser fbUser) {
 			super(activity, activity);
 			mProfilePic = profilePic;
 			mFBUser = fbUser;

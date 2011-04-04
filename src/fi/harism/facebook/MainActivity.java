@@ -1,21 +1,17 @@
 package fi.harism.facebook;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.AlphaAnimation;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.net.FBClient;
 import fi.harism.facebook.request.RequestUI;
-import fi.harism.facebook.view.ProfilePictureView;
+import fi.harism.facebook.view.UserView;
 
 /**
  * Main Activity of this application. Once Activity is launched it starts to
@@ -26,6 +22,13 @@ import fi.harism.facebook.view.ProfilePictureView;
 public class MainActivity extends BaseActivity {
 
 	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		getGlobalState().getFBClient().authorizeCallback(requestCode,
+				resultCode, data);
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -33,25 +36,21 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.activity_main);
 		final Activity self = this;
 
-		// Set default picture as user picture.
-		Bitmap picture = getGlobalState().getDefaultPicture();
-		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_main_profile_picture);
-		picView.setBitmap(picture);
-
-		// Add onClick listener to "Friends" button.
-		Button friendsButton = (Button) findViewById(R.id.activity_main_button_friends);
-		friendsButton.setOnClickListener(new View.OnClickListener() {
+		// Add onClick listener to "Friends" button. Button friendsButton =
+		View.OnClickListener friendsListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// On click trigger friends activity.
 				Intent i = createIntent(FriendsActivity.class);
 				startActivity(i);
 			}
-		});
+		};
+		updateButton(R.id.activity_main_button_friends,
+				R.drawable.pic_button_friends,
+				R.string.activity_main_button_friends, friendsListener);
 
 		// Add onClick listener to "News Feed" button.
-		Button newsFeedButton = (Button) findViewById(R.id.activity_main_button_news);
-		newsFeedButton.setOnClickListener(new View.OnClickListener() {
+		View.OnClickListener newsListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
@@ -63,11 +62,13 @@ public class MainActivity extends BaseActivity {
 								R.string.activity_feed_news_title));
 				startActivity(i);
 			}
-		});
+		};
+		updateButton(R.id.activity_main_button_news,
+				R.drawable.pic_button_feed, R.string.activity_main_button_news,
+				newsListener);
 
-		// Add onClick listener to "Wall" button.
-		Button wallButton = (Button) findViewById(R.id.activity_main_button_wall);
-		wallButton.setOnClickListener(new View.OnClickListener() {
+		// Add onClick listener to "Wall" button. Button wallButton =
+		View.OnClickListener wallListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// On click trigger feed activity.
@@ -79,48 +80,71 @@ public class MainActivity extends BaseActivity {
 								R.string.activity_feed_profile_title));
 				startActivity(i);
 			}
-		});
+		};
+		updateButton(R.id.activity_main_button_wall,
+				R.drawable.pic_button_feed, R.string.activity_main_button_wall,
+				wallListener);
 
-		// Add onClick listener to "Profile" button.
-		Button profileButton = (Button) findViewById(R.id.activity_main_button_profile);
-		profileButton.setOnClickListener(new View.OnClickListener() {
+		// Add onClick listener to "Profile" button. Button profileButton =
+		View.OnClickListener profileListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent i = createIntent(UserActivity.class);
 				i.putExtra("fi.harism.facebook.UserActivity.user", "me");
 				startActivity(i);
 			}
-		});
+		};
+		updateButton(R.id.activity_main_button_profile,
+				R.drawable.pic_button_profile,
+				R.string.activity_main_button_profile, profileListener);
 
-		// Add onClick listener to "Chat" button.
-		Button chatButton = (Button) findViewById(R.id.activity_main_button_chat);
-		chatButton.setOnClickListener(new View.OnClickListener() {
+		// Add onClick listener to "Chat" button. Button chatButton =
+		View.OnClickListener chatListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// On click trigger feed activity.
 				Intent i = createIntent(ChatActivity.class);
 				startActivity(i);
 			}
-		});
+		};
+		updateButton(R.id.activity_main_button_chat,
+				R.drawable.pic_button_chat, R.string.activity_main_button_chat,
+				chatListener);
 
 		// Add onClick listener to "Logout" button.
 		View logoutButton = findViewById(R.id.activity_main_button_logout);
 		logoutButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				LogoutObserver observer = new LogoutObserver();
+				LogoutObserver observer = new LogoutObserver(self);
 				getGlobalState().getFBClient().logout(self, observer);
 			}
 		});
 
-		// Update user information asynchronously if needed.
-		FBUser fbUserMe = getGlobalState().getFBFactory().getUser("me");
-		if (fbUserMe.getLevel() == FBUser.Level.FULL) {
-			updateProfileInfo(fbUserMe);
+		// TODO: Should take care of situation in which user uses 'back' button
+		// on login dialog.
+		View userView = findViewById(R.id.activity_main_current_user);
+		userView.setVisibility(View.GONE);
+
+		if (getGlobalState().getFBClient().isAuthorized()) {
+			loadUserInfo();
 		} else {
-			FBUserRequest meRequest = new FBUserRequest(this, fbUserMe);
-			getGlobalState().getRequestQueue().addRequest(meRequest);
+			LoginObserver observer = new LoginObserver(this);
+			getGlobalState().getFBClient().authorize(this, observer);
 		}
+	}
+
+	/**
+	 * Updates 'Button' view with given values.
+	 */
+	private void updateButton(int buttonId, int pictureRes, int textRes,
+			View.OnClickListener observer) {
+		View v = findViewById(buttonId);
+		ImageView image = (ImageView) v
+				.findViewById(R.id.view_main_button_image);
+		image.setImageResource(pictureRes);
+		TextView text = (TextView) v.findViewById(R.id.view_main_button_text);
+		text.setText(textRes);
+		v.setOnClickListener(observer);
 	}
 
 	@Override
@@ -141,48 +165,47 @@ public class MainActivity extends BaseActivity {
 		getGlobalState().getRequestQueue().setPaused(this, false);
 	}
 
+	/**
+	 * Loads currently logged in user's information.
+	 */
+	private void loadUserInfo() {
+		// Update user information asynchronously if needed.
+		FBUser fbUserMe = getGlobalState().getFBFactory().getUser("me");
+		if (fbUserMe.getLevel() == FBUser.Level.FULL) {
+			updateProfileInfo(fbUserMe);
+		} else {
+			FBUserRequest meRequest = new FBUserRequest(this, fbUserMe);
+			getGlobalState().getRequestQueue().addRequest(meRequest);
+		}
+	}
+
+	/**
+	 * Updates user information to screen.
+	 */
 	private void updateProfileInfo(FBUser fbUserMe) {
-		TextView nameView = (TextView) findViewById(R.id.activity_main_name);
-		nameView.setText(fbUserMe.getName());
+		UserView userView = (UserView) findViewById(R.id.activity_main_current_user);
+		userView.setVisibility(View.VISIBLE);
 
-		TextView statusView = (TextView) findViewById(R.id.activity_main_status);
-		if (fbUserMe.getStatus() == null || fbUserMe.getStatus().length() == 0) {
-			statusView.setVisibility(View.GONE);
-		} else {
-			statusView.setText(fbUserMe.getStatus());
-		}
-
-		TextView loadingView = (TextView) findViewById(R.id.activity_main_loading);
-
-		Rect r = new Rect();
-		if (nameView.getLocalVisibleRect(r)
-				&& statusView.getLocalVisibleRect(r)) {
-			AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-			inAnimation.setDuration(700);
-			nameView.startAnimation(inAnimation);
-			statusView.startAnimation(inAnimation);
-
-			AlphaAnimation outAnimation = new AlphaAnimation(1, 0);
-			outAnimation.setDuration(700);
-			outAnimation.setFillAfter(true);
-			loadingView.startAnimation(outAnimation);
-		} else {
-			loadingView.setVisibility(View.GONE);
-		}
+		userView.setName(fbUserMe.getName());
+		userView.setContent(fbUserMe.getStatus());
 
 		FBBitmap fbBitmapMe = getGlobalState().getFBFactory().getBitmap(
 				fbUserMe.getPicture());
 		if (fbBitmapMe.getBitmap() != null) {
 			updateProfilePicture(fbBitmapMe);
 		} else {
+			userView.setPicture(getGlobalState().getDefaultPicture());
 			FBBitmapRequest request = new FBBitmapRequest(this, fbBitmapMe);
 			getGlobalState().getRequestQueue().addRequest(request);
 		}
 	}
 
+	/**
+	 * Updates user's picture.
+	 */
 	private void updateProfilePicture(FBBitmap fbBitmapMe) {
-		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_main_profile_picture);
-		picView.setBitmap(fbBitmapMe.getBitmap());
+		UserView userView = (UserView) findViewById(R.id.activity_main_current_user);
+		userView.setPicture(fbBitmapMe.getBitmap());
 	}
 
 	/**
@@ -239,18 +262,59 @@ public class MainActivity extends BaseActivity {
 	}
 
 	/**
+	 * LoginObserver observer for Facebook authentication procedure.
+	 */
+	private final class LoginObserver implements FBClient.LoginObserver {
+
+		private Activity mActivity;
+
+		public LoginObserver(Activity activity) {
+			mActivity = activity;
+		}
+
+		@Override
+		public void onCancel() {
+			// If user cancels login dialog let's simply close app.
+			finish();
+		}
+
+		@Override
+		public void onComplete() {
+			// On successful login start loading logged in user's information.
+			loadUserInfo();
+		}
+
+		@Override
+		public void onError(Exception ex) {
+			// On error trigger new login dialog.
+			LoginObserver observer = new LoginObserver(mActivity);
+			getGlobalState().getFBClient().authorize(mActivity, observer);
+			// If there was an error during authorization show an alert to user.
+			showAlertDialog(ex.getLocalizedMessage());
+		}
+	}
+
+	/**
 	 * LogoutObserver for handling asynchronous logout procedure.
 	 */
 	private final class LogoutObserver implements FBClient.LogoutObserver {
+
+		private Activity mActivity;
+
+		public LogoutObserver(Activity activity) {
+			mActivity = activity;
+		}
+
 		@Override
 		public void onComplete() {
 			// First hide progress dialog.
 			hideProgressDialog();
 			getGlobalState().getFBFactory().reset();
-			// Switch to login view.
-			Intent intent = createIntent(LoginActivity.class);
-			startActivity(intent);
-			finish();
+			View userView = findViewById(R.id.activity_main_current_user);
+			userView.setVisibility(View.GONE);
+			// Trigger new login dialog.
+			LoginObserver observer = new LoginObserver(mActivity);
+			getGlobalState().getFBClient().authorize(mActivity, observer);
 		}
 
 		@Override

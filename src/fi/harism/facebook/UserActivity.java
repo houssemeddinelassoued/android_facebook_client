@@ -3,7 +3,7 @@ package fi.harism.facebook;
 import fi.harism.facebook.dao.FBBitmap;
 import fi.harism.facebook.dao.FBUser;
 import fi.harism.facebook.request.RequestUI;
-import fi.harism.facebook.view.ProfilePictureView;
+import fi.harism.facebook.view.BitmapSwitcher;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -77,7 +77,7 @@ public class UserActivity extends BaseActivity {
 			nameView.setText(fbUser.getName());
 		}
 
-		ProfilePictureView picView = (ProfilePictureView) findViewById(R.id.activity_user_picture);
+		BitmapSwitcher picView = (BitmapSwitcher) findViewById(R.id.activity_user_picture);
 		FBBitmap fbBitmap = getGlobalState().getFBFactory().getBitmap(
 				fbUser.getPicture());
 		Bitmap bitmap = fbBitmap.getBitmap();
@@ -133,10 +133,10 @@ public class UserActivity extends BaseActivity {
 
 	private class PictureRequest extends RequestUI {
 
-		private ProfilePictureView mPicView;
+		private BitmapSwitcher mPicView;
 		private FBBitmap mFBBitmap;
 
-		public PictureRequest(Activity activity, ProfilePictureView picView,
+		public PictureRequest(Activity activity, BitmapSwitcher picView,
 				FBBitmap fbBitmap) {
 			super(activity, activity);
 			mPicView = picView;
