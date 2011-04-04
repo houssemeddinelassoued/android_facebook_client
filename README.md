@@ -35,3 +35,9 @@ Chat
 * Clicking on user opens a separate chat/conversation view.
 * For testing purposes there is connect, disconnect and show log buttons visible at all times.
 * This is more of a proof of concept than proper implementation at the moment.
+
+Thank you's
+===========
+Application icon [from here](http://www.iconarchive.com/show/circle-social-bookmark-icons-by-fasticon.html).
+Main View icons [from here](http://brsev.deviantart.com/art/Token-128429570).
+Base64 encoder/decoder [from here](http://migbase64.sourceforge.net/).
