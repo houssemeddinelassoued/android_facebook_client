@@ -9,7 +9,7 @@
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:id="@+id/header" >	
-		<fi.harism.facebook.view.ProfilePictureView
+		<fi.harism.facebook.view.BitmapSwitcher
 			android:layout_height="42dp"
 			android:layout_width="42dp"
 			android:background="#40000000"
