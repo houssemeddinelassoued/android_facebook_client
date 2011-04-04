@@ -32,16 +32,14 @@ public class FBClient {
 	// Our application id.
 	private static final String FACEBOOK_APP_ID = "190087744355420";
 	// Private Facebook instance.
-	private Facebook facebook = null;
-	// Flag for checking if Facebook instance has been authorized.
-	private boolean facebookAuthorized = false;
+	private Facebook mFacebook = null;
 
 	/**
 	 * Default constructor. Before using this class authorize should be called
 	 * successfully.
 	 */
 	public FBClient() {
-		facebook = new Facebook(FACEBOOK_APP_ID);
+		mFacebook = new Facebook(FACEBOOK_APP_ID);
 	}
 
 	/**
@@ -54,52 +52,45 @@ public class FBClient {
 	 */
 	public void authorize(Activity activity, final LoginObserver observer) {
 		// Check if we have authorized Facebook instance already.
-		if (facebookAuthorized) {
-			observer.onComplete();
-		} else {
-			// List of permissions our application needs.
-			String permissions[] = {
-					// For reading streams and posting comments.
-					"read_stream", "publish_stream",
-					// For latest status message.
-					"user_status", "friends_status",
-					// Needed for login to chat.facebook.com.
-					"xmpp_login" };
-			// Call actual authorization procedure.
-			facebook.authorize(activity, permissions,
-					new Facebook.DialogListener() {
-						@Override
-						public void onCancel() {
-							observer.onCancel();
-						}
+		// List of permissions our application needs.
+		String permissions[] = {
+				// For reading streams and posting comments.
+				"read_stream", "publish_stream",
+				// For latest status message.
+				"user_status", "friends_status",
+				// Needed for login to chat.facebook.com.
+				"xmpp_login" };
+		// Call actual authorization procedure.
+		mFacebook.authorize(activity, permissions,
+				new Facebook.DialogListener() {
+					@Override
+					public void onCancel() {
+						observer.onCancel();
+					}
 
-						@Override
-						public void onComplete(Bundle values) {
-							facebookAuthorized = true;
-							observer.onComplete();
-						}
+					@Override
+					public void onComplete(Bundle values) {
+						observer.onComplete();
+					}
 
-						@Override
-						public void onError(DialogError ex) {
-							observer.onError(new Exception(ex
-									.getLocalizedMessage()));
-						}
+					@Override
+					public void onError(DialogError ex) {
+						observer.onError(new Exception(ex.getLocalizedMessage()));
+					}
 
-						@Override
-						public void onFacebookError(FacebookError ex) {
-							observer.onError(new Exception(ex
-									.getLocalizedMessage()));
-						}
-					});
-		}
+					@Override
+					public void onFacebookError(FacebookError ex) {
+						observer.onError(new Exception(ex.getLocalizedMessage()));
+					}
+				});
 	}
 
 	public void authorizeCallback(int requestCode, int resultCode, Intent data) {
-		facebook.authorizeCallback(requestCode, resultCode, data);
+		mFacebook.authorizeCallback(requestCode, resultCode, data);
 	}
 
 	public String getAccessToken() {
-		return facebook.getAccessToken();
+		return mFacebook.getAccessToken();
 	}
 
 	/**
@@ -109,7 +100,7 @@ public class FBClient {
 	 * @return Returns true if Facebook instance has been authorized.
 	 */
 	public boolean isAuthorized() {
-		return facebookAuthorized;
+		return mFacebook.isSessionValid();
 	}
 
 	/**
@@ -125,10 +116,7 @@ public class FBClient {
 			@Override
 			public void run() {
 				try {
-					if (facebookAuthorized) {
-						facebook.logout(activity);
-						facebookAuthorized = false;
-					}
+					mFacebook.logout(activity);
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -156,7 +144,7 @@ public class FBClient {
 	 * @return Response String.
 	 */
 	public String request(Bundle parameters) throws IOException {
-		return facebook.request(parameters);
+		return mFacebook.request(parameters);
 	}
 
 	/**
@@ -204,8 +192,8 @@ public class FBClient {
 	 */
 	public JSONObject request(String graphPath, Bundle requestParameters,
 			String method) throws IOException, JSONException {
-		String response = facebook
-				.request(graphPath, requestParameters, method);
+		String response = mFacebook.request(graphPath, requestParameters,
+				method);
 		try {
 			return Util.parseJson(response);
 		} catch (FacebookError error) {
@@ -230,7 +218,7 @@ public class FBClient {
 	public JSONObject requestFQL(String query) throws IOException,
 			JSONException, MalformedURLException, XmlPullParserException {
 
-		String token = URLEncoder.encode(facebook.getAccessToken());
+		String token = URLEncoder.encode(mFacebook.getAccessToken());
 		query = URLEncoder.encode(query);
 
 		URL url = new URL(
