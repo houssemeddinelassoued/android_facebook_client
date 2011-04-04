@@ -55,6 +55,23 @@
 		<item name="android:background">@drawable/bg_footer_button</item>
 	</style>
 	
+	<style name="button" parent="@style/headerText" >
+		<item name="android:paddingTop">5dp</item>
+		<item name="android:paddingBottom">5dp</item>
+		<item name="android:paddingLeft">10dp</item>
+		<item name="android:paddingRight">10dp</item>
+		<item name="android:background">@drawable/bg_button</item>
+	</style>
+	
+	<style name="separator" parent="@style/contentTextSmall" >
+		<item name="android:textStyle">bold</item>
+		<item name="android:paddingTop">2dp</item>
+		<item name="android:paddingBottom">2dp</item>
+		<item name="android:paddingLeft">5dp</item>
+		<item name="android:paddingRight">5dp</item>
+		<item name="android:background">@drawable/bg_separator</item>
+	</style>
+	
 	<style name="editText" parent="@style/contentContainer" >
 		<item name="android:padding">5dp</item>
 		<item name="android:textSize">16sp</item>

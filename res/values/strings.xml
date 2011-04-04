@@ -22,13 +22,14 @@
 	<string name="activity_login_button">Login</string>
 
 	<!-- Main Activity -->
+	<string name="activity_main_current_user">Current User</string>
+	<string name="activity_main_options">Options</string>
 	<string name="activity_main_button_news">News Feed</string>
 	<string name="activity_main_button_wall">Wall</string>
 	<string name="activity_main_button_friends">Friends</string>
 	<string name="activity_main_button_profile">Profile</string>
 	<string name="activity_main_button_chat">Chat</string>
 	<string name="activity_main_button_logout">Logout</string>
-	<string name="activity_main_loading">Loading profile information..</string>
 	
 	<!--  Chat Activity -->
 	<string name="chat_title">Friends Online</string>
