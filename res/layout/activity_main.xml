@@ -59,31 +59,15 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/activity_main_options" />
-		<ScrollView
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" >
-			<!-- TODO: Implement me as GridView -->
-			<LinearLayout
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:orientation="vertical" >
-				<include
-					layout="@layout/view_main_button"
-					android:id="@+id/activity_main_button_news" />
-				<include
-					layout="@layout/view_main_button"
-					android:id="@+id/activity_main_button_wall" />
-				<include
-					layout="@layout/view_main_button"
-					android:id="@+id/activity_main_button_friends" />
-				<include
-					layout="@layout/view_main_button"
-					android:id="@+id/activity_main_button_chat" />
-				<include
-					layout="@layout/view_main_button"
-					android:id="@+id/activity_main_button_profile" />
-			</LinearLayout>
-		</ScrollView>
+		<GridView
+			android:layout_width="fill_parent" 
+			android:layout_height="fill_parent"
+			android:columnWidth="90dp"
+			android:numColumns="auto_fit"
+			android:verticalSpacing="10dp"
+			android:horizontalSpacing="10dp"
+			android:stretchMode="columnWidth"
+			android:gravity="center"
+			android:id="@+id/activity_main_grid" />
 	</LinearLayout>
-
 </RelativeLayout>

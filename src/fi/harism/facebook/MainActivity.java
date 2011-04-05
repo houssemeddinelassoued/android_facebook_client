@@ -1,10 +1,16 @@
 package fi.harism.facebook;
 
+import java.util.Vector;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import fi.harism.facebook.dao.FBBitmap;
@@ -21,6 +27,12 @@ import fi.harism.facebook.view.UserView;
  */
 public class MainActivity extends BaseActivity {
 
+	private static final int ID_WALL = 1;
+	private static final int ID_NEWS = 2;
+	private static final int ID_FRIENDS = 3;
+	private static final int ID_CHAT = 4;
+	private static final int ID_PROFILE = 5;
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -36,79 +48,66 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.activity_main);
 		final Activity self = this;
 
-		// Add onClick listener to "Friends" button. Button friendsButton =
-		View.OnClickListener friendsListener = new View.OnClickListener() {
+		GridView gridView = (GridView) findViewById(R.id.activity_main_grid);
+		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
-			public void onClick(View v) {
-				// On click trigger friends activity.
-				Intent i = createIntent(FriendsActivity.class);
-				startActivity(i);
+			public void onItemClick(AdapterView<?> parent, View v, int pos,
+					long id) {
+				switch ((int) id) {
+				case ID_NEWS: {
+					Intent i = createIntent(FeedActivity.class);
+					i.putExtra("fi.harism.facebook.FeedActivity.path",
+							"me/home");
+					i.putExtra(
+							"fi.harism.facebook.FeedActivity.title",
+							getResources().getString(
+									R.string.activity_feed_news_title));
+					startActivity(i);
+					break;
+				}
+				case ID_WALL: {
+					Intent i = createIntent(FeedActivity.class);
+					i.putExtra("fi.harism.facebook.FeedActivity.path",
+							"me/feed");
+					i.putExtra(
+							"fi.harism.facebook.FeedActivity.title",
+							getResources().getString(
+									R.string.activity_feed_profile_title));
+					startActivity(i);
+					break;
+				}
+				case ID_FRIENDS: {
+					Intent i = createIntent(FriendsActivity.class);
+					startActivity(i);
+					break;
+				}
+				case ID_CHAT: {
+					Intent i = createIntent(ChatActivity.class);
+					startActivity(i);
+					break;
+				}
+				case ID_PROFILE: {
+					Intent i = createIntent(UserActivity.class);
+					i.putExtra("fi.harism.facebook.UserActivity.user", "me");
+					startActivity(i);
+					break;
+				}
+				}
 			}
-		};
-		updateButton(R.id.activity_main_button_friends,
-				R.drawable.pic_button_friends,
-				R.string.activity_main_button_friends, friendsListener);
+		});
 
-		// Add onClick listener to "News Feed" button.
-		View.OnClickListener newsListener = new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// On click trigger feed activity.
-				Intent i = createIntent(FeedActivity.class);
-				i.putExtra("fi.harism.facebook.FeedActivity.path", "me/home");
-				i.putExtra(
-						"fi.harism.facebook.FeedActivity.title",
-						getResources().getString(
-								R.string.activity_feed_news_title));
-				startActivity(i);
-			}
-		};
-		updateButton(R.id.activity_main_button_news,
-				R.drawable.pic_button_feed, R.string.activity_main_button_news,
-				newsListener);
-
-		// Add onClick listener to "Wall" button. Button wallButton =
-		View.OnClickListener wallListener = new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// On click trigger feed activity.
-				Intent i = createIntent(FeedActivity.class);
-				i.putExtra("fi.harism.facebook.FeedActivity.path", "me/feed");
-				i.putExtra(
-						"fi.harism.facebook.FeedActivity.title",
-						getResources().getString(
-								R.string.activity_feed_profile_title));
-				startActivity(i);
-			}
-		};
-		updateButton(R.id.activity_main_button_wall,
-				R.drawable.pic_button_feed, R.string.activity_main_button_wall,
-				wallListener);
-
-		// Add onClick listener to "Profile" button. Button profileButton =
-		View.OnClickListener profileListener = new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent i = createIntent(UserActivity.class);
-				i.putExtra("fi.harism.facebook.UserActivity.user", "me");
-				startActivity(i);
-			}
-		};
-		updateButton(R.id.activity_main_button_profile,
-				R.drawable.pic_button_profile,
-				R.string.activity_main_button_profile, profileListener);
-
-		// Add onClick listener to "Chat" button. Button chatButton =
-		View.OnClickListener chatListener = new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent i = createIntent(ChatActivity.class);
-				startActivity(i);
-			}
-		};
-		updateButton(R.id.activity_main_button_chat,
-				R.drawable.pic_button_chat, R.string.activity_main_button_chat,
-				chatListener);
+		GridAdapter gridAdapter = new GridAdapter();
+		gridAdapter.addItem(R.drawable.pic_button_friends,
+				R.string.activity_main_button_friends, ID_FRIENDS);
+		gridAdapter.addItem(R.drawable.pic_button_feed,
+				R.string.activity_main_button_news, ID_NEWS);
+		gridAdapter.addItem(R.drawable.pic_button_feed,
+				R.string.activity_main_button_wall, ID_WALL);
+		gridAdapter.addItem(R.drawable.pic_button_profile,
+				R.string.activity_main_button_profile, ID_PROFILE);
+		gridAdapter.addItem(R.drawable.pic_button_chat,
+				R.string.activity_main_button_chat, ID_CHAT);
+		gridView.setAdapter(gridAdapter);
 
 		// Add onClick listener to "Logout" button.
 		View logoutButton = findViewById(R.id.activity_main_button_logout);
@@ -131,20 +130,6 @@ public class MainActivity extends BaseActivity {
 			LoginObserver observer = new LoginObserver(this);
 			getGlobalState().getFBClient().authorize(this, observer);
 		}
-	}
-
-	/**
-	 * Updates 'Button' view with given values.
-	 */
-	private void updateButton(int buttonId, int pictureRes, int textRes,
-			View.OnClickListener observer) {
-		View v = findViewById(buttonId);
-		ImageView image = (ImageView) v
-				.findViewById(R.id.view_main_button_image);
-		image.setImageResource(pictureRes);
-		TextView text = (TextView) v.findViewById(R.id.view_main_button_text);
-		text.setText(textRes);
-		v.setOnClickListener(observer);
 	}
 
 	@Override
@@ -323,6 +308,62 @@ public class MainActivity extends BaseActivity {
 			hideProgressDialog();
 			// Show error alert.
 			showAlertDialog(ex.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * ListAdapter for populating grid view.
+	 */
+	private class GridAdapter extends BaseAdapter {
+
+		private Vector<GridItem> mItems;
+
+		public GridAdapter() {
+			mItems = new Vector<GridItem>();
+		}
+
+		public void addItem(int pictureId, int textId, int id) {
+			GridItem item = new GridItem();
+			item.mPictureId = pictureId;
+			item.mTextId = textId;
+			item.mId = id;
+			mItems.add(item);
+		}
+
+		@Override
+		public int getCount() {
+			return mItems.size();
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			return mItems.get(arg0);
+		}
+
+		@Override
+		public long getItemId(int arg0) {
+			return mItems.get(arg0).mId;
+		}
+
+		@Override
+		public View getView(int arg0, View arg1, ViewGroup arg2) {
+			if (arg1 == null) {
+				arg1 = getLayoutInflater().inflate(R.layout.view_imagebutton,
+						null);
+			}
+			TextView text = (TextView) arg1
+					.findViewById(R.id.view_imagebutton_text);
+			ImageView picture = (ImageView) arg1
+					.findViewById(R.id.view_imagebutton_image);
+			text.setText(mItems.get(arg0).mTextId);
+			picture.setImageResource(mItems.get(arg0).mPictureId);
+			return arg1;
+		}
+
+		private class GridItem {
+			int mTextId;
+			int mPictureId;
+			int mId;
 		}
 	}
 
