@@ -3,49 +3,51 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent" >
-	<TextView
-		style="@style/headerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/chat_title"
-		android:id="@+id/header" />
+	
+	<LinearLayout
+		style="@style/headerContainer" >
+		<ImageView
+			style="@style/headerIcon" />
+		<TextView
+			style="@style/headerText"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/activity_chat_title" />
+	</LinearLayout>
+	
 	<LinearLayout
 		style="@style/footerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:gravity="center"
-		android:id="@+id/footer" >
+		android:gravity="center" >
 		<Button
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/chat_button_connect"
-			android:id="@+id/chat_button_connect" />
+			android:text="@string/activity_chat_button_connect"
+			android:id="@+id/activity_chat_button_connect" />
 		<Button
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/chat_button_disconnect"
-			android:id="@+id/chat_button_disconnect" />
+			android:text="@string/activity_chat_button_disconnect"
+			android:id="@+id/activity_chat_button_disconnect" />
 		<Button
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/chat_button_showlog"
-			android:id="@+id/chat_button_showlog" />
+			android:text="@string/activity_chat_button_showlog"
+			android:id="@+id/activity_chat_button_showlog" />
 	</LinearLayout>
+	
 	<ScrollView
 		style="@style/contentContainer"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/header"
-		android:layout_above="@id/footer" >
+		android:layout_height="wrap_content" >
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
-			android:id="@+id/chat_user_list" />
+			android:id="@+id/activity_chat_user_list" />
 	</ScrollView>
+	
 </RelativeLayout>
 

@@ -34,7 +34,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_chat);
 
-		Button connectButton = (Button) findViewById(R.id.chat_button_connect);
+		Button connectButton = (Button) findViewById(R.id.activity_chat_button_connect);
 		connectButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -42,7 +42,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			}
 		});
 
-		Button closeButton = (Button) findViewById(R.id.chat_button_disconnect);
+		Button closeButton = (Button) findViewById(R.id.activity_chat_button_disconnect);
 		closeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -50,7 +50,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 			}
 		});
 
-		Button logButton = (Button) findViewById(R.id.chat_button_showlog);
+		Button logButton = (Button) findViewById(R.id.activity_chat_button_showlog);
 		logButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -106,7 +106,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 				showAlertDialog("Disconnected.");
 				// TODO: It is possible there is presence request waiting in
 				// request queue at this point.
-				LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
+				LinearLayout list = (LinearLayout) findViewById(R.id.activity_chat_user_list);
 				list.removeAllViews();
 			}
 		});
@@ -126,7 +126,7 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 	}
 
 	private void handlePresenceChange(FBUser user) {
-		LinearLayout list = (LinearLayout) findViewById(R.id.chat_user_list);
+		LinearLayout list = (LinearLayout) findViewById(R.id.activity_chat_user_list);
 		View v = list.findViewWithTag(user.getId());
 
 		if (v != null && user.getPresence() == FBUser.Presence.GONE) {

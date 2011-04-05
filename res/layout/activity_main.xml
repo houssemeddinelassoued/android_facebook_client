@@ -5,16 +5,9 @@
 	android:layout_height="fill_parent" >
 
 	<LinearLayout
-		style="@style/headerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center_vertical"
-		android:id="@+id/header" >
+		style="@style/headerContainer" >
 		<ImageView
-			android:layout_width="30dp"
-			android:layout_height="30dp"
-			android:layout_marginRight="2dp"
-			android:src="@drawable/pic_application_small" />
+			style="@style/headerIcon" />
 		<TextView
 			style="@style/headerText"
 			android:layout_height="wrap_content"
@@ -24,11 +17,7 @@
 	
 	<LinearLayout
 		style="@style/footerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:gravity="center"
-		android:id="@+id/footer" >
+		android:gravity="center" >
 		<Button
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
@@ -41,8 +30,6 @@
 		style="@style/contentContainer"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/header"
-		android:layout_above="@id/footer"
 		android:orientation="vertical" >
 		<TextView
 			style="@style/separator"
@@ -70,4 +57,5 @@
 			android:gravity="center"
 			android:id="@+id/activity_main_grid" />
 	</LinearLayout>
+	
 </RelativeLayout>

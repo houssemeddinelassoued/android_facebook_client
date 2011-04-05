@@ -36,15 +36,32 @@
 	<style name="headerContainer" parent="@style/headerText" >
 		<item name="android:padding">5dp</item>
 		<item name="android:background">@drawable/bg_header</item>
-	</style>	
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:gravity">center_vertical</item>
+		<item name="android:id">@+id/header</item>
+	</style>
+	
+	<style name="headerIcon" >
+		<item name="android:layout_width">30dp</item>
+		<item name="android:layout_height">30dp</item>
+		<item name="android:layout_marginRight">2dp</item>
+		<item name="android:src">@drawable/pic_application_small</item>
+	</style>
 	
 	<style name="footerContainer" parent="@style/footerText" >
 		<item name="android:padding">5dp</item>
 		<item name="android:background">@drawable/bg_footer</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_alignParentBottom">true</item>
+		<item name="android:id">@+id/footer</item>
 	</style>
 	
 	<style name="contentContainer" parent="@style/contentText" >
 		<item name="android:background">@drawable/bg_content</item>
+		<item name="android:layout_below">@id/header</item>
+		<item name="android:layout_above">@id/footer</item>
 	</style>
 	
 	<style name="footerButton" parent="@style/footerText" >

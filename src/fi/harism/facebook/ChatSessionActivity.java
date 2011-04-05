@@ -27,7 +27,7 @@ public class ChatSessionActivity extends BaseActivity implements
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_chat_session);
 
-		Button connectButton = (Button) findViewById(R.id.chat_button_connect);
+		Button connectButton = (Button) findViewById(R.id.activity_chat_button_connect);
 		connectButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -35,7 +35,7 @@ public class ChatSessionActivity extends BaseActivity implements
 			}
 		});
 
-		Button closeButton = (Button) findViewById(R.id.chat_button_disconnect);
+		Button closeButton = (Button) findViewById(R.id.activity_chat_button_disconnect);
 		closeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -43,7 +43,7 @@ public class ChatSessionActivity extends BaseActivity implements
 			}
 		});
 
-		Button logButton = (Button) findViewById(R.id.chat_button_showlog);
+		Button logButton = (Button) findViewById(R.id.activity_chat_button_showlog);
 		logButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -51,11 +51,11 @@ public class ChatSessionActivity extends BaseActivity implements
 			}
 		});
 
-		Button sendButton = (Button) findViewById(R.id.chat_session_button_send);
+		Button sendButton = (Button) findViewById(R.id.activity_chat_session_button_send);
 		sendButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EditText edit = (EditText) findViewById(R.id.chat_session_edit);
+				EditText edit = (EditText) findViewById(R.id.activity_chat_session_edit);
 				Editable editable = edit.getText();
 				String message = editable.toString().trim();
 				if (message.length() > 0) {
@@ -73,9 +73,9 @@ public class ChatSessionActivity extends BaseActivity implements
 		addText("Chatting with\nid=" + fbUser.getId() + "\n");
 		addText("name=" + fbUser.getName() + "\n\n");
 
-		String title = getString(R.string.chat_session_title);
+		String title = getString(R.string.activity_chat_session_title);
 		title = String.format(title, fbUser.getName());
-		TextView tv = (TextView) findViewById(R.id.chat_session_title);
+		TextView tv = (TextView) findViewById(R.id.activity_chat_session_title);
 		tv.setText(title);
 	}
 
@@ -102,7 +102,7 @@ public class ChatSessionActivity extends BaseActivity implements
 	}
 
 	private void addText(String text) {
-		TextView tv = (TextView) findViewById(R.id.chat_session_text);
+		TextView tv = (TextView) findViewById(R.id.activity_chat_session_text);
 		CharSequence currentText = tv.getText();
 		String newText = currentText + text;
 		tv.setText(newText);

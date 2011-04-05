@@ -15,11 +15,8 @@
 	<string name="activity_feed_post_details" formatted="false">%s  ·  Comments(%d)  ·  Likes(%d)</string>
 
 	<!-- Friends Activity -->
+	<string name="activity_friends_title">Friend List</string>
 	<string name="activity_friends_search">Search</string>
-
-	<!-- Login Activity -->
-	<string name="activity_login_content"><b>Facebook</b>\nClient\nExample</string>
-	<string name="activity_login_button">Login</string>
 
 	<!-- Main Activity -->
 	<string name="activity_main_current_user">Current User</string>
@@ -32,20 +29,17 @@
 	<string name="activity_main_button_logout">Logout</string>
 	
 	<!--  Chat Activity -->
-	<string name="chat_title">Friends Online</string>
-	<string name="chat_button_connect">Connect</string>
-	<string name="chat_button_disconnect">Disconnect</string>
-	<string name="chat_button_showlog">Show Log</string>
+	<string name="activity_chat_title">Friends Online</string>
+	<string name="activity_chat_button_connect">Connect</string>
+	<string name="activity_chat_button_disconnect">Disconnect</string>
+	<string name="activity_chat_button_showlog">Show Log</string>
 	
 	<!--  Chat Session Activity -->
-	<string name="chat_session_title">Chat with > %s</string>
-	<string name="chat_session_button_send">Send</string>
+	<string name="activity_chat_session_title">Chat with > %s</string>
+	<string name="activity_chat_session_button_send">Send</string>
 	
 	<!-- Post Activity -->
 	<string name="activity_post_title">Comments</string>
 	<string name="activity_post_button_send">Send</string>
-	
-	<!-- Profile Dialog -->
-	<string name="dialog_profile_title">Profile</string>
 	
 </resources>

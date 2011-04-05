@@ -3,18 +3,20 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent" >
-	<TextView
-		style="@style/headerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/activity_post_title"
-		android:id="@+id/header"/>
+	
+	<LinearLayout
+		style="@style/headerContainer" >
+		<ImageView
+			style="@style/headerIcon" />
+		<TextView
+			style="@style/headerText"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/activity_post_title" />
+	</LinearLayout>
+	
 	<RelativeLayout
-		style="@style/footerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:id="@+id/footer" >
+		style="@style/footerContainer" >
 		<Button
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
@@ -30,12 +32,11 @@
 			android:layout_toLeftOf="@id/activity_post_button_send"
 			android:id="@+id/activity_post_edit" />
 	</RelativeLayout>
+	
 	<ScrollView
 		style="@style/contentContainer"
 		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_below="@id/header"
-		android:layout_above="@id/footer" >
+		android:layout_width="fill_parent" >
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
@@ -43,5 +44,6 @@
 			android:padding="5dp"
 			android:id="@+id/activity_post_content" />
 	</ScrollView>
+	
 </RelativeLayout>
 

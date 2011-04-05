@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:orientation="vertical" >
+	android:layout_height="fill_parent" >
 
 	<LinearLayout
-		style="@style/headerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
+		style="@style/headerContainer" >
+		<ImageView
+			style="@style/headerIcon" />
+		<TextView
+			style="@style/headerText"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:text="@string/activity_friends_title" />
+	</LinearLayout>
+	
+	<LinearLayout
+		style="@style/footerContainer"
 		android:gravity="center_vertical" >
 		<TextView
 			style="@style/headerText"
@@ -35,4 +43,4 @@
 			android:orientation="vertical" />
 	</ScrollView>
 
-</LinearLayout>
+</RelativeLayout>

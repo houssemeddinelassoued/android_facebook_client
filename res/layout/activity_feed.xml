@@ -3,18 +3,21 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent" >
-	<TextView
-		style="@style/headerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:id="@+id/header" />
+	
+	<LinearLayout
+		style="@style/headerContainer" >
+		<ImageView
+			style="@style/headerIcon" />
+		<TextView
+			style="@style/headerText"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/activity_feed_title" />
+	</LinearLayout>
+		
 	<LinearLayout
 		style="@style/footerContainer"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:gravity="center"
-		android:id="@+id/footer" >
+		android:gravity="center" >
 		<Button
 			style="@style/footerButton"
 			android:layout_width="wrap_content"
@@ -22,12 +25,11 @@
 			android:text="@string/activity_feed_button_update"
 			android:id="@+id/activity_feed_button_update" />
 	</LinearLayout>
+	
 	<ScrollView
 		style="@style/contentContainer"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/header"
-		android:layout_above="@id/footer" >
+		android:layout_height="wrap_content" >
 		<LinearLayout
 			android:id="@+id/activity_feed_content"
 			android:layout_width="fill_parent"

@@ -56,7 +56,7 @@ public class FeedActivity extends BaseActivity {
 		mSpanClickObserver = new SpanClickObserver();
 		mPostClickObserver = new PostClickObserver();
 
-		TextView title = (TextView) findViewById(R.id.header);
+		TextView title = (TextView) findViewById(R.id.activity_feed_title);
 		title.setText(getIntent().getStringExtra(
 				"fi.harism.facebook.FeedActivity.title"));
 
