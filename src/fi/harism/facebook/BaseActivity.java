@@ -60,16 +60,10 @@ public class BaseActivity extends Activity {
 	 *            Message for this alert dialog.
 	 */
 	public void showAlertDialog(final String message) {
-		final Activity self = this;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(self);
-				dlgBuilder.setMessage(message);
-				AlertDialog dlg = dlgBuilder.create();
-				dlg.show();
-			}
-		});
+		AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(this);
+		dlgBuilder.setMessage(message);
+		AlertDialog dlg = dlgBuilder.create();
+		dlg.show();
 	}
 
 	/**
