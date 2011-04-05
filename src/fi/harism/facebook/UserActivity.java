@@ -149,8 +149,10 @@ public class UserActivity extends BaseActivity {
 		}
 
 		@Override
-		public void executeUI() {
-			mPicView.setBitmap(mFBBitmap.getBitmap());
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				mPicView.setBitmap(mFBBitmap.getBitmap());
+			}
 		}
 	}
 
@@ -165,18 +167,16 @@ public class UserActivity extends BaseActivity {
 
 		@Override
 		public void execute() throws Exception {
-			try {
-				mFBUser.load(FBUser.Level.FULL);
-			} catch (Exception ex) {
-				hideProgressDialog();
-				showAlertDialog(ex.toString());
-				throw ex;
-			}
+			mFBUser.load(FBUser.Level.FULL);
 		}
 
 		@Override
-		public void executeUI() {
-			setUserInfo(mFBUser);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				setUserInfo(mFBUser);
+			} else {
+				showAlertDialog(ex.toString());				
+			}
 			hideProgressDialog();
 		}
 	}

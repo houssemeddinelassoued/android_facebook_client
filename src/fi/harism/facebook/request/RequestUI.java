@@ -38,8 +38,9 @@ public abstract class RequestUI extends Request {
 
 	/**
 	 * This method is called always from UI thread. Implement this to update UI.
+	 * Exception is null, or one thrown from execute() method.
 	 */
-	public abstract void executeUI();
+	public abstract void executeUI(Exception ex);
 
 	/**
 	 * Returns boolean indicating if this Request has been canceled.
@@ -53,12 +54,13 @@ public abstract class RequestUI extends Request {
 	@Override
 	public final void run() {
 		if (!isCancelled) {
+			Exception ex = null;
 			try {
 				execute();
-				activity.runOnUiThread(new RunnableUI());
-			} catch (Exception ex) {
-				// We don't really care about errors but this prevents
-				// executeUI() from being called if execute fails.
+			} catch (Exception e) {
+				ex = e;
+			} finally {
+				activity.runOnUiThread(new RunnableUI(ex));
 			}
 		}
 	}
@@ -69,10 +71,17 @@ public abstract class RequestUI extends Request {
 	 * @author harism
 	 */
 	private class RunnableUI implements Runnable {
+
+		private Exception mEx;
+
+		public RunnableUI(Exception ex) {
+			mEx = ex;
+		}
+
 		@Override
 		public void run() {
 			if (!isCancelled) {
-				executeUI();
+				executeUI(mEx);
 			}
 		}
 	}

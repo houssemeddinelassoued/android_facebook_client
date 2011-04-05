@@ -201,16 +201,19 @@ public class ChatActivity extends BaseActivity implements FBChat.Observer {
 		}
 
 		@Override
-		public void executeUI() {
-			TextView nameView = (TextView) friendView
-					.findViewById(R.id.view_friend_name);
-			nameView.setText(fbUser.getName());
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				TextView nameView = (TextView) friendView
+						.findViewById(R.id.view_friend_name);
+				nameView.setText(fbUser.getName());
 
-			// Search picture Container and set default profile picture into it.
-			BitmapSwitcher profilePic = (BitmapSwitcher) friendView
-					.findViewById(R.id.view_friend_picture);
-			profilePic.setBitmap(BitmapUtils.roundBitmap(fbBitmap.getBitmap(),
-					7));
+				// Search picture Container and set default profile picture into
+				// it.
+				BitmapSwitcher profilePic = (BitmapSwitcher) friendView
+						.findViewById(R.id.view_friend_picture);
+				profilePic.setBitmap(BitmapUtils.roundBitmap(
+						fbBitmap.getBitmap(), 7));
+			}
 		}
 	}
 

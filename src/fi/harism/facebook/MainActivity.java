@@ -211,8 +211,10 @@ public class MainActivity extends BaseActivity {
 		}
 
 		@Override
-		public void executeUI() {
-			updateProfilePicture(fbBitmap);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				updateProfilePicture(fbBitmap);
+			}
 		}
 	}
 
@@ -230,18 +232,17 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void execute() throws Exception {
-			try {
-				mFBUser.load(FBUser.Level.FULL);
-			} catch (Exception ex) {
-				// TODO: This is rather disastrous situation actually.
-				showAlertDialog(ex.toString());
-				throw ex;
-			}
+			mFBUser.load(FBUser.Level.FULL);
 		}
 
 		@Override
-		public void executeUI() {
-			updateProfileInfo(mFBUser);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				updateProfileInfo(mFBUser);
+			} else {
+				// TODO: This is rather disastrous situation actually.
+				showAlertDialog(ex.toString());
+			}
 		}
 
 	}

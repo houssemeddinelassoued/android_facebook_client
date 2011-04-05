@@ -228,7 +228,7 @@ public class FeedActivity extends BaseActivity {
 					getGlobalState().getRequestQueue().addRequest(request);
 				}
 			}
-			
+
 			postView.setOnClickListener(mPostClickObserver);
 			contentView.addView(postView);
 		}
@@ -248,20 +248,18 @@ public class FeedActivity extends BaseActivity {
 		}
 
 		@Override
-		public void execute() {
-			try {
-				mFBFeed.load();
-			} catch (Exception ex) {
-				// Hide progress dialog.
-				hideProgressDialog();
-				// We don't want to see this happening but just in case.
-				showAlertDialog(ex.getLocalizedMessage());
-			}
+		public void execute() throws Exception {
+			mFBFeed.load();
 		}
 
 		@Override
-		public void executeUI() {
-			updateFeedView(mFBFeed);
+		public void executeUI(Exception ex) {
+			if (ex != null) {
+				// We don't want to see this happening but just in case.
+				showAlertDialog(ex.getLocalizedMessage());
+			} else {
+				updateFeedView(mFBFeed);
+			}
 			hideProgressDialog();
 		}
 
@@ -276,8 +274,8 @@ public class FeedActivity extends BaseActivity {
 		private FBUser mFBUser;
 		private FBBitmap mFBBitmap;
 
-		public FromPictureRequest(Activity activity,
-				BitmapSwitcher profilePic, FBUser fbUser) {
+		public FromPictureRequest(Activity activity, BitmapSwitcher profilePic,
+				FBUser fbUser) {
 			super(activity, activity);
 			mProfilePic = profilePic;
 			mFBUser = fbUser;
@@ -292,10 +290,12 @@ public class FeedActivity extends BaseActivity {
 		}
 
 		@Override
-		public void executeUI() {
-			Bitmap rounded = BitmapUtils.roundBitmap(mFBBitmap.getBitmap(),
-					PICTURE_ROUND_RADIUS);
-			mProfilePic.setBitmap(rounded);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				Bitmap rounded = BitmapUtils.roundBitmap(mFBBitmap.getBitmap(),
+						PICTURE_ROUND_RADIUS);
+				mProfilePic.setBitmap(rounded);
+			}
 		}
 	}
 
@@ -320,14 +320,16 @@ public class FeedActivity extends BaseActivity {
 		}
 
 		@Override
-		public void executeUI() {
-			mImageView.setImageBitmap(mFBBitmap.getBitmap());
-			// TODO: Image size is (0, 0) and animation never takes place.
-			Rect r = new Rect();
-			if (mImageView.getLocalVisibleRect(r)) {
-				AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
-				inAnimation.setDuration(700);
-				mImageView.startAnimation(inAnimation);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				mImageView.setImageBitmap(mFBBitmap.getBitmap());
+				// TODO: Image size is (0, 0) and animation never takes place.
+				Rect r = new Rect();
+				if (mImageView.getLocalVisibleRect(r)) {
+					AlphaAnimation inAnimation = new AlphaAnimation(0, 1);
+					inAnimation.setDuration(700);
+					mImageView.startAnimation(inAnimation);
+				}
 			}
 		}
 	}
@@ -351,19 +353,19 @@ public class FeedActivity extends BaseActivity {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Click observer for post items.
 	 */
 	private final class PostClickObserver implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			String postId = (String)v.getTag();
+			String postId = (String) v.getTag();
 			Intent i = createIntent(PostActivity.class);
 			i.putExtra(PostActivity.INTENT_FEED_PATH, mFeedPath);
 			i.putExtra(PostActivity.INTENT_POST_ID, postId);
 			startActivity(i);
 		}
-		
+
 	}
 }

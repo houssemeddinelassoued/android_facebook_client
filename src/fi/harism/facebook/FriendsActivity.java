@@ -200,8 +200,10 @@ public class FriendsActivity extends BaseActivity {
 		}
 
 		@Override
-		public void executeUI() {
-			mFriendView.setPicture(mBitmap);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				mFriendView.setPicture(mBitmap);
+			}
 		}
 	}
 
@@ -219,18 +221,16 @@ public class FriendsActivity extends BaseActivity {
 
 		@Override
 		public void execute() throws Exception {
-			try {
-				mFBFriendList.load();
-			} catch (Exception ex) {
-				hideProgressDialog();
-				showAlertDialog(ex.toString());
-				throw ex;
-			}
+			mFBFriendList.load();
 		}
 
 		@Override
-		public void executeUI() {
-			updateFriendList(mFBFriendList);
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				updateFriendList(mFBFriendList);
+			} else {
+				showAlertDialog(ex.toString());				
+			}
 			hideProgressDialog();
 		}
 	}

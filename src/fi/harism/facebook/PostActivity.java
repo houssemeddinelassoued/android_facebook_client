@@ -74,7 +74,8 @@ public class PostActivity extends BaseActivity {
 
 			TextView detailsView = (TextView) commentView
 					.findViewById(R.id.view_comment_details);
-			detailsView.setText(StringUtils.convertFBTime(comment.getCreatedTime()));
+			detailsView.setText(StringUtils.convertFBTime(comment
+					.getCreatedTime()));
 
 			container.addView(commentView);
 		}
@@ -100,22 +101,21 @@ public class PostActivity extends BaseActivity {
 
 		@Override
 		public void execute() throws Exception {
-			try {
-				if (mMessage.length() != 0) {
-					mFBPost.sendComment(mMessage);
-					mMessage = "";
-					mFBPost.update();
-				}
-			} catch (Exception ex) {
-				hideProgressDialog();
-				showAlertDialog(ex.toString());
+			if (mMessage.length() != 0) {
+				mFBPost.sendComment(mMessage);
+				mMessage = "";
+				mFBPost.update();
 			}
 		}
 
 		@Override
-		public void executeUI() {
-			mEditText.setText(mMessage);
-			updateComments();
+		public void executeUI(Exception ex) {
+			if (ex == null) {
+				mEditText.setText(mMessage);
+				updateComments();
+			} else {
+				showAlertDialog(ex.toString());
+			}
 			hideProgressDialog();
 		}
 
