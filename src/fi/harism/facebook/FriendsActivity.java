@@ -129,6 +129,7 @@ public class FriendsActivity extends BaseActivity {
 	private final void updateFriendList(FBFriendList fbFriendList) {
 		// LinearLayout which is inside ScrollView.
 		LinearLayout friendsView = (LinearLayout) findViewById(R.id.activity_friends_content);
+		friendsView.setVisibility(View.GONE);
 		friendsView.removeAllViews();
 
 		// Sort friend list.
@@ -174,6 +175,8 @@ public class FriendsActivity extends BaseActivity {
 				mRequestQueue.addRequest(request);
 			}
 		}
+		
+		friendsView.setVisibility(View.VISIBLE);
 	}
 
 	/**

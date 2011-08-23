@@ -182,7 +182,9 @@ public class FeedActivity extends BaseActivity {
 	 */
 	private void updateFeedView(FBFeed fbFeed) {
 		LinearLayout contentView = (LinearLayout) findViewById(R.id.activity_feed_content);
+		contentView.setVisibility(View.GONE);
 		contentView.removeAllViews();
+		
 		for (FBPost post : fbFeed.getPosts()) {
 			View postView = createPostView(post);
 			postView.setTag(post.getId());
@@ -233,6 +235,7 @@ public class FeedActivity extends BaseActivity {
 			contentView.addView(postView);
 		}
 
+		contentView.setVisibility(View.VISIBLE);
 	}
 
 	/**
