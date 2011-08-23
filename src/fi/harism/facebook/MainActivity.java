@@ -5,6 +5,7 @@ import java.util.Vector;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -35,9 +36,9 @@ public class MainActivity extends BaseActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
 		getGlobalState().getFBClient().authorizeCallback(requestCode,
 				resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
@@ -272,11 +273,13 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onError(Exception ex) {
+			Log.e("MainActivity", ex.toString());
+			finish();
 			// On error trigger new login dialog.
-			LoginObserver observer = new LoginObserver(mActivity);
-			getGlobalState().getFBClient().authorize(mActivity, observer);
+			// LoginObserver observer = new LoginObserver(mActivity);
+			// getGlobalState().getFBClient().authorize(mActivity, observer);
 			// If there was an error during authorization show an alert to user.
-			showAlertDialog(ex.getLocalizedMessage());
+			// showAlertDialog(ex.getLocalizedMessage());
 		}
 	}
 
