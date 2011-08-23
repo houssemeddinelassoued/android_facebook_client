@@ -61,7 +61,7 @@ public class FBClient {
 				// Needed for login to chat.facebook.com.
 				"xmpp_login" };
 		// Call actual authorization procedure.
-		mFacebook.authorize(activity, permissions,
+		mFacebook.authorize(activity, permissions, Facebook.FORCE_DIALOG_AUTH,
 				new Facebook.DialogListener() {
 					@Override
 					public void onCancel() {
